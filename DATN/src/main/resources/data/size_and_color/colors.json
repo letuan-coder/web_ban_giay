@@ -1,0 +1,22 @@
+[
+  { "code": "CL001", "name": "Đỏ", "hexCode": "#FF0000" },
+  { "code": "CL002", "name": "Xanh dương", "hexCode": "#0000FF" },
+  { "code": "CL003", "name": "Xanh lá", "hexCode": "#00FF00" },
+  { "code": "CL004", "name": "Vàng", "hexCode": "#FFFF00" },
+  { "code": "CL005", "name": "Cam", "hexCode": "#FFA500" },
+  { "code": "CL006", "name": "Tím", "hexCode": "#800080" },
+  { "code": "CL007", "name": "Hồng", "hexCode": "#FFC0CB" },
+  { "code": "CL008", "name": "Nâu", "hexCode": "#8B4513" },
+  { "code": "CL009", "name": "Đen", "hexCode": "#000000" },
+  { "code": "CL010", "name": "Trắng", "hexCode": "#FFFFFF" },
+  { "code": "CL011", "name": "Xám", "hexCode": "#808080" },
+  { "code": "CL012", "name": "Be", "hexCode": "#F5F5DC" },
+  { "code": "CL013", "name": "Xanh ngọc", "hexCode": "#40E0D0" },
+  { "code": "CL014", "name": "Xanh navy", "hexCode": "#000080" },
+  { "code": "CL015", "name": "Đỏ rượu vang", "hexCode": "#800000" },
+  { "code": "CL016", "name": "Vàng nhạt", "hexCode": "#FFFACD" },
+  { "code": "CL017", "name": "Xanh mint", "hexCode": "#98FF98" },
+  { "code": "CL018", "name": "Hồng pastel", "hexCode": "#FFD1DC" },
+  { "code": "CL019", "name": "Xanh lam nhạt", "hexCode": "#ADD8E6" },
+  { "code": "CL020", "name": "Xanh olive", "hexCode": "#808000" }
+]
