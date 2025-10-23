@@ -11,7 +11,7 @@ import com.example.DATN.repositories.NewsletterSubscriptionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,7 +28,7 @@ public class NewsletterSubscriptionService {
         }
 
         NewsletterSubscription subscription = newsletterSubscriptionMapper.toNewsletterSubscription(request);
-        subscription.setCreatedAt(LocalDate.now());
+        subscription.setCreatedAt(LocalDateTime.now());
         subscription.setActive(true); // New subscriptions are active
         subscription = newsletterSubscriptionRepository.save(subscription);
         return newsletterSubscriptionMapper.toNewsletterSubscriptionResponse(subscription);

@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -16,8 +14,6 @@ public class ApiResponse <T>   {
     @Builder.Default
     int code=1000;
     String message;
-    @Builder.Default
-    private LocalDateTime timestamp = LocalDateTime.now();
     private T data;
 
 }

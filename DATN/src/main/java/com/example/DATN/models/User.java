@@ -1,5 +1,6 @@
 package com.example.DATN.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -21,7 +22,9 @@ public class User extends BaseEntity {
     @Id
     Long id;
 
-    @Column(nullable = false, length = 255,unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
+    @Column(nullable = false
+            , length = 255
+            ,unique = true)
     String username;
 
     @Column(nullable = false, length = 255)
@@ -44,6 +47,10 @@ public class User extends BaseEntity {
 
     @ManyToMany
     Set<Role> roles;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private Cart cart;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     List<Order> orders;

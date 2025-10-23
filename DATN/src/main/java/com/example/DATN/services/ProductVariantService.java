@@ -1,8 +1,7 @@
 package com.example.DATN.services;
 
 import com.example.DATN.dtos.request.CreationProductVariantRequest;
-import com.example.DATN.dtos.request.ProductVariantRequest;
-import com.example.DATN.dtos.respone.ImageProductResponse;
+import com.example.DATN.dtos.request.UpdateProductVariantRequest;
 import com.example.DATN.dtos.respone.ProductVariantResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
@@ -10,16 +9,16 @@ import com.example.DATN.mapper.ColorMapper;
 import com.example.DATN.mapper.ImageProductMapper;
 import com.example.DATN.mapper.ProductVariantMapper;
 import com.example.DATN.mapper.SizeMapper;
-import com.example.DATN.models.*;
+import com.example.DATN.models.ProductColor;
+import com.example.DATN.models.ProductVariant;
+import com.example.DATN.models.Size;
 import com.example.DATN.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,61 +38,28 @@ public class ProductVariantService {
     private final ImageProductService imageProductService;
     private final ColorService colorService;
     private final ColorRepository colorRepository;
+    private final ProductColorRepository productColorRepository;
     private final SizeRepository sizeRepository;
-
 
     @Transactional(rollbackFor = Exception.class)
     public ProductVariantResponse createProductVariant
             (CreationProductVariantRequest request) {
-        Color color = new Color();
-        if (request.getVariantRequest().getColors()!=null){
-           var colordto =
-                    colorService.createColor
-                            (request.getVariantRequest().getColors());
-           color = colorMapper.toEntity(colordto);
-           colorRepository.save(color);
-        }
-        var productResponse = productService.createProduct(request.getProductRequest());
-        var productId = productResponse.getId();
+        ProductColor productColor = productColorRepository.findById(request.getProductColorId())
+                .orElseThrow(()->new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
 
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
-        if (request.getVariantRequest().getColorName()!=null) {
-            color = colorRepository.findByName(request.getVariantRequest().getColorName())
-                    .orElseThrow(() -> new ApplicationException(ErrorCode.COLOR_NOT_FOUND));
-        }
         Size size = sizeRepository.findByName(request.getVariantRequest().getSize().getName())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.SIZE_NOT_FOUND));
-        String skugenerate = product.getProductCode() + "-" + color.getCode() + "-" + size.getCode();
+        String skugenerate =productColor.getProduct().getProductCode() + "-" + productColor.getColor().getCode() + "-" + size.getCode();
         ProductVariant productVariant = ProductVariant
                 .builder()
-                .product(product)
+                .productColor(productColor)
                 .stock(request.getVariantRequest().getStock())
                 .sku(skugenerate)
                 .price(request.getVariantRequest().getPrice())
                 .size(size)
-                .color(color)
                 .build();
         ProductVariant savedproductvariant = productVariantRepository.save(productVariant);
-        List<ImageProduct> imageEntities = new ArrayList<>();
-        if (request.getFiles() != null && !request.getFiles().isEmpty()) {
-            var images = imageProductService.uploadImages(productVariant.getId(), request.getFiles(), request.getAltText());
-            for (ImageProductResponse response : images) {
-                ImageProduct image = imageProductMapper.toEntity(response);
-                imageProductRepository.save(image);
-                imageEntities.add(image);
-            }
-            savedproductvariant.setImages(imageEntities);
-            productVariantRepository.save(savedproductvariant);
-        }
         return productVariantMapper.toProductVariantResponse(savedproductvariant);
-    }
-
-    public List<ProductVariantResponse> getProductVariantsByProductId(UUID productId) {
-        List<ProductVariant> productVariants = productVariantRepository.findByProductId(productId);
-        return productVariants.stream()
-                .map(productVariantMapper::toProductVariantResponse)
-                .collect(Collectors.toList());
     }
 
     public ProductVariantResponse getProductVariantById(UUID id) {
@@ -103,7 +69,6 @@ public class ProductVariantService {
     }
 
     public List<ProductVariantResponse> getallproductvariant() {
-
         return productVariantRepository.findAll()
                 .stream()
                 .map(productVariantMapper::toProductVariantResponse)
@@ -111,17 +76,37 @@ public class ProductVariantService {
     }
 
 
-    @Transactional
-    public ProductVariantResponse updateProductVariant(UUID id, ProductVariantRequest request, UUID productId) {
+    @Transactional(rollbackFor = Exception.class)
+    public ProductVariantResponse updateProductVariant(
+            UUID id, UpdateProductVariantRequest request) {
         ProductVariant existingProductVariant = productVariantRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
 
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
+        boolean skuNeedsUpdate = false;
+        if (request.getPrice() != null) {
+            existingProductVariant.setPrice(request.getPrice());
+        }
 
-        existingProductVariant.setProduct(product);
-        existingProductVariant.setPrice(request.getPrice());
-        existingProductVariant.setStock(request.getStock());
+        if (request.getStock() != null) {
+            existingProductVariant.setStock(request.getStock());
+        }
+
+        if (request.getSize() != null && request.getSize().getName() != null) {
+            Size size = sizeRepository.findByName(request.getSize().getName())
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.SIZE_NOT_FOUND));
+            if(!size.equals(existingProductVariant.getSize())){
+                existingProductVariant.setSize(size);
+                skuNeedsUpdate = true;
+            }
+        }
+
+
+        if(request.getDiscountPrice()!=null){
+            existingProductVariant.setDiscountPrice(request.getDiscountPrice());
+        }
+        if (request.getSku() != null && !request.getSku().isEmpty()) {
+            existingProductVariant.setSku(request.getSku());
+        }
         ProductVariant updatedProductVariant = productVariantRepository.save(existingProductVariant);
         return productVariantMapper.toProductVariantResponse(updatedProductVariant);
     }

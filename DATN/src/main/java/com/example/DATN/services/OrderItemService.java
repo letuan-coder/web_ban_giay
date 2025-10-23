@@ -2,8 +2,9 @@ package com.example.DATN.services;
 
 import com.example.DATN.models.OrderItem;
 import com.example.DATN.repositories.OrderItemRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -11,9 +12,10 @@ import java.util.Optional;
  * Service nghiệp vụ sản phẩm trong đơn hàng
  */
 @Service
+@RequiredArgsConstructor
 public class OrderItemService {
-    @Autowired
-    private OrderItemRepository orderItemRepository;
+
+    final private OrderItemRepository orderItemRepository;
 
     public List<OrderItem> getAllOrderItems() {
         return orderItemRepository.findAll();

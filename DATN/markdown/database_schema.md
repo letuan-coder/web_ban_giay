@@ -1,6 +1,13 @@
 # Tài liệu Schema Database - Luận văn tốt nghiệp
 
 Đây là tài liệu mô tả cấu trúc database dựa trên file `final_db_luanvan.txt`.
+taileduc0404@gmail.com Le Duc Tai
+
+© 2025 Lê Đức Tài.
+Tác phẩm/ cơ sở dữ liệu đã đăng ký quyền tác giả. 
+Mọi quyền được bảo lưu. Nghiêm cấm sao chép, 
+trích dẫn,
+phân phối hoặc khai thác dưới mọi hình thức khi chưa có phép bằng văn bản.
 ---
 
 ## Phần 1: Bảng Địa lý (Geography)

@@ -2,6 +2,7 @@ package com.example.DATN.models;
 
 import com.example.DATN.constant.OrderStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -20,7 +21,7 @@ public class Order extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -30,10 +31,12 @@ public class Order extends BaseEntity {
     private List<OrderItem> items;
 
     @JoinColumn(name = "payment_method_id")
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
-
     private PaymentMethod paymentMethod;
+
+    @NotNull
+    private Integer total_price;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;

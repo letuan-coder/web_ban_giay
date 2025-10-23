@@ -8,9 +8,7 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface ColorMapper {
+    Color toEntity(ColorResponse response);
     ColorResponse toColorResponse(Color color);
-
-    Color toColor(ColorRequest request);
-    Color toEntity (ColorResponse response);
     void updateColor(@MappingTarget Color color, ColorRequest request);
 }

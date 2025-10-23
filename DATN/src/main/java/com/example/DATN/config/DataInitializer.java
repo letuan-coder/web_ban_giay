@@ -173,6 +173,7 @@ public class DataInitializer implements CommandLineRunner {
                     Color c = new Color();
                     c.setCode(node.getCode());
                     c.setName(node.getName());
+                    c.setHexCode(node.getHexCode());
                     return c;
                 }).collect(Collectors.toList());
 
@@ -200,6 +201,7 @@ public class DataInitializer implements CommandLineRunner {
     static class ColorNode {
         private String code;
         private String name;
+        private String hexCode;
     }
 
     @Data

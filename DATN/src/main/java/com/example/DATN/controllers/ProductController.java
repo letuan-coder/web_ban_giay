@@ -35,6 +35,7 @@ public class ProductController {
     }
 
     @GetMapping
+
     public ApiResponse<PageResponse<ProductResponse>> getAllProducts(
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<ProductResponse> productPage = productService.getAllProducts(pageable);

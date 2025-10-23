@@ -1,6 +1,7 @@
 package com.example.DATN.config;
 
 import com.example.DATN.dtos.request.IntrospectRequest;
+import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.services.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ public class CustomeJwtDecoder implements JwtDecoder {
                             .token(token)
                             .build());
             if (!response.isActive())
-                throw new JwtException("Token invalid");
+                throw new JwtException(ErrorCode.EXPIRED_TOKEN.getMessage());
         } catch (JOSEException | ParseException e) {
             throw new JwtException(e.getMessage());
         }

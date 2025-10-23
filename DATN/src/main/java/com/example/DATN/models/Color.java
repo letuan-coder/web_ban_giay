@@ -1,12 +1,11 @@
 package com.example.DATN.models;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -24,15 +23,6 @@ public class Color extends BaseEntity {
     @Column(nullable = false)
     String name; // tên màu, ví dụ "White"
 
-
-    @Column(unique = true)
+    @Column(nullable = false)
     String hexCode;
-
-    @OneToMany(mappedBy = "color"
-            , cascade = CascadeType.ALL
-            , orphanRemoval = true)
-            @JsonBackReference
-    List<ProductVariant> variants = new ArrayList<>();
-
-
 }

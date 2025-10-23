@@ -9,8 +9,6 @@ import java.util.Optional;
 @Repository
 public interface ColorRepository extends JpaRepository<Color, String> {
     boolean existsByHexCode(String hexCode);
-    Optional<Color> findTopByOrderByCodeDesc();
-    boolean existsByName(String name);
     Optional<Color> findByCode(String code);
     Optional<Color> findByName(String colorName);
 }

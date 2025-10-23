@@ -1,0 +1,16 @@
+package com.example.DATN.mapper;
+
+import com.example.DATN.dtos.request.CartRequest;
+import com.example.DATN.dtos.respone.CartResponse;
+import com.example.DATN.models.Cart;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+@Mapper(componentModel = "spring", uses = {CartItemMapper.class})
+public interface CartMapper {
+    @Mapping(source = "user.id", target = "userId")
+    CartResponse toCartResponse(Cart cart);
+
+    @Mapping(target = "user.id", source = "userId")
+    Cart toCart(CartRequest request);
+}

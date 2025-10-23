@@ -31,7 +31,7 @@
 //    @Transactional
 //    public OrderResponse createOrder(OrderRequest request) {
 //        User user = userRepository.findById(request.getUserId())
-//                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_FOUND));
+//                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
 //
 //        PaymentMethod paymentMethod = paymentMethodRepository.findById(request.getPaymentMethodId())
 //                .orElseThrow(() -> new ApplicationException(ErrorCode.PAYMENT_METHOD_NOT_FOUND));

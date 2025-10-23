@@ -13,8 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderRequest {
-    private Integer userId;
-    private Integer paymentMethodId;
+    private Long userId;
+    private Long paymentMethodId;
     private OrderStatus orderStatus;
     private List<OrderItemRequest> items;
 }

@@ -9,15 +9,14 @@ import com.example.DATN.dtos.respone.AuthenticationResponse;
 import com.example.DATN.dtos.respone.IntrospectResponse;
 import com.example.DATN.services.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 
@@ -27,14 +26,27 @@ import java.text.ParseException;
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class AuthenticationController {
-    @Autowired
-    AuthenticationService authenticationService;
+    private final AuthenticationService authenticationService;
 
+    @Value("${cookie.duration.days}")
+    private Integer COOKIE_DURATION;
     @PostMapping("/login")
-    ApiResponse <AuthenticationResponse> login(@RequestBody AuthenticationRequest request) {
-        AuthenticationResponse isSuccess = authenticationService.authenticate(request);
+    ApiResponse <AuthenticationResponse> login(
+            @RequestBody AuthenticationRequest request,
+            @RequestParam(value="remember-me", required = false, defaultValue = "false")
+            Boolean remember,
+            HttpServletResponse response) {
+        AuthenticationResponse authResponse = authenticationService.authenticate(request);
+        if (remember) {
+            Cookie cookie = new Cookie("remember-me", authResponse.getToken());
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true); // nếu dùng HTTPS
+            cookie.setPath("/");
+            cookie.setMaxAge(COOKIE_DURATION); // 7 ngày
+            response.addCookie(cookie);
+        }
         return ApiResponse.<AuthenticationResponse>builder()
-                .data(isSuccess)
+                .data(authResponse)
                 .build();
     }
     @PostMapping("/introspect")

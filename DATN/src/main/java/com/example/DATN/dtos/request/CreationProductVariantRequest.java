@@ -1,18 +1,17 @@
 package com.example.DATN.dtos.request;
 
-import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.UUID;
 
-@Getter
-@Setter
-@AllArgsConstructor
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class CreationProductVariantRequest {
-    private ProductRequest productRequest;
+    private UUID productColorId;
     private ProductVariantRequest variantRequest;
-    private List<MultipartFile> files;
-    private List<String> altText;
 }

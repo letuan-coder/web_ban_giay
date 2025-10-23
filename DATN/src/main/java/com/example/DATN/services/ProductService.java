@@ -9,10 +9,7 @@ import com.example.DATN.mapper.ProductMapper;
 import com.example.DATN.models.Brand;
 import com.example.DATN.models.Category;
 import com.example.DATN.models.Product;
-import com.example.DATN.repositories.BrandRepository;
-import com.example.DATN.repositories.CategoryRepository;
-import com.example.DATN.repositories.ImageProductRepository;
-import com.example.DATN.repositories.ProductRepository;
+import com.example.DATN.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -34,7 +31,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
-    private final ImageProductRepository imageProductRepository;
+    private final ProductColorRepository productColorRepository;
     private final ProductMapper productMapper;
     private final SkuUtil skuConstant;
 
@@ -53,15 +50,12 @@ public class ProductService {
         Product product = productMapper.toProduct(request);
         product.setName(formatProductName);
         product.setDescription(request.getDescription());
-        product.setPrice(request.getPrice());
-        product.setStock(request.getStock());
         product.setProductCode(productCode);
         product.setBrand(brand);
         product.setCategory(category);
         product.setSlug(toSlug(formatProductName));
-        product.setCreatedAt(LocalDate.now());
-        product.setUpdatedAt(LocalDate.now());
         Product savedProduct = productRepository.save(product);
+
         return productMapper.toProductResponse(savedProduct);
 
     }
@@ -96,12 +90,10 @@ public class ProductService {
 
         existingProduct.setName(request.getName());
         existingProduct.setDescription(request.getDescription());
-        existingProduct.setPrice(request.getPrice());
-        existingProduct.setStock(request.getStock());
         existingProduct.setBrand(brand);
         existingProduct.setCategory(category);
         existingProduct.setSlug(toSlug(request.getName()));
-        existingProduct.setUpdatedAt(LocalDate.now());
+        existingProduct.setUpdatedAt(LocalDateTime.now());
 
         Product updatedProduct = productRepository.save(existingProduct);
         return productMapper.toProductResponse(updatedProduct);

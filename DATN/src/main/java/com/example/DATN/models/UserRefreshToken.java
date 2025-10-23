@@ -17,7 +17,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "user_refresh_tokens")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserRefreshToken {
+public class UserRefreshToken extends BaseEntity {
     @Id
     @UuidGenerator
     private UUID id;
@@ -35,11 +35,4 @@ public class UserRefreshToken {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }

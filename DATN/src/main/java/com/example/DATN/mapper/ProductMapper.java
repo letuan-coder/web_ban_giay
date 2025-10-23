@@ -7,9 +7,10 @@ import com.example.DATN.models.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {ImageProductMapper.class})
+@Mapper(componentModel = "spring", uses = {ImageProductMapper.class, ProductColorMapper.class})
 public interface ProductMapper {
-
+    @Mapping(source = "available",target = "available")
+    @Mapping(source = "productColors", target = "colorResponses")
     ProductResponse toProductResponse(Product product);
 
     @Mapping(target = "slug", ignore = true)

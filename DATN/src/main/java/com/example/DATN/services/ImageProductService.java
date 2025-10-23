@@ -1,16 +1,15 @@
-
 package com.example.DATN.services;
 
 import com.example.DATN.constant.Util.FileUtil;
-import com.example.DATN.dtos.respone.ImageProductResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.ImageProductMapper;
-import com.example.DATN.mapper.ProductVariantMapper;
 import com.example.DATN.models.ImageProduct;
-import com.example.DATN.models.ProductVariant;
+import com.example.DATN.models.ProductColor;
+import com.example.DATN.repositories.ColorRepository;
 import com.example.DATN.repositories.ImageProductRepository;
-import com.example.DATN.repositories.ProductVariantRepository;
+import com.example.DATN.repositories.ProductColorRepository;
+import com.example.DATN.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,14 +22,12 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ImageProductService {
-    //REPOSITORIES
     private final FileStorageService fileStorageService;
-
     private final ImageProductRepository imageProductRepository;
-
-    private final ProductVariantRepository productVariantRepository;
+    private final ColorRepository colorRepository;
+    private final ProductRepository productRepository;
     private final ImageProductMapper imageProductMapper;
-    private final ProductVariantMapper productVariantMapper;
+    private final ProductColorRepository productColorRepository;
 
     public static boolean isImageFile(MultipartFile file) {
         String contentType = file.getContentType();
@@ -49,17 +46,18 @@ public class ImageProductService {
                 || extension.equals("gif");
     }
 
-    public List<ImageProductResponse> uploadImages
-            (UUID productVariantId,
-             List<MultipartFile> files,
-             List<String> altTexts) {
-        Integer count = productVariantRepository.countById(productVariantId);
-        if (count > FileUtil.FILE_LIMIT) {
+    public List<ImageProduct> uploadImages(
+            UUID ProductColorId,
+            UUID productId,
+            List<MultipartFile> files,
+            List<String> altTexts) {
+        ProductColor productColor = productColorRepository
+                .findById(ProductColorId).orElseThrow(()-> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
+        if (files.size() > FileUtil.FILE_LIMIT) { // Hardcoded FILE_LIMIT
             throw new ApplicationException(ErrorCode.FILE_COUNT_EXCEEDED);
         }
-        ProductVariant productVariant = productVariantRepository.findById(productVariantId)
-                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
-        String productSlug = productVariant.getProduct().getSlug();
+
+        String productSlug = productColor.getProduct().getSlug();
         List<ImageProduct> newImages = new ArrayList<>();
         for (int i = 0; i < files.size(); i++) {
             MultipartFile file = files.get(i);
@@ -67,35 +65,29 @@ public class ImageProductService {
                 throw new ApplicationException(ErrorCode.INVALID_FILE_TYPE);
             }
             String altText = (altTexts != null && i < altTexts.size())
-                    ? altTexts.get(i) : productVariant.getProduct().getName(); // Default altText to product name
+                    ? altTexts.get(i) : productColor.getProduct().getName(); // Default altText to product name
 
-            // 2. Store the file using FileStorageService with product slug
             String generatedFileName = fileStorageService.storeFile(file, productSlug);
             String imageUrl = UriComponentsBuilder.fromPath("/uploads/")
                     .path(generatedFileName)
                     .build()
                     .toUriString();
             ImageProduct imageProduct = ImageProduct.builder()
-                    .productVariant(productVariant)
+                    .productColor(productColor)
                     .altText(altText)
                     .imageUrl(imageUrl)
                     .build();
             newImages.add(imageProduct);
         }
-        List<ImageProduct> savedImages = imageProductRepository.saveAll(newImages);
-        return savedImages.stream()
-                .map(imageProductMapper::toImageProductResponse)
-                .toList();
+        return imageProductRepository.saveAll(newImages);
     }
-//
-//    public void deleteImage(Long imageId) {
-//        ImageProduct imageProduct = imageProductRepository.findById(imageId)
-//                .orElseThrow(() -> new ApplicationException(ErrorCode.IMAGE_NOT_FOUND));
-//
-//        // Delete physical file
-//        fileStorageService.deleteFile(imageProduct.getImageUrl());
-//
-//        // Delete database record
-//        imageProductRepository.delete(imageProduct);
-//    }
+
+    public void deleteImage(Long imageId) {
+        ImageProduct imageProduct = imageProductRepository.findById(imageId)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.IMAGE_NOT_FOUND));
+
+        fileStorageService.deleteFile(imageProduct.getImageUrl());
+
+        imageProductRepository.delete(imageProduct);
+    }
 }

@@ -21,7 +21,8 @@ public class CategoryController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<CategoryResponse> createCategory(@RequestBody @Valid CategoryRequest request) {
+    public ApiResponse<CategoryResponse> createCategory(
+            @RequestBody @Valid CategoryRequest request) {
         return ApiResponse.<CategoryResponse>builder()
                 .data(categoryService.createCategory(request))
                 .build();

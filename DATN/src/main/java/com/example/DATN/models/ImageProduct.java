@@ -1,6 +1,7 @@
 
 package com.example.DATN.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,8 +18,9 @@ public class ImageProduct extends BaseEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "product_variant_id")
-    private ProductVariant productVariant;
+    @JoinColumn(name = "product_color_id")
+    @JsonBackReference
+    private ProductColor productColor;
 
     @Column(name = "image_url", length = 300)
     private String imageUrl;

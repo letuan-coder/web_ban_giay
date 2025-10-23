@@ -1,23 +1,20 @@
 package com.example.DATN.controllers;
 
 import com.example.DATN.dtos.request.CreationProductVariantRequest;
-import com.example.DATN.dtos.request.ProductRequest;
 import com.example.DATN.dtos.request.ProductVariantRequest;
+import com.example.DATN.dtos.request.UpdateProductVariantRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
-import com.example.DATN.dtos.respone.ProductResponse;
 import com.example.DATN.dtos.respone.ProductVariantResponse;
 import com.example.DATN.mapper.ProductVariantMapper;
 import com.example.DATN.services.ColorService;
 import com.example.DATN.services.ImageProductService;
 import com.example.DATN.services.ProductService;
 import com.example.DATN.services.ProductVariantService;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -33,19 +30,14 @@ public class ProductVariantController {
     private final ColorService colorService;
     private final ProductVariantMapper productVariantMapper;
 
-    @Transactional(rollbackOn = Exception.class)
-    @PostMapping
+    @PostMapping("/{product_color_id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<ProductVariantResponse>> createProductVariant(
-            @Valid @ModelAttribute ProductRequest productRequest,
-            @Valid @ModelAttribute ProductVariantRequest variantRequest,
-            @RequestParam(required = false) List<MultipartFile> files,
-            @RequestParam(required = false) List<String> altText) {
-        CreationProductVariantRequest request= CreationProductVariantRequest.builder()
-                .productRequest(productRequest)
+            @PathVariable UUID product_color_id,
+            @Valid @ModelAttribute ProductVariantRequest variantRequest) {
+        CreationProductVariantRequest request = CreationProductVariantRequest.builder()
+                .productColorId(product_color_id)
                 .variantRequest(variantRequest)
-                .files(files)
-                .altText(altText)
                 .build();
         ApiResponse response = ApiResponse.<ProductVariantResponse>builder()
                 .data(productVariantService.createProductVariant(request))
@@ -53,14 +45,14 @@ public class ProductVariantController {
         return ResponseEntity.ok(response);
     }
 
-    @Transactional
-    @GetMapping("/product/{productId}")
-    public ApiResponse<List<ProductVariantResponse>> getProductVariantsByProductId(
-            @PathVariable UUID productId) {
-        return ApiResponse.<List<ProductVariantResponse>>builder()
-                .data(productVariantService.getProductVariantsByProductId(productId))
-                .build();
-    }
+//    @Transactional
+//    @GetMapping("/product/{productId}")
+//    public ApiResponse<List<ProductVariantResponse>> getProductVariantsByProductId(
+//            @PathVariable UUID productId) {
+//        return ApiResponse.<List<ProductVariantResponse>>builder()
+//                .data(productVariantService.getProductVariantsByProductId(productId))
+//                .build();
+//    }
 
     @GetMapping("/{id}")
     public ApiResponse<ProductVariantResponse> getProductVariantById(@PathVariable UUID id) {
@@ -70,16 +62,13 @@ public class ProductVariantController {
     }
 
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<ProductVariantResponse>> updateProductVariant(
-            @PathVariable UUID id,
-            @RequestBody @Valid ProductVariantRequest request,
-            @RequestBody @Valid ProductRequest productRequest) {
-        ProductResponse productResponse = productService.createProduct(productRequest);
-        UUID prodcutID = productResponse.getId();
+            @PathVariable UUID id ,
+            @ModelAttribute @Valid UpdateProductVariantRequest updaterequest) {
         ApiResponse response = ApiResponse.<ProductVariantResponse>builder()
-                .data(productVariantService.updateProductVariant(id, request, prodcutID))
+                .data(productVariantService.updateProductVariant(id, updaterequest))
                 .build();
         return ResponseEntity.ok(response);
     }

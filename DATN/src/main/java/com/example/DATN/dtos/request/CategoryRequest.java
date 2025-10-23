@@ -14,6 +14,5 @@ import lombok.NoArgsConstructor;
 public class CategoryRequest {
     @NotEmpty(message = "CATEGORY_NAME_REQUIRED")
     private String name;
-
     private String description;
 }

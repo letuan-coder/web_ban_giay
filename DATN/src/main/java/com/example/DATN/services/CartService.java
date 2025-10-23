@@ -1,39 +1,123 @@
-//package com.example.DATN.services;
-//
-//import com.example.DATN.models.Cart;
-//import com.example.DATN.repositories.CartRepository;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.stereotype.Service;
-//import java.util.List;
-//import java.util.Optional;
-//import java.util.UUID;
-//
-///**
-// * Service nghiệp vụ giỏ hàng
-// */
-//@Service
-//public class CartService {
-//    @Autowired
-//    private CartRepository cartRepository;
-//
-//    public List<Cart> getAllCarts() {
-//        return cartRepository.findAll();
-//    }
-//
-//    public Optional<Cart> getCartById(UUID id) {
-//        return cartRepository.findById(id);
-//    }
-//
-//    public Cart createCart(Cart cart) {
-//        return cartRepository.save(cart);
-//    }
-//
-//    public Cart updateCart(Cart cart) {
-//        return cartRepository.save(cart);
-//    }
-//
-//    public void deleteCart(UUID id) {
-//        cartRepository.deleteById(id);
-//    }
-//}
-//
+package com.example.DATN.services;
+
+import com.example.DATN.dtos.request.CartRequest;
+import com.example.DATN.dtos.respone.CartResponse;
+import com.example.DATN.exception.ApplicationException;
+import com.example.DATN.exception.ErrorCode;
+import com.example.DATN.mapper.CartMapper;
+import com.example.DATN.models.Cart;
+import com.example.DATN.models.User;
+import com.example.DATN.repositories.CartItemRepository;
+import com.example.DATN.repositories.CartRepository;
+import com.example.DATN.repositories.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * Service nghiệp vụ giỏ hàng
+ */
+@Service
+@EnableWebSecurity
+@RequiredArgsConstructor
+public class CartService {
+
+    final private CartRepository cartRepository;
+    final private CartMapper cartMapper;
+    final private RedisTemplate redisTemplate;
+    final private UserRepository userRepository;
+    private final CartItemRepository cartItemRepository;
+    private final ObjectMapper objectMapper;
+    private static final String CART_KEY_PREFIX = "cart:";
+
+    public Page<CartResponse> getAllCarts(Pageable pageable) {
+        return cartRepository.findAll(pageable)
+                .map(cartMapper::toCartResponse);
+    }
+
+    public User getCurrentUser() {
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = jwt.getSubject(); // "admin"
+
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
+    }
+
+    @Transactional
+    public CartResponse getCartByUserId() {
+        User user = getCurrentUser();
+        String key = "cart:user:" + user.getId();
+
+        // 1. Lấy dữ liệu giỏ hàng từ Redis
+        Object cachedData = redisTemplate.opsForValue().get(key);
+        if (cachedData != null) {
+            // Nếu có trong cache, chuyển đổi và trả về
+            return objectMapper.convertValue(cachedData, CartResponse.class);
+        }
+
+        // 2. Nếu không có trong cache, tìm trong DB hoặc tạo mới
+        // orElseGet sẽ thực thi lambda để tạo cart mới nếu không tìm thấy
+        Cart cart = cartRepository.findByUser(user).orElseGet(() -> {
+            Cart newCart = new Cart();
+            newCart.setUser(user);
+            newCart.setTotal_price(BigDecimal.ZERO); // Khởi tạo tổng tiền là 0
+            // createdAt và updatedAt nên được tự động quản lý bởi @CreationTimestamp/@UpdateTimestamp trong BaseEntity
+            return cartRepository.save(newCart);
+        });
+
+        // 3. Chuyển đổi sang DTO
+        CartResponse cartResponse = cartMapper.toCartResponse(cart);
+
+        // 4. Lưu vào Redis cho những lần gọi sau
+        redisTemplate.opsForValue().set(key, cartResponse, 7, TimeUnit.DAYS);
+
+        return cartResponse;
+    }
+
+    public CartResponse getCartById(UUID id) {
+        Cart respone = cartRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.CART_NOT_FOUND));
+        return cartMapper.toCartResponse(respone);
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public CartResponse createCart(CartRequest request) {
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
+        // Nếu user đã có cart thì trả về cart đó luôn
+        Cart cart = user.getCart();
+        if (cart == null) {
+            cart = new Cart();
+            cart.setUser(user);
+            cart.setCreatedAt(LocalDateTime.now());
+            cart.setTotal_price(BigDecimal.ZERO);
+            cart = cartRepository.save(cart);
+        }
+
+        // Lưu cache vào Redis
+        CartResponse dto = cartMapper.toCartResponse(cart);
+        redisTemplate.opsForValue().set("cart:" + cart.getId(), dto);
+        return cartMapper.toCartResponse(cart);
+    }
+
+    public Cart updateCart(Cart cart) {
+        return cartRepository.save(cart);
+    }
+
+    public void deleteCart(UUID id) {
+        cartRepository.deleteById(id);
+    }
+}
+

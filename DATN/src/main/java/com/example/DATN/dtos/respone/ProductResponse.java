@@ -1,14 +1,12 @@
 
 package com.example.DATN.dtos.respone;
 
-import com.example.DATN.Validator.PriceSerializer;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.example.DATN.constant.Is_Available;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -21,14 +19,11 @@ public class ProductResponse {
     private UUID id;
     private String name;
     private String slug;
+    private String productCode;
     private String description;
-    @JsonSerialize(using = PriceSerializer.class)
-    private BigDecimal price;
-    @JsonSerialize(using = PriceSerializer.class)
-    private BigDecimal discountPrice;
-    private int stock;
+    private Is_Available available;
+    private List<ProductColorResponse> colorResponses;
     private LocalDate createdAt;
     private LocalDate updatedAt;
-    private List<ProductVariantResponse> variants;
 
 }
