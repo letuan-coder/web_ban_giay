@@ -49,10 +49,14 @@ public class CartItemService {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
     }
-
     public List<CartItemResponse> getAllCartItems() {
-        return cartItemRepository
-                .findAll().stream()
+        User user = getCurrentUser();
+        String key = "cartItems:user:" + user.getId();
+        Cart cart = cartRepository.findByUser(user)
+                .orElseThrow(()->new ApplicationException(ErrorCode.CART_NOT_FOUND));
+        List<CartItem> listResponse = cartItemRepository.findByCart(cart);
+        redisTemplate.opsForValue().set(key, listResponse, 7, TimeUnit.DAYS);
+        return listResponse.stream()
                 .map(cartItemMapper::toCartItemResponse).toList();
     }
 
@@ -66,18 +70,15 @@ public class CartItemService {
     @Transactional
     public CartItemResponse AddCartItem(CartItemRequest request) {
         User user = getCurrentUser();
-
         Cart cart = cartRepository.findByUser(user)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
                     newCart.setUser(user);
                     return cartRepository.save(newCart);
                 });
-
         ProductVariant variant = productVariantRepository
                 .findById(request.getProductVariantId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
-
         if (variant.getIsAvailable() == Is_Available.NOT_AVAILABLE) {
             throw new ApplicationException(ErrorCode.PRODUCT_NOT_AVAILABLE);
         }

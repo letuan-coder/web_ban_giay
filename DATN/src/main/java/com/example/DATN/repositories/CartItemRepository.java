@@ -6,6 +6,7 @@ import com.example.DATN.models.ProductVariant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,7 +15,7 @@ import java.util.UUID;
  */
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
-//    List<CartItem> findByCartId(UUID cartid);
+   List<CartItem> findByCart(Cart cart);
 
     Optional<CartItem> findByCartAndProductVariant(Cart cart, ProductVariant variant);
 

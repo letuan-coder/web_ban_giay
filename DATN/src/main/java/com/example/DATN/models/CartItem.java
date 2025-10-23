@@ -30,7 +30,7 @@ public class CartItem extends BaseEntity {
     @JsonBackReference
     Cart cart;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_variant_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     ProductVariant productVariant;

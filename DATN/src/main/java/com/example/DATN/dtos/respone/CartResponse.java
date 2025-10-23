@@ -3,6 +3,7 @@ package com.example.DATN.dtos.respone;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,5 +15,6 @@ import java.util.UUID;
 public class CartResponse {
     UUID id;
     Long userId;
+    BigDecimal total_price;
     List<CartItemResponse> cartItems;
 }
