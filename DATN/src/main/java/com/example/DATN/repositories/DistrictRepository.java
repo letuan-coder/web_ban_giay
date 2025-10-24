@@ -9,5 +9,6 @@ import java.util.List;
 @Repository
 public interface DistrictRepository extends JpaRepository<District, String> {
     boolean existsByCode(String id);
+
     List<District> findByParentCode(String parentCode);
 }

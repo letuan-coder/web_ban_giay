@@ -1,6 +1,5 @@
 package com.example.DATN.services;
 
-import com.example.DATN.dtos.request.CartRequest;
 import com.example.DATN.dtos.respone.CartItemResponse;
 import com.example.DATN.dtos.respone.CartResponse;
 import com.example.DATN.dtos.respone.ProductVariantResponse;
@@ -105,9 +104,8 @@ public class CartService {
     }
 
     @Transactional(rollbackOn = Exception.class)
-    public CartResponse createCart(CartRequest request) {
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
+    public CartResponse createCart() {
+        User user = getCurrentUser();
         // Nếu user đã có cart thì trả về cart đó luôn
         Cart cart = user.getCart();
         if (cart == null) {

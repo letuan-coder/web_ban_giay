@@ -49,6 +49,14 @@ public class AuthenticationController {
                 .data(authResponse)
                 .build();
     }
+
+    @PostMapping("/guest")
+    ApiResponse<AuthenticationResponse> createGuest() {
+        AuthenticationResponse authResponse = authenticationService.createGuestAndAuthenticate();
+        return ApiResponse.<AuthenticationResponse>builder()
+                .data(authResponse)
+                .build();
+    }
     @PostMapping("/introspect")
     ApiResponse<Boolean> introspect(@RequestBody IntrospectRequest request)
             throws ParseException, JOSEException {

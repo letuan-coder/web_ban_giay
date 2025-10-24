@@ -26,8 +26,11 @@ public class UserController {
     private UserRepository userRepository;
     @Autowired
     private UserService userService;
+
     @PostMapping("/register")
-    ApiResponse<UserResponse> createUser(@RequestBody @Valid RegisterRequest request) {
+    ApiResponse<UserResponse> createUser(
+            @RequestBody @Valid RegisterRequest request) {
+
         return ApiResponse.<UserResponse>builder()
                 .data(userService.createUser(request))
                 .message("Đăng ký thành công")

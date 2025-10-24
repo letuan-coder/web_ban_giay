@@ -24,7 +24,7 @@ public class CustomeJwtDecoder implements JwtDecoder {
     private String signerKey;
 
     @Autowired
-    private AuthenticationService authenticationService;
+    private final AuthenticationService authenticationService;
 
     private NimbusJwtDecoder nimbusJwtDecoder;
 

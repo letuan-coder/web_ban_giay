@@ -1,6 +1,5 @@
 package com.example.DATN.controllers;
 
-import com.example.DATN.dtos.request.CartRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.CartResponse;
 import com.example.DATN.mapper.CartMapper;
@@ -47,9 +46,10 @@ public class CartController {
     }
 
     @PostMapping
-    public ApiResponse<CartResponse> createCart(@RequestBody CartRequest request) {
+    public ApiResponse<CartResponse> createCart(
+            ) {
         return ApiResponse.<CartResponse>builder()
-                .data(cartService.createCart(request))
+                .data(cartService.createCart())
                 .build();
     }
 

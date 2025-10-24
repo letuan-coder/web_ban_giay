@@ -1,5 +1,6 @@
 package com.example.DATN.models;
 
+import com.example.DATN.constant.AuthProvider;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -41,9 +42,17 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 255)
     String password;
 
-    @Column(nullable = false)
-
     LocalDate dob;
+
+    @Column(nullable = false)
+    boolean isGuest = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50)
+    AuthProvider provider;
+
+    @Column(length = 255)
+    String providerId;
 
     @ManyToMany
     Set<Role> roles;

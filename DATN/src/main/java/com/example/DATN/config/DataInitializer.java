@@ -2,211 +2,219 @@ package com.example.DATN.config;
 
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.InputStream;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class DataInitializer implements CommandLineRunner {
+public class DataInitializer implements ApplicationRunner {
 
+    private final RoleRepository roleRepository;
+    private final PermissionRepository permissionRepository;
+    private final ColorRepository colorRepository;
+    private final SizeRepository sizeRepository;
     private final ProvinceRepository provinceRepository;
     private final DistrictRepository districtRepository;
     private final CommuneRepository communeRepository;
+    private final ResourceLoader resourceLoader;
     private final ObjectMapper objectMapper;
-    private final ColorRepository colorRepository;
-    private final SizeRepository sizeRepository;
+
     @Override
     @Transactional
-    public void run(String... args) throws Exception {
-        long provinceCount = provinceRepository.count();
-        long districtCount = districtRepository.count();
-        long communeCount = communeRepository.count();
-        long colorCount = colorRepository.count();
-        long sizeCount = sizeRepository.count();
-        if (provinceCount == 0 && districtCount == 0 && communeCount == 0) {
-            log.info("Seeding address data...");
-
-            // 1. Seed Provinces
-            Map<String, Province> provinceMap = seedProvinces();
-
-            // 2. Seed Districts
-            Map<String, District> districtMap = seedDistricts(provinceMap);
-
-            // 3. Seed Communes
-            seedCommunes(districtMap);
-
-            log.info("Finished seeding address data.");
-        } else {
-            log.info("Address data already exists. Skipping seed.");
+    public void run(ApplicationArguments args) {
+        log.info("==================================================");
+        log.info("Master Data Initialization Started...");
+        try {
+            initializeGeography();
+            initializeColors();
+            initializeSizes();
+            initializeRolesAndPermissions();
+        } catch (Exception e) {
+            log.error("Error during data initialization", e);
         }
-        if (sizeCount == 0 || colorCount == 0) {
-            log.info("Seeding size and color data...");
-            seedColors();
-            seedSizes();
-            log.info("Finished seeding size and color data.");
-        } else {
-            log.info("Size and color data already exists. Skipping seed.");
+        log.info("Master Data Initialization Finished.");
+        log.info("==================================================");
+    }
+
+    private void initializeGeography() throws Exception {
+        if (provinceRepository.count() > 0) {
+            log.info("Geography data already initialized.");
+            return;
         }
+
+        Resource provincesResource = resourceLoader.getResource("classpath:data/georaphy/provinces.json");
+        Map<String, GeoDTO> provinceDTOs = objectMapper.readValue(provincesResource.getInputStream(), new TypeReference<>() {});
+        Map<String, Province> persistedProvinces = provinceDTOs.values().stream().map(dto -> {
+            Province province = new Province();
+            province.setId(dto.getCode());
+            province.setCode(dto.getCode());
+            province.setName(dto.getName());
+            province.setSlug(dto.getSlug());
+            province.setType(dto.getType());
+            province.setNameWithType(dto.getName_with_type());
+            return provinceRepository.save(province);
+        }).collect(Collectors.toMap(Province::getCode, Function.identity()));
+        log.info("Initialized {} provinces.", persistedProvinces.size());
+
+        Resource districtsResource = resourceLoader.getResource("classpath:data/georaphy/districts.json");
+        Map<String, GeoDTO> districtDTOs = objectMapper.readValue(districtsResource.getInputStream(), new TypeReference<>() {});
+        Map<String, District> persistedDistricts = districtDTOs.values().stream().map(dto -> {
+            Province parent = persistedProvinces.get(dto.getParent_code());
+            if (parent == null) return null;
+            District district = new District();
+            district.setId(dto.getCode());
+            district.setCode(dto.getCode());
+            district.setName(dto.getName());
+            district.setSlug(dto.getSlug());
+            district.setType(dto.getType());
+            district.setNameWithType(dto.getName_with_type());
+            district.setPath(dto.getPath());
+            district.setPathWithType(dto.getPath_with_type());
+            district.setParentCode(dto.getParent_code());
+            district.setProvince(parent);
+            return districtRepository.save(district);
+        }).filter(java.util.Objects::nonNull).collect(Collectors.toMap(District::getCode, Function.identity()));
+        log.info("Initialized {} districts.", persistedDistricts.size());
+
+        Resource communesResource = resourceLoader.getResource("classpath:data/georaphy/communes.json");
+        Map<String, GeoDTO> communeDTOs = objectMapper.readValue(communesResource.getInputStream(), new TypeReference<>() {});
+        communeDTOs.values().forEach(dto -> {
+            District parent = persistedDistricts.get(dto.getParent_code());
+            if (parent != null) {
+                Commune commune = new Commune();
+                commune.setId(dto.getCode());
+                commune.setCode(dto.getCode());
+                commune.setName(dto.getName());
+                commune.setSlug(dto.getSlug());
+                commune.setType(dto.getType());
+                commune.setNameWithType(dto.getName_with_type());
+                commune.setPath(dto.getPath());
+                commune.setPathWithType(dto.getPath_with_type());
+                commune.setParentCode(dto.getParent_code());
+                commune.setDistrict(parent);
+                communeRepository.save(commune);
+            }
+        });
+        log.info("Initialized {} communes.", communeDTOs.size());
     }
 
-    private Map<String, Province> seedProvinces() throws Exception {
-        TypeReference<Map<String, AddressNode>> typeRef = new TypeReference<>() {
-        };
-        InputStream inputStream = new ClassPathResource("data/georaphy/provinces.json").getInputStream();
-        Map<String, AddressNode> provinceNodes = objectMapper.readValue(inputStream, typeRef);
-
-        List<Province> provincesToSave = provinceNodes.values().stream()
-                .map(node -> {
-                    Province p = new Province();
-                    p.setId(node.getCode()); // Set ID from code
-                    p.setCode(node.getCode());
-                    p.setName(node.getName());
-                    p.setSlug(node.getSlug());
-                    p.setType(node.getType());
-                    p.setNameWithType(node.getNameWithType());
-                    return p;
-                }).collect(Collectors.toList());
-
-        provinceRepository.saveAll(provincesToSave);
-        return provincesToSave.stream().collect(Collectors.toMap(Province::getCode, Function.identity()));
+    private void initializeColors() throws Exception {
+        if (colorRepository.count() > 0) {
+            log.info("Colors already initialized.");
+            return;
+        }
+        Resource resource = resourceLoader.getResource("classpath:data/size_and_color/colors.json");
+        List<ColorDTO> colorDTOs = objectMapper.readValue(resource.getInputStream(), new TypeReference<>() {});
+        colorDTOs.forEach(dto -> {
+            Color color = new Color();
+            color.setCode(dto.getCode());
+            color.setName(dto.getName());
+            color.setHexCode(dto.getHexCode());
+            colorRepository.save(color);
+        });
+        log.info("Initialized {} colors.", colorDTOs.size());
     }
 
-    private Map<String, District> seedDistricts(Map<String, Province> provinceMap) throws Exception {
-        TypeReference<Map<String, AddressNode>> typeRef = new TypeReference<>() {
-        };
-        InputStream inputStream = new ClassPathResource("data/georaphy/districts.json").getInputStream();
-        Map<String, AddressNode> districtNodes = objectMapper.readValue(inputStream, typeRef);
-
-        List<District> districtsToSave = districtNodes.values().stream()
-                .map(node -> {
-                    Province parent = provinceMap.get(node.getParentCode());
-                    if (parent == null) return null;
-                    District d = new District();
-                    d.setId(node.getCode()); // Set ID from code
-                    d.setCode(node.getCode());
-                    d.setName(node.getName());
-                    d.setSlug(node.getSlug());
-                    d.setType(node.getType());
-                    d.setNameWithType(node.getNameWithType());
-                    d.setPath(node.getPath());
-                    d.setPathWithType(node.getPathWithType());
-                    d.setParentCode(node.getParentCode());
-                    d.setProvince(parent);
-                    return d;
-                })
-                .filter(java.util.Objects::nonNull)
-                .collect(Collectors.toList());
-
-        districtRepository.saveAll(districtsToSave);
-        return districtsToSave.stream().collect(Collectors.toMap(District::getCode, Function.identity()));
+    private void initializeSizes() throws Exception {
+        if (sizeRepository.count() > 0) {
+            log.info("Sizes already initialized.");
+            return;
+        }
+        Resource resource = resourceLoader.getResource("classpath:data/size_and_color/sizes.json");
+        List<SizeDTO> sizeDTOs = objectMapper.readValue(resource.getInputStream(), new TypeReference<>() {});
+        sizeDTOs.forEach(dto -> {
+            Size size = new Size();
+            size.setCode(dto.getCode());
+            size.setName(dto.getName());
+            sizeRepository.save(size);
+        });
+        log.info("Initialized {} sizes.", sizeDTOs.size());
     }
 
-    private void seedCommunes(Map<String, District> districtMap) throws Exception {
-        TypeReference<Map<String, AddressNode>> typeRef = new TypeReference<>() {
-        };
-        InputStream inputStream = new ClassPathResource("data/georaphy/communes.json").getInputStream();
-        Map<String, AddressNode> communeNodes = objectMapper.readValue(inputStream, typeRef);
+    private void initializeRolesAndPermissions() throws Exception {
+        Resource resource = resourceLoader.getResource("classpath:data/role_and_permission/role_and_permission.json");
+        RolePermissionConfig config = objectMapper.readValue(resource.getInputStream(), RolePermissionConfig.class);
 
-        List<Commune> communesToSave = communeNodes.values().stream()
-                .map(node -> {
-                    District parent = districtMap.get(node.getParentCode());
-                    if (parent == null) return null;
-                    Commune c = new Commune();
-                    c.setId(node.getCode()); // Set ID from code
-                    c.setCode(node.getCode());
-                    c.setName(node.getName());
-                    c.setSlug(node.getSlug());
-                    c.setType(node.getType());
-                    c.setNameWithType(node.getNameWithType());
-                    c.setPath(node.getPath());
-                    c.setPathWithType(node.getPathWithType());
-                    c.setParentCode(node.getParentCode());
-                    c.setDistrict(parent);
-                    return c;
-                })
-                .filter(java.util.Objects::nonNull)
-                .collect(Collectors.toList());
+        Map<String, Permission> persistedPermissions = permissionRepository.findAll().stream()
+                .collect(Collectors.toMap(Permission::getName, Function.identity()));
+        if (config.getPermissions() != null) {
+            config.getPermissions().forEach(pDto -> persistedPermissions.computeIfAbsent(pDto.getCode(), code -> {
+                Permission newPermission = new Permission();
+                newPermission.setName(code);
+                newPermission.setDescription(pDto.getDescription());
+                return permissionRepository.save(newPermission);
+            }));
+        }
+        log.info("Permissions checked/initialized.");
 
-        communeRepository.saveAll(communesToSave);
+        Map<String, Role> persistedRoles = roleRepository.findAll().stream()
+                .collect(Collectors.toMap(Role::getName, Function.identity()));
+        if (config.getRoles() != null) {
+            config.getRoles().forEach(rDto -> persistedRoles.computeIfAbsent(rDto.getRole(), roleName -> {
+                Role newRole = new Role();
+                newRole.setName(roleName);
+                newRole.setDescription(rDto.getDescription());
+                return roleRepository.save(newRole);
+            }));
+        }
+        log.info("Roles checked/initialized.");
+
+        if (config.getRole_permissions() != null) {
+            config.getRole_permissions().forEach(rpDto -> {
+                Role role = persistedRoles.get(rpDto.getRole());
+                if (role != null) {
+                    final Set<Permission> finalPermissions = (role.getPermissions() == null) ? new HashSet<>() : role.getPermissions();
+                    if (rpDto.getPermissions() != null) {
+                        rpDto.getPermissions().forEach(permissionCode -> {
+                            Permission permission = persistedPermissions.get(permissionCode);
+                            if (permission != null) {
+                                finalPermissions.add(permission);
+                            }
+                        });
+                    }
+                    role.setPermissions(finalPermissions);
+                    roleRepository.save(role);
+                }
+            });
+        }
+        log.info("Role-Permission assignments checked/completed.");
     }
 
-    private void seedSizes() throws Exception {
-        TypeReference<List<SizeNode>> typeRef = new TypeReference<>() {
-        };
-        InputStream inputStream = new ClassPathResource("data/size_and_color/sizes.json").getInputStream();
-        List<SizeNode> sizeNodes = objectMapper.readValue(inputStream, typeRef);
-
-        List<Size> sizesToSave = sizeNodes.stream()
-                .map(node -> {
-                    Size s = new Size();
-                    s.setCode(node.getCode());
-                    s.setName(node.getName());
-                    return s;
-                }).collect(Collectors.toList());
-
-        sizeRepository.saveAll(sizesToSave);
-    }
-
-    private void seedColors() throws Exception {
-        TypeReference<List<ColorNode>> typeRef = new TypeReference<>() {
-        };
-        InputStream inputStream = new ClassPathResource("data/size_and_color/colors.json").getInputStream();
-        List<ColorNode> colorNodes = objectMapper.readValue(inputStream, typeRef);
-
-        List<Color> colorsToSave = colorNodes.stream()
-                .map(node -> {
-                    Color c = new Color();
-                    c.setCode(node.getCode());
-                    c.setName(node.getName());
-                    c.setHexCode(node.getHexCode());
-                    return c;
-                }).collect(Collectors.toList());
-
-        colorRepository.saveAll(colorsToSave);
-    }
-
+    // --- Inner DTOs ---
+    @Data private static class ColorDTO { private String code; private String name; private String hexCode; }
+    @Data private static class SizeDTO { private String code; private String name; }
+    @Data private static class RolePermissionConfig { private List<PermissionDTO> permissions; private List<RoleDTO> roles; private List<RolePermissionDTO> role_permissions; }
+    @Data private static class PermissionDTO { private String code; private String description; }
+    @Data private static class RoleDTO { private String role; private String description; }
+    @Data private static class RolePermissionDTO { private String role; private List<String> permissions; }
     @Data
-    static class AddressNode {
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private static class GeoDTO {
         private String name;
-        private String type;
+        private String code;
+        private String parent_code;
         private String slug;
-        @JsonProperty("name_with_type")
-        private String nameWithType;
+        private String type;
+        private String name_with_type;
         private String path;
-        @JsonProperty("path_with_type")
-        private String pathWithType;
-        private String code;
-        @JsonProperty("parent_code")
-        private String parentCode;
-        @JsonProperty("name_en")
-        private String nameEn;
-    }
-
-    @Data
-    static class ColorNode {
-        private String code;
-        private String name;
-        private String hexCode;
-    }
-
-    @Data
-    static class SizeNode {
-        private String code;
-        private String name;
+        private String path_with_type;
     }
 }

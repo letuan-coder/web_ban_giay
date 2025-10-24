@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatusCode;
 @AllArgsConstructor
 public enum ErrorCode {
     // Auth & User
+    ROLE_NOT_FOUND(1036,"ROLE NOT FOUND",HttpStatus.NOT_FOUND),
     EXPIRED_TOKEN(1001, "TOKEN EXPIRED", HttpStatus.UNAUTHORIZED),
     USERNAME_INVALID(1003, "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1004, "Password must be at least {min} characters", HttpStatus.BAD_REQUEST),

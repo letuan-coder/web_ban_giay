@@ -1,0 +1,106 @@
+{
+  "permissions": [
+    { "code": "USER_VIEW", "description": "Xem danh sách và chi tiết người dùng" },
+    { "code": "USER_CREATE", "description": "Tạo người dùng mới" },
+    { "code": "USER_UPDATE", "description": "Cập nhật thông tin người dùng" },
+    { "code": "USER_DELETE", "description": "Xóa người dùng" },
+    { "code": "USER_ROLE_ASSIGN", "description": "Gán vai trò cho người dùng" },
+
+    { "code": "PRODUCT_VIEW", "description": "Xem sản phẩm" },
+    { "code": "PRODUCT_SEARCH", "description": "Tìm kiếm sản phẩm" },
+    { "code": "PRODUCT_CREATE", "description": "Thêm sản phẩm mới" },
+    { "code": "PRODUCT_UPDATE", "description": "Cập nhật sản phẩm" },
+    { "code": "PRODUCT_DELETE", "description": "Xóa sản phẩm" },
+
+    { "code": "CATEGORY_VIEW", "description": "Xem danh mục" },
+    { "code": "CATEGORY_CREATE", "description": "Tạo danh mục" },
+    { "code": "CATEGORY_UPDATE", "description": "Cập nhật danh mục" },
+    { "code": "CATEGORY_DELETE", "description": "Xóa danh mục" },
+
+    { "code": "ORDER_VIEW", "description": "Xem đơn hàng" },
+    { "code": "ORDER_CREATE", "description": "Tạo đơn hàng mới" },
+    { "code": "ORDER_UPDATE", "description": "Cập nhật trạng thái đơn hàng" },
+    { "code": "ORDER_APPROVE", "description": "Duyệt đơn hàng" },
+    { "code": "ORDER_CANCEL", "description": "Hủy đơn hàng" },
+
+    { "code": "CUSTOMER_VIEW", "description": "Xem khách hàng" },
+    { "code": "CUSTOMER_UPDATE", "description": "Cập nhật thông tin khách hàng" },
+
+    { "code": "PROMO_VIEW", "description": "Xem mã khuyến mãi" },
+    { "code": "PROMO_CREATE", "description": "Tạo mã khuyến mãi mới" },
+    { "code": "PROMO_UPDATE", "description": "Cập nhật mã khuyến mãi" },
+    { "code": "PROMO_DELETE", "description": "Xóa mã khuyến mãi" },
+
+    { "code": "SETTING_VIEW", "description": "Xem cấu hình hệ thống" },
+    { "code": "SETTING_UPDATE", "description": "Cập nhật cấu hình hệ thống" },
+
+    { "code": "REPORT_SALES_VIEW", "description": "Xem báo cáo doanh thu" },
+    { "code": "REPORT_EXPORT", "description": "Xuất báo cáo ra file" },
+
+    { "code": "PAYMENT_VIEW", "description": "Xem phương thức thanh toán" },
+    { "code": "PAYMENT_MANUAL", "description": "Thanh toán thủ công" },
+
+    { "code": "CART_VIEW", "description": "Xem giỏ hàng" },
+    { "code": "CART_ADD_ITEM", "description": "Thêm sản phẩm vào giỏ hàng" },
+    { "code": "CART_UPDATE_ITEM", "description": "Cập nhật số lượng trong giỏ hàng" },
+    { "code": "CART_REMOVE_ITEM", "description": "Xóa sản phẩm khỏi giỏ hàng" },
+
+    { "code": "REVIEW_CREATE", "description": "Thêm đánh giá sản phẩm" },
+    { "code": "REVIEW_VIEW", "description": "Xem đánh giá sản phẩm" },
+
+    { "code": "PROFILE_UPDATE", "description": "Cập nhật thông tin cá nhân" }
+  ],
+
+  "roles": [
+    {
+      "role": "ADMIN",
+      "description": "Quản trị viên toàn hệ thống"
+    },
+    {
+      "role": "USER",
+      "description": "Người dùng đã đăng ký"
+    },
+    {
+      "role": "GUEST",
+      "description": "Khách chưa đăng ký"
+    }
+  ],
+
+  "role_permissions": [
+    {
+      "role": "ADMIN",
+      "permissions": [
+        "USER_VIEW", "USER_CREATE", "USER_UPDATE", "USER_DELETE", "USER_ROLE_ASSIGN",
+        "PRODUCT_VIEW", "PRODUCT_SEARCH", "PRODUCT_CREATE", "PRODUCT_UPDATE", "PRODUCT_DELETE",
+        "CATEGORY_VIEW", "CATEGORY_CREATE", "CATEGORY_UPDATE", "CATEGORY_DELETE",
+        "ORDER_VIEW", "ORDER_UPDATE", "ORDER_APPROVE", "ORDER_CANCEL",
+        "CUSTOMER_VIEW", "CUSTOMER_UPDATE",
+        "PROMO_VIEW", "PROMO_CREATE", "PROMO_UPDATE", "PROMO_DELETE",
+        "SETTING_VIEW", "SETTING_UPDATE",
+        "REPORT_SALES_VIEW", "REPORT_EXPORT"
+      ]
+    },
+    {
+      "role": "USER",
+      "permissions": [
+        "PRODUCT_VIEW", "PRODUCT_SEARCH",
+        "CATEGORY_VIEW",
+        "ORDER_VIEW", "ORDER_CREATE", "ORDER_CANCEL",
+        "CART_VIEW", "CART_ADD_ITEM", "CART_UPDATE_ITEM", "CART_REMOVE_ITEM",
+        "PAYMENT_VIEW", "PAYMENT_MANUAL",
+        "REVIEW_CREATE", "REVIEW_VIEW",
+        "PROMO_VIEW",
+        "PROFILE_UPDATE"
+      ]
+    },
+    {
+      "role": "GUEST",
+      "permissions": [
+        "PRODUCT_VIEW", "PRODUCT_SEARCH",
+        "CATEGORY_VIEW",
+        "PROMO_VIEW",
+        "CART_VIEW", "CART_ADD_ITEM", "CART_UPDATE_ITEM", "CART_REMOVE_ITEM"
+      ]
+    }
+  ]
+}

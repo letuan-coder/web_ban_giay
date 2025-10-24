@@ -1,4 +1,5 @@
 package com.example.DATN.config;
+
 import com.example.DATN.models.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,8 +10,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -32,7 +31,8 @@ public class SecurityConfig {
                     ,"/api/newsletter/subscribe"
                     ,"/api/products"
                     ,"/api/products/search"
-                    ,"/api/ghtk/create-order"};
+                    ,"/api/ghtk/create-order",
+                    "/api/guest"};
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -61,11 +61,6 @@ public class SecurityConfig {
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
         return httpSecurity.build();
     }
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(10);
-    }
-
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();

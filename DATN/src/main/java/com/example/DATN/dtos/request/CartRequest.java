@@ -12,5 +12,4 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CartRequest {
     UUID id;
-    Long userId;
 }

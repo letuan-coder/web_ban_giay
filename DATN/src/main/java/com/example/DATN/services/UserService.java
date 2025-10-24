@@ -1,6 +1,7 @@
 package com.example.DATN.services;
 
 import cn.ipokerface.snowflake.SnowflakeIdGenerator;
+import com.example.DATN.constant.AuthProvider;
 import com.example.DATN.constant.PredefinedRole;
 import com.example.DATN.dtos.request.RegisterRequest;
 import com.example.DATN.dtos.request.UpdateUserRequest;
@@ -12,6 +13,7 @@ import com.example.DATN.models.Role;
 import com.example.DATN.models.User;
 import com.example.DATN.repositories.RoleRepository;
 import com.example.DATN.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -32,6 +34,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService {
 
+    GetCurrentUser getCurrentUser;
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
     UserRepository userRepository;
@@ -42,9 +45,9 @@ public class UserService {
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }
-
-
+    @Transactional(rollbackOn = Exception.class)
     public UserResponse createUser(RegisterRequest registerRequest) {
+        User user =getCurrentUser.getCurrentUser();
         if (roleRepository.findByName("USER").isEmpty()){
             Role role = Role.builder()
                     .name(PredefinedRole.USER.name())
@@ -52,13 +55,17 @@ public class UserService {
                     .build();
             roleRepository.save(role);
         }
-        User user = userMapper.Register(registerRequest);
-        long newid = snowflakeIdGenerator.nextId();
-        user.setId(newid);
+//        user = userMapper.Register(registerRequest);
+        user.setUsername(registerRequest.getUsername());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         var adminRole = roleRepository.findByName(PredefinedRole.USER.name())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ROLE_NOT_EXIST));
-
+        user.setFirstName(registerRequest.getFirstName());
+        user.setLastName(registerRequest.getLastName());
+        user.setDob(registerRequest.getDob());
+        user.setEmail(registerRequest.getEmail());
+        user.setGuest(false);
+        user.setProvider(AuthProvider.LOCAL);
         var roles = new HashSet<Role>();
         roles.add(adminRole);
         user.setRoles(roles);
