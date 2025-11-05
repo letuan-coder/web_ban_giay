@@ -1,9 +1,8 @@
 package com.example.DATN.mapper;
 
-import com.example.DATN.dtos.respone.ProvinceResponse;
+import com.example.DATN.dtos.respone.georaphy.ProvinceResponse;
 import com.example.DATN.models.Province;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")

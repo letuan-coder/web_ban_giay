@@ -1,8 +1,8 @@
 
 package com.example.DATN.mapper;
 
-import com.example.DATN.dtos.request.CategoryRequest;
-import com.example.DATN.dtos.respone.CategoryResponse;
+import com.example.DATN.dtos.request.category.CategoryRequest;
+import com.example.DATN.dtos.respone.category.CategoryResponse;
 import com.example.DATN.models.Category;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;

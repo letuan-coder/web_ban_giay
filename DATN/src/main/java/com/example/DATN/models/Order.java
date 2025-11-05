@@ -7,6 +7,7 @@ import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -36,7 +37,7 @@ public class Order extends BaseEntity {
     private PaymentMethod paymentMethod;
 
     @NotNull
-    private Integer total_price;
+    private BigDecimal total_price;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;

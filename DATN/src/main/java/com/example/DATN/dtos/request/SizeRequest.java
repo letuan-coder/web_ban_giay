@@ -1,5 +1,6 @@
 package com.example.DATN.dtos.request;
 
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,5 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SizeRequest {
-    private String name;
+    @Min(value =20,message = "SIZE_NOT_ALLOW")
+    private Integer name;
 }

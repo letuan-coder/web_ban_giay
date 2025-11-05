@@ -1,10 +1,10 @@
 package com.example.DATN.controllers;
 
-import com.example.DATN.dtos.request.CreationProductVariantRequest;
-import com.example.DATN.dtos.request.ProductVariantRequest;
-import com.example.DATN.dtos.request.UpdateProductVariantRequest;
+
+import com.example.DATN.dtos.request.product.ProductVariantRequest;
+import com.example.DATN.dtos.request.product.UpdateProductVariantRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
-import com.example.DATN.dtos.respone.ProductVariantResponse;
+import com.example.DATN.dtos.respone.product.ProductVariantResponse;
 import com.example.DATN.mapper.ProductVariantMapper;
 import com.example.DATN.services.ColorService;
 import com.example.DATN.services.ImageProductService;
@@ -30,29 +30,16 @@ public class ProductVariantController {
     private final ColorService colorService;
     private final ProductVariantMapper productVariantMapper;
 
-    @PostMapping("/{product_color_id}")
+    @PostMapping("/list/{product_color_id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<ProductVariantResponse>> createProductVariant(
+    public ResponseEntity<ApiResponse<List<ProductVariantResponse>>> createListProductVariant(
             @PathVariable UUID product_color_id,
-            @Valid @ModelAttribute ProductVariantRequest variantRequest) {
-        CreationProductVariantRequest request = CreationProductVariantRequest.builder()
-                .productColorId(product_color_id)
-                .variantRequest(variantRequest)
-                .build();
-        ApiResponse response = ApiResponse.<ProductVariantResponse>builder()
-                .data(productVariantService.createProductVariant(request))
+            @Valid @RequestBody List<ProductVariantRequest> variantRequest) {
+        ApiResponse response = ApiResponse.<List<ProductVariantResponse>>builder()
+                .data(productVariantService.createListProductVariant(product_color_id,variantRequest))
                 .build();
         return ResponseEntity.ok(response);
     }
-
-//    @Transactional
-//    @GetMapping("/product/{productId}")
-//    public ApiResponse<List<ProductVariantResponse>> getProductVariantsByProductId(
-//            @PathVariable UUID productId) {
-//        return ApiResponse.<List<ProductVariantResponse>>builder()
-//                .data(productVariantService.getProductVariantsByProductId(productId))
-//                .build();
-//    }
 
     @GetMapping("/{id}")
     public ApiResponse<ProductVariantResponse> getProductVariantById(@PathVariable UUID id) {
@@ -64,14 +51,15 @@ public class ProductVariantController {
 
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<ProductVariantResponse>> updateProductVariant(
+    public ResponseEntity<ApiResponse<List<ProductVariantResponse>>> updateProductVariantByColor(
             @PathVariable UUID id ,
-            @ModelAttribute @Valid UpdateProductVariantRequest updaterequest) {
-        ApiResponse response = ApiResponse.<ProductVariantResponse>builder()
-                .data(productVariantService.updateProductVariant(id, updaterequest))
+             @RequestBody @Valid List<UpdateProductVariantRequest> listofupdaterequest) {
+        ApiResponse response = ApiResponse.<List<ProductVariantResponse>>builder()
+                .data(productVariantService.updateProductVariant(id, listofupdaterequest))
                 .build();
         return ResponseEntity.ok(response);
     }
+
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")

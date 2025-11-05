@@ -1,9 +1,9 @@
 package com.example.DATN.controllers;
 
-import com.example.DATN.dtos.request.ProductRequest;
+import com.example.DATN.dtos.request.product.ProductRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.PageResponse;
-import com.example.DATN.dtos.respone.ProductResponse;
+import com.example.DATN.dtos.respone.product.ProductResponse;
 import com.example.DATN.services.ImageProductService;
 import com.example.DATN.services.ProductService;
 import jakarta.validation.Valid;
@@ -14,6 +14,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,8 +36,14 @@ public class ProductController {
                 .build();
     }
 
-    @GetMapping
+    @PostMapping("/upload")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Void> uploadProducts(@RequestParam("file") MultipartFile file) {
+        productService.addProductsFromExcel(file);
+        return ApiResponse.<Void>builder().build();
+    }
 
+    @GetMapping
     public ApiResponse<PageResponse<ProductResponse>> getAllProducts(
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<ProductResponse> productPage = productService.getAllProducts(pageable);
@@ -48,6 +56,14 @@ public class ProductController {
                 .build();
         return ApiResponse.<PageResponse<ProductResponse>>builder()
                 .data(pageResponse)
+                .build();
+    }
+
+    @GetMapping("/code/{productCode}")
+    public ApiResponse<List<ProductResponse>> getProductByProductCode(
+            @PathVariable String productCode) {
+        return ApiResponse.<List<ProductResponse>>builder()
+                .data(productService.getProductByProductCode(productCode))
                 .build();
     }
 
@@ -66,7 +82,7 @@ public class ProductController {
                 .build();
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<ProductResponse> updateProduct(
             @PathVariable UUID id, @RequestBody @Valid ProductRequest request) {

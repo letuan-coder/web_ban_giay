@@ -1,6 +1,6 @@
 package com.example.DATN.mapper;
 
-import com.example.DATN.dtos.respone.CommuneResponse;
+import com.example.DATN.dtos.respone.georaphy.CommuneResponse;
 import com.example.DATN.models.Commune;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

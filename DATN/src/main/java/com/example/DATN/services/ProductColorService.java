@@ -1,19 +1,15 @@
 package com.example.DATN.services;
 
-import com.example.DATN.dtos.request.CreationProductVariantRequest;
-import com.example.DATN.dtos.request.ProductColorRequest;
-import com.example.DATN.dtos.request.ProductVariantRequest;
-import com.example.DATN.dtos.request.UpdateProductVariantRequest;
+import com.example.DATN.dtos.request.product.ProductColorRequest;
+import com.example.DATN.dtos.request.product.ProductVariantRequest;
+import com.example.DATN.dtos.request.product.UpdateProductColorRequest;
+import com.example.DATN.dtos.request.product.UpdateProductVariantRequest;
 import com.example.DATN.dtos.respone.ColorResponse;
-import com.example.DATN.dtos.respone.ProductColorResponse;
-import com.example.DATN.dtos.respone.ProductVariantResponse;
+import com.example.DATN.dtos.respone.product.ProductColorResponse;
+import com.example.DATN.dtos.respone.product.ProductVariantResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
-import com.example.DATN.mapper.ColorMapper;
-import com.example.DATN.mapper.ProductColorMapper;
-import com.example.DATN.mapper.ProductMapper;
-import com.example.DATN.mapper.ImageProductMapper;
-import com.example.DATN.mapper.ProductVariantMapper;
+import com.example.DATN.mapper.*;
 import com.example.DATN.models.Color;
 import com.example.DATN.models.Product;
 import com.example.DATN.models.ProductColor;
@@ -23,6 +19,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -70,17 +67,7 @@ public class ProductColorService {
                 .color(color)
                 .build();
         ProductColor savedProductColor = productColorRepository.save(productColor);
-        List<ProductVariantResponse> productVariantResponses = request.getVariantRequests().stream()
-                .map(variantRequest -> {
-                    CreationProductVariantRequest creationRequest =
-                            CreationProductVariantRequest.builder()
-                                    .productColorId(savedProductColor.getId())
-                                    .variantRequest(variantRequest)
-                                    .build();
-                    return productVariantService.createProductVariant(creationRequest);
-                })
-                .collect(Collectors.toList());
-
+        List<ProductVariantResponse> productVariantResponses = productVariantService.createListProductVariant(savedProductColor.getId(),requests);
         List<UUID> variantIds = productVariantResponses.stream()
                 .map(ProductVariantResponse::getId)
                 .collect(Collectors.toList());
@@ -89,7 +76,7 @@ public class ProductColorService {
 
         if (request.getFiles() != null && !request.getFiles().isEmpty()) {
             savedProductColor.setImages(imageProductService.uploadImages
-                    (savedProductColor.getId(), savedProductColor.getProduct().getId(), request.getFiles(), request.getAltText()));
+                    (savedProductColor.getId(), request.getFiles(), request.getAltText()));
         }
 
 //        ProductColorResponse response = ProductColorResponse.builder()
@@ -118,31 +105,59 @@ public class ProductColorService {
     }
 
     @Transactional
-    public ProductColorResponse updateProductColor(UUID id, ProductColorRequest request) {
+    public ProductColorResponse updateProductColor(UUID id, UpdateProductColorRequest request) {
         ProductColor existingProductColor = productColorRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
+
+        if (request.getIsAvailable() != null) {
+            existingProductColor.setIsAvailable(request.getIsAvailable());
+        }
+
+        if (request.getColorName() != null) {
+            Color color = colorRepository.findByName(request.getColorName())
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.COLOR_NOT_FOUND));
+            if (!existingProductColor.getColor().equals(color)) {
+                if (productColorRepository.existsByProductAndColor(existingProductColor.getProduct(), color)) {
+                    throw new ApplicationException(ErrorCode.PRODUCT_COLOR_EXISTED);
+                }
+                existingProductColor.setColor(color);
+            }
+        }
+
+        List<ProductVariantRequest> variantsToCreate = new ArrayList<>();
+        List<UpdateProductVariantRequest> variantsToUpdate = new ArrayList<>();
 
         if (request.getVariantRequests() != null && !request.getVariantRequests().isEmpty()) {
             request.getVariantRequests().forEach(variantRequest -> {
                 if (variantRequest.getId() != null) {
                     UpdateProductVariantRequest updateRequest = UpdateProductVariantRequest.builder()
-                            .size(variantRequest.getSize())
+                            .id(variantRequest.getId())
                             .price(variantRequest.getPrice())
                             .stock(variantRequest.getStock())
                             .build();
-                    productVariantService.updateProductVariant(variantRequest.getId(), updateRequest);
+                    variantsToUpdate.add(updateRequest);
                 } else {
-                    CreationProductVariantRequest creationRequest = new CreationProductVariantRequest(existingProductColor.getProduct().getId(), variantRequest);
-                    productVariantService.createProductVariant(creationRequest);
+                    variantsToCreate.add(variantRequest);
                 }
             });
         }
 
-        if (request.getFiles() != null && !request.getFiles().isEmpty()) {
-            imageProductService.uploadImages(existingProductColor.getId(), existingProductColor.getProduct().getId(), request.getFiles(), request.getAltText());
+        if (!variantsToUpdate.isEmpty()) {
+            productVariantService.updateProductVariant(id, variantsToUpdate);
         }
 
-        return productColorMapper.toProductColorResponse(existingProductColor);
+        if (!variantsToCreate.isEmpty()) {
+            productVariantService.createListProductVariant(id, variantsToCreate);
+        }
+
+        if (request.getFiles() != null && !request.getFiles().isEmpty()) {
+            imageProductService.uploadImages(existingProductColor.getId(), request.getFiles(), request.getAltText());
+        }
+
+        ProductColor updatedProductColor = productColorRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
+
+        return productColorMapper.toProductColorResponse(updatedProductColor);
     }
 
     @Transactional

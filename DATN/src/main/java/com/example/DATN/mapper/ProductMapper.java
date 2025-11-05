@@ -1,8 +1,8 @@
 
 package com.example.DATN.mapper;
 
-import com.example.DATN.dtos.request.ProductRequest;
-import com.example.DATN.dtos.respone.ProductResponse;
+import com.example.DATN.dtos.request.product.ProductRequest;
+import com.example.DATN.dtos.respone.product.ProductResponse;
 import com.example.DATN.models.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

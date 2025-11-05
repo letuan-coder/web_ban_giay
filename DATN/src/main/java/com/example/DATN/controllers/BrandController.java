@@ -1,8 +1,8 @@
 package com.example.DATN.controllers;
 
-import com.example.DATN.dtos.request.BrandRequest;
+import com.example.DATN.dtos.request.brand.BrandRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
-import com.example.DATN.dtos.respone.BrandResponse;
+import com.example.DATN.dtos.respone.brand.BrandResponse;
 import com.example.DATN.services.BrandService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class BrandController {
     private final BrandService brandService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CREATE_BRAND')")
     public ApiResponse<BrandResponse> createBrand(@RequestBody @Valid BrandRequest request) {
         return ApiResponse.<BrandResponse>builder()
                 .data(brandService.createBrand(request))
@@ -27,6 +27,7 @@ public class BrandController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('BRAND_VIEW')")
     public ApiResponse<List<BrandResponse>> getAllBrands() {
         return ApiResponse.<List<BrandResponse>>builder()
                 .data(brandService.getAllBrands())
@@ -49,15 +50,16 @@ public class BrandController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<BrandResponse> updateBrand(@PathVariable Long id, @RequestBody @Valid BrandRequest request) {
+    @PreAuthorize("hasAuthority('BRAND_UPDATE')")
+    public ApiResponse<BrandResponse> updateBrand(
+            @PathVariable Long id, @RequestBody @Valid BrandRequest request) {
         return ApiResponse.<BrandResponse>builder()
                 .data(brandService.updateBrand(id, request))
                 .build();
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('BRAND_DELETE')")
     public ApiResponse<Void> deleteBrand(@PathVariable Long id) {
         brandService.deleteBrand(id);
         return ApiResponse.<Void>builder().build();

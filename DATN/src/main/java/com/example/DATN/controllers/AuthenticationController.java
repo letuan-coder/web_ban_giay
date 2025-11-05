@@ -1,12 +1,12 @@
 package com.example.DATN.controllers;
 
-import com.example.DATN.dtos.request.AuthenticationRequest;
-import com.example.DATN.dtos.request.IntrospectRequest;
-import com.example.DATN.dtos.request.LogoutRequest;
-import com.example.DATN.dtos.request.RefreshRequest;
+import com.example.DATN.dtos.request.jwt.AuthenticationRequest;
+import com.example.DATN.dtos.request.jwt.IntrospectRequest;
+import com.example.DATN.dtos.request.jwt.LogoutRequest;
+import com.example.DATN.dtos.request.jwt.RefreshRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
-import com.example.DATN.dtos.respone.AuthenticationResponse;
-import com.example.DATN.dtos.respone.IntrospectResponse;
+import com.example.DATN.dtos.respone.jwt.AuthenticationResponse;
+import com.example.DATN.dtos.respone.jwt.IntrospectResponse;
 import com.example.DATN.services.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
 import jakarta.servlet.http.Cookie;
@@ -50,13 +50,6 @@ public class AuthenticationController {
                 .build();
     }
 
-    @PostMapping("/guest")
-    ApiResponse<AuthenticationResponse> createGuest() {
-        AuthenticationResponse authResponse = authenticationService.createGuestAndAuthenticate();
-        return ApiResponse.<AuthenticationResponse>builder()
-                .data(authResponse)
-                .build();
-    }
     @PostMapping("/introspect")
     ApiResponse<Boolean> introspect(@RequestBody IntrospectRequest request)
             throws ParseException, JOSEException {
@@ -85,5 +78,11 @@ public class AuthenticationController {
                 .data(result)
                 .build();
     }
-
+    @PostMapping("/guest")
+    ApiResponse<AuthenticationResponse> createGuest() {
+        AuthenticationResponse authResponse = authenticationService.createGuestAndAuthenticate();
+        return ApiResponse.<AuthenticationResponse>builder()
+                .data(authResponse)
+                .build();
+    }
 }

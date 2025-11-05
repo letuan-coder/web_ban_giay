@@ -48,7 +48,6 @@ public class ImageProductService {
 
     public List<ImageProduct> uploadImages(
             UUID ProductColorId,
-            UUID productId,
             List<MultipartFile> files,
             List<String> altTexts) {
         ProductColor productColor = productColorRepository
@@ -85,7 +84,6 @@ public class ImageProductService {
     public void deleteImage(Long imageId) {
         ImageProduct imageProduct = imageProductRepository.findById(imageId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.IMAGE_NOT_FOUND));
-
         fileStorageService.deleteFile(imageProduct.getImageUrl());
 
         imageProductRepository.delete(imageProduct);

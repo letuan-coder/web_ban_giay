@@ -1,9 +1,9 @@
 package com.example.DATN.controllers;
 
-import com.example.DATN.dtos.request.CartItemRequest;
-import com.example.DATN.dtos.request.UpdateCartIItemRequest;
+import com.example.DATN.dtos.request.cart.CartItemRequest;
+import com.example.DATN.dtos.request.cart.UpdateCartIItemRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
-import com.example.DATN.dtos.respone.CartItemResponse;
+import com.example.DATN.dtos.respone.cart.CartItemResponse;
 import com.example.DATN.mapper.CartItemMapper;
 import com.example.DATN.services.CartItemService;
 import lombok.RequiredArgsConstructor;

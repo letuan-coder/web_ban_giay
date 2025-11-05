@@ -1,17 +1,18 @@
 package com.example.DATN.services;
 
 import cn.ipokerface.snowflake.SnowflakeIdGenerator;
-import com.example.DATN.constant.AuthProvider;
 import com.example.DATN.constant.PredefinedRole;
-import com.example.DATN.dtos.request.AuthenticationRequest;
-import com.example.DATN.dtos.request.IntrospectRequest;
-import com.example.DATN.dtos.request.LogoutRequest;
-import com.example.DATN.dtos.request.RefreshRequest;
-import com.example.DATN.dtos.respone.AuthenticationResponse;
-import com.example.DATN.dtos.respone.IntrospectResponse;
+import com.example.DATN.dtos.request.jwt.AuthenticationRequest;
+import com.example.DATN.dtos.request.jwt.IntrospectRequest;
+import com.example.DATN.dtos.request.jwt.LogoutRequest;
+import com.example.DATN.dtos.request.jwt.RefreshRequest;
+import com.example.DATN.dtos.respone.jwt.AuthenticationResponse;
+import com.example.DATN.dtos.respone.jwt.IntrospectResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
+import com.example.DATN.helper.GetJwtIdForGuest;
 import com.example.DATN.models.InvalidateToken;
+import com.example.DATN.models.Role;
 import com.example.DATN.models.User;
 import com.example.DATN.repositories.CategoryRepository;
 import com.example.DATN.repositories.InvalidateTokenRepository;
@@ -27,15 +28,14 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
-import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.Set;
 import java.util.StringJoiner;
 import java.util.UUID;
 
@@ -60,28 +60,13 @@ public class AuthenticationService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
+    private final CartService cartService;
+    private final GetJwtIdForGuest getJwtIdForGuest;
+    private RedisTemplate redisTemplate;
     final InvalidateTokenRepository invalidateTokenRepository;
 
     public AuthenticationResponse createGuestAndAuthenticate() {
-        var userRole = roleRepository.findByName(PredefinedRole.GUEST.name())
-                .orElseThrow(() -> new ApplicationException(ErrorCode.ROLE_NOT_FOUND));
-        long newid = snowflakeIdGenerator.nextId();
-
-        User guestUser = new User();
-        guestUser.setId(newid);
-        guestUser.setUsername("guest_" + UUID.randomUUID().toString());
-        guestUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString())); // Random secure password
-        guestUser.setFirstName("Guest");
-        guestUser.setDob(LocalDate.now());
-        guestUser.setLastName("User");
-        guestUser.setGuest(true);
-        guestUser.setProvider(AuthProvider.LOCAL);
-        guestUser.setRoles(Set.of(userRole));
-
-        userRepository.save(guestUser);
-
-        String jwt = GenerateJWT(guestUser);
-
+        String jwt = GenerateJwtForGuest();
         return AuthenticationResponse.builder()
                 .token(jwt)
                 .success(true)
@@ -102,6 +87,42 @@ public class AuthenticationService {
                 .success(true)
                 .message("Đăng nhập thành công")
                 .build();
+    }
+
+    public String GenerateJwtForGuest() {
+        Role userRole = roleRepository.findByName(PredefinedRole.GUEST.name())
+                .orElseThrow(() -> new ApplicationException(ErrorCode.ROLE_NOT_FOUND));
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + VALID_DURATION * 1000L);
+
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .subject("guest_" + UUID.randomUUID().toString())
+                .issuer("DATN.com")
+                .issueTime(new Date())
+                .expirationTime(expiryDate)
+                .jwtID(UUID.randomUUID().toString())
+                .claim("scope", GetPermissionForRole(userRole))
+                .build();
+        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
+        JWSObject jwsObject = new JWSObject(header, payload);
+        try {
+            jwsObject.sign(new MACSigner(jwtSecret.getBytes()));
+
+            return jwsObject.serialize();
+        } catch (JOSEException e) {
+            log.error("Error when sign jwt", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String GetPermissionForRole(Role role) {
+        StringJoiner stringJoiner = new StringJoiner(" ");
+        stringJoiner.add("ROLE_" + role.getName());
+        role.getPermissions()
+                .forEach(permission ->
+                        stringJoiner.add(permission.getName()));
+        return stringJoiner.toString();
     }
 
     public String GenerateJWT(User user) {

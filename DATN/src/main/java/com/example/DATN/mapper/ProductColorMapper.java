@@ -1,8 +1,8 @@
 package com.example.DATN.mapper;
 
-import com.example.DATN.dtos.request.ProductColorRequest;
-import com.example.DATN.dtos.respone.ProductColorResponse;
-import com.example.DATN.dtos.respone.ProductResponse;
+import com.example.DATN.dtos.request.product.ProductColorRequest;
+import com.example.DATN.dtos.respone.product.ProductColorResponse;
+import com.example.DATN.dtos.respone.product.ProductResponse;
 import com.example.DATN.models.ProductColor;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

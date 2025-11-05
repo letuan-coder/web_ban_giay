@@ -1,7 +1,7 @@
 package com.example.DATN.controllers;
 
 import com.example.DATN.dtos.respone.ApiResponse;
-import com.example.DATN.dtos.respone.CommuneResponse;
+import com.example.DATN.dtos.respone.georaphy.CommuneResponse;
 import com.example.DATN.services.CommuneService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

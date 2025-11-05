@@ -1,8 +1,8 @@
 
 package com.example.DATN.mapper;
 
-import com.example.DATN.dtos.request.BrandRequest;
-import com.example.DATN.dtos.respone.BrandResponse;
+import com.example.DATN.dtos.request.brand.BrandRequest;
+import com.example.DATN.dtos.respone.brand.BrandResponse;
 import com.example.DATN.models.Brand;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;

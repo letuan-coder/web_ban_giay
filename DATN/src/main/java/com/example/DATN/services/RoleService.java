@@ -1,7 +1,7 @@
 package com.example.DATN.services;
 
-import com.example.DATN.dtos.request.RoleRequest;
-import com.example.DATN.dtos.respone.RoleResponse;
+import com.example.DATN.dtos.request.user.RoleRequest;
+import com.example.DATN.dtos.respone.user.RoleResponse;
 import com.example.DATN.mapper.RoleMapper;
 import com.example.DATN.models.Role;
 import com.example.DATN.repositories.PermissionRepository;

@@ -1,6 +1,6 @@
 package com.example.DATN.services;
 
-import com.example.DATN.dtos.respone.DistrictResponse;
+import com.example.DATN.dtos.respone.georaphy.DistrictResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.DistrictMapper;

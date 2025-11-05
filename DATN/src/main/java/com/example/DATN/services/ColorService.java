@@ -38,6 +38,7 @@ public class ColorService {
     }
 
     public List<ColorResponse> getColors() {
+
         return colorRepository.findAll().stream()
                 .map(colorMapper::toColorResponse)
                 .toList();

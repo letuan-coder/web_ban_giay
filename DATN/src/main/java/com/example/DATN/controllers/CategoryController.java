@@ -1,9 +1,9 @@
 
 package com.example.DATN.controllers;
 
-import com.example.DATN.dtos.request.CategoryRequest;
+import com.example.DATN.dtos.request.category.CategoryRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
-import com.example.DATN.dtos.respone.CategoryResponse;
+import com.example.DATN.dtos.respone.category.CategoryResponse;
 import com.example.DATN.services.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

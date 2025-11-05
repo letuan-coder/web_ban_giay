@@ -17,6 +17,11 @@
     { "code": "CATEGORY_UPDATE", "description": "Cập nhật danh mục" },
     { "code": "CATEGORY_DELETE", "description": "Xóa danh mục" },
 
+    { "code": "BRAND_VIEW", "description": "Xem thương hiệu" },
+    { "code": "BRAND_CREATE", "description": "Tạo thương hiệu" },
+    { "code": "BRAND_UPDATE", "description": "Cập nhật thương hiệu" },
+    { "code": "BRAND_DELETE", "description": "Xóa thương hiệu" },
+
     { "code": "ORDER_VIEW", "description": "Xem đơn hàng" },
     { "code": "ORDER_CREATE", "description": "Tạo đơn hàng mới" },
     { "code": "ORDER_UPDATE", "description": "Cập nhật trạng thái đơn hàng" },
@@ -70,6 +75,7 @@
     {
       "role": "ADMIN",
       "permissions": [
+        "BRAND_VIEW", "BRAND_CREATE","BRAND_UPDATE","BRAND_DELETE",
         "USER_VIEW", "USER_CREATE", "USER_UPDATE", "USER_DELETE", "USER_ROLE_ASSIGN",
         "PRODUCT_VIEW", "PRODUCT_SEARCH", "PRODUCT_CREATE", "PRODUCT_UPDATE", "PRODUCT_DELETE",
         "CATEGORY_VIEW", "CATEGORY_CREATE", "CATEGORY_UPDATE", "CATEGORY_DELETE",

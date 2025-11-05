@@ -1,7 +1,7 @@
 package com.example.DATN.services;
 
-import com.example.DATN.dtos.request.BrandRequest;
-import com.example.DATN.dtos.respone.BrandResponse;
+import com.example.DATN.dtos.request.brand.BrandRequest;
+import com.example.DATN.dtos.respone.brand.BrandResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.BrandMapper;

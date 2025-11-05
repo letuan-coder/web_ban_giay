@@ -53,6 +53,11 @@ public enum ErrorCode {
     SIZE_NOT_FOUND(1042, "Size not found", HttpStatus.NOT_FOUND),
     PRODUCT_COLOR_NOT_FOUND(1046, "Product color not found", HttpStatus.NOT_FOUND),
     PRODUCT_COLOR_EXISTED(1047, "Product color already exists", HttpStatus.BAD_REQUEST),
+    INVALID_SIZE_FOR_TYPE(1048, "Invalid size for type", HttpStatus.BAD_REQUEST),
+
+    //
+    SIZE_NOT_ALLOW(1049, "size must be at least 20", HttpStatus.NOT_FOUND),
+    TYPE_ALREADY_EXISTS(1050, "Type already exists", HttpStatus.BAD_REQUEST),
 
     // File & Image
     FILE_EMPTY(1006, "File is empty", HttpStatus.BAD_REQUEST),
@@ -60,6 +65,7 @@ public enum ErrorCode {
     FILE_SIZE_EXCEEDED(1023, "File size must be 10mb", HttpStatus.BAD_REQUEST),
     FILE_COUNT_EXCEEDED(1024, "Product have 5 image", HttpStatus.BAD_REQUEST),
     INVALID_FILE_TYPE(1032, "Invalid file type", HttpStatus.BAD_REQUEST),
+    FILE_UPLOAD_ERROR(1051, "Error uploading file", HttpStatus.BAD_REQUEST),
 
     // Newsletter
     NEWSLETTER_SUBSCRIPTION_NOT_FOUND(1025, "Newsletter subscription not found", HttpStatus.NOT_FOUND), // Re-numbered
@@ -70,6 +76,7 @@ public enum ErrorCode {
     CART_NOT_FOUND(1026,"cart is not exsited",HttpStatus.NOT_FOUND),
 
     // Order
+    ORDER_ITEM_NOT_FOUND(1054,"Order item not found",HttpStatus.NOT_FOUND),
     ORDER_NOT_FOUND(1043, "Order not found", HttpStatus.NOT_FOUND),
     PAYMENT_METHOD_NOT_FOUND(1044, "Payment method not found", HttpStatus.NOT_FOUND),
     INSUFFICIENT_STOCK(1045, "Insufficient stock", HttpStatus.BAD_REQUEST),

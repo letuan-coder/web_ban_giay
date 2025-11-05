@@ -1,6 +1,6 @@
 package com.example.DATN.config;
 
-import com.example.DATN.dtos.request.IntrospectRequest;
+import com.example.DATN.dtos.request.jwt.IntrospectRequest;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.services.AuthenticationService;
 import com.nimbusds.jose.JOSEException;

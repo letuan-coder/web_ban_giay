@@ -22,9 +22,12 @@ public class Size extends BaseEntity {
     String code;
 
     @Column(nullable = false)
-    String name;
+    Integer name;
 
-    @OneToMany(mappedBy = "size", cascade = CascadeType.ALL, orphanRemoval = true)
+
+    @OneToMany(mappedBy = "size",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     @JsonBackReference
     List<ProductVariant> variants = new ArrayList<>();
 }

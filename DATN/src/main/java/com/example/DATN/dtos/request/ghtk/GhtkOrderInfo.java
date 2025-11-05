@@ -1,6 +1,5 @@
 package com.example.DATN.dtos.request.ghtk;
 
-import com.example.DATN.dtos.request.GamSolution;
 import lombok.Data;
 
 import java.util.List;

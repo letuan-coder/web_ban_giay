@@ -1,6 +1,6 @@
 package com.example.DATN.mapper;
 
-import com.example.DATN.dtos.respone.DistrictResponse;
+import com.example.DATN.dtos.respone.georaphy.DistrictResponse;
 import com.example.DATN.models.District;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

@@ -1,8 +1,8 @@
 package com.example.DATN.controllers;
 
-import com.example.DATN.dtos.request.RoleRequest;
+import com.example.DATN.dtos.request.user.RoleRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
-import com.example.DATN.dtos.respone.RoleResponse;
+import com.example.DATN.dtos.respone.user.RoleResponse;
 import com.example.DATN.services.RoleService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

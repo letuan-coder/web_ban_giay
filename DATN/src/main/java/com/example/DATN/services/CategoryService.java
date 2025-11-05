@@ -1,7 +1,7 @@
 package com.example.DATN.services;
 
-import com.example.DATN.dtos.request.CategoryRequest;
-import com.example.DATN.dtos.respone.CategoryResponse;
+import com.example.DATN.dtos.request.category.CategoryRequest;
+import com.example.DATN.dtos.respone.category.CategoryResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.CategoryMapper;

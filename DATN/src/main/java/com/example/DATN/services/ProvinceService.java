@@ -1,6 +1,6 @@
 package com.example.DATN.services;
 
-import com.example.DATN.dtos.respone.ProvinceResponse;
+import com.example.DATN.dtos.respone.georaphy.ProvinceResponse;
 import com.example.DATN.mapper.ProvinceMapper;
 import com.example.DATN.repositories.ProvinceRepository;
 import lombok.RequiredArgsConstructor;

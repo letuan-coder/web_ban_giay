@@ -1,7 +1,7 @@
 package com.example.DATN.controllers;
 
 import com.example.DATN.dtos.respone.ApiResponse;
-import com.example.DATN.dtos.respone.CartResponse;
+import com.example.DATN.dtos.respone.cart.CartResponse;
 import com.example.DATN.mapper.CartMapper;
 import com.example.DATN.models.Cart;
 import com.example.DATN.services.CartService;
@@ -21,22 +21,6 @@ public class CartController {
     private final CartService cartService;
     private final CartMapper cartMapper;
 
-//    @GetMapping
-//    public ApiResponse<PageResponse<CartResponse>> getAllCarts(
-//            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-//        Page<CartResponse> cartpage = cartService.getAllCarts(pageable);
-//        PageResponse<CartResponse> pageResponse = PageResponse.<CartResponse>builder()
-//                .page(cartpage.getNumber())
-//                .size(cartpage.getSize())
-//                .totalElements(cartpage.getTotalElements())
-//                .totalPages(cartpage.getTotalPages())
-//                .content(cartpage.getContent())
-//                .build();
-//        return ApiResponse.<PageResponse<CartResponse>>builder()
-//                .data(pageResponse)
-//                .build();
-//    }
-
     @GetMapping("/{id}")
     public ApiResponse<CartResponse> getCartById(
             @PathVariable UUID id) {
@@ -46,10 +30,9 @@ public class CartController {
     }
 
     @PostMapping
-    public ApiResponse<CartResponse> createCart(
-            ) {
+    public ApiResponse<CartResponse> createCart() {
         return ApiResponse.<CartResponse>builder()
-                .data(cartService.createCart())
+                .data(cartService.createCartForUser())
                 .build();
     }
 

@@ -29,6 +29,7 @@ public class DataInitializer implements ApplicationRunner {
 
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
+
     private final ColorRepository colorRepository;
     private final SizeRepository sizeRepository;
     private final ProvinceRepository provinceRepository;
@@ -199,8 +200,9 @@ public class DataInitializer implements ApplicationRunner {
     }
 
     // --- Inner DTOs ---
+    @Data private static class TypeDTO { private String name; private List<String> sizes;}
     @Data private static class ColorDTO { private String code; private String name; private String hexCode; }
-    @Data private static class SizeDTO { private String code; private String name; }
+    @Data private static class SizeDTO { private String code; private Integer name; }
     @Data private static class RolePermissionConfig { private List<PermissionDTO> permissions; private List<RoleDTO> roles; private List<RolePermissionDTO> role_permissions; }
     @Data private static class PermissionDTO { private String code; private String description; }
     @Data private static class RoleDTO { private String role; private String description; }

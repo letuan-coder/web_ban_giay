@@ -1,9 +1,9 @@
 package com.example.DATN.controllers;
 
-import com.example.DATN.dtos.request.RegisterRequest;
-import com.example.DATN.dtos.request.UpdateUserRequest;
+import com.example.DATN.dtos.request.user.RegisterRequest;
+import com.example.DATN.dtos.request.user.UpdateUserRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
-import com.example.DATN.dtos.respone.UserResponse;
+import com.example.DATN.dtos.respone.user.UserResponse;
 import com.example.DATN.models.User;
 import com.example.DATN.repositories.UserRepository;
 import com.example.DATN.services.UserService;
@@ -30,7 +30,6 @@ public class UserController {
     @PostMapping("/register")
     ApiResponse<UserResponse> createUser(
             @RequestBody @Valid RegisterRequest request) {
-
         return ApiResponse.<UserResponse>builder()
                 .data(userService.createUser(request))
                 .message("Đăng ký thành công")
@@ -57,6 +56,7 @@ public class UserController {
                 .build();
     }
 
+
     @DeleteMapping("/{id}")
     public ApiResponse<UserResponse> deleteUser(@PathVariable Long id) {
         User user = userRepository.findById(id)
@@ -67,7 +67,8 @@ public class UserController {
                 .build();
     }
     @PutMapping("/{id}")
-    public ApiResponse<UserResponse> updateProfile(@PathVariable Long id, @RequestBody @Valid UpdateUserRequest request) {
+    public ApiResponse<UserResponse> updateProfile(
+            @PathVariable Long id, @RequestBody @Valid UpdateUserRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .data(userService.updateUser(id, request))
                 .build();

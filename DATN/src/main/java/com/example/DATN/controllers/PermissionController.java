@@ -1,8 +1,8 @@
 package com.example.DATN.controllers;
 
-import com.example.DATN.dtos.request.PermissionRequest;
+import com.example.DATN.dtos.request.user.PermissionRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
-import com.example.DATN.dtos.respone.PermissionResponse;
+import com.example.DATN.dtos.respone.user.PermissionResponse;
 import com.example.DATN.services.PermissionService;
 import org.springframework.validation.annotation.Validated;
 import lombok.AllArgsConstructor;

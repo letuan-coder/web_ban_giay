@@ -10,5 +10,6 @@ import java.util.UUID;
 
 public interface ProductColorRepository extends JpaRepository<ProductColor, UUID> {
     List<ProductColor> findAllByProduct(Product product);
+    ProductColor findByColor(Color color);
     boolean existsByProductAndColor(Product product, Color color);
 }

@@ -3,14 +3,19 @@ package com.example.DATN.services;
 import cn.ipokerface.snowflake.SnowflakeIdGenerator;
 import com.example.DATN.constant.AuthProvider;
 import com.example.DATN.constant.PredefinedRole;
-import com.example.DATN.dtos.request.RegisterRequest;
-import com.example.DATN.dtos.request.UpdateUserRequest;
-import com.example.DATN.dtos.respone.UserResponse;
+import com.example.DATN.dtos.request.user.RegisterRequest;
+import com.example.DATN.dtos.request.user.UpdateUserRequest;
+import com.example.DATN.dtos.respone.cart.CartResponse;
+import com.example.DATN.dtos.respone.user.UserResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
+import com.example.DATN.helper.GetUserByJwtHelper;
+import com.example.DATN.mapper.CartMapper;
 import com.example.DATN.mapper.UserMapper;
+import com.example.DATN.models.Cart;
 import com.example.DATN.models.Role;
 import com.example.DATN.models.User;
+import com.example.DATN.repositories.CartRepository;
 import com.example.DATN.repositories.RoleRepository;
 import com.example.DATN.repositories.UserRepository;
 import jakarta.transaction.Transactional;
@@ -33,33 +38,32 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService {
+    private final CartRepository cartRepository;
 
-    GetCurrentUser getCurrentUser;
+    private final GetUserByJwtHelper getUserByJwtHelper;
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
+    CartService cartService;
     UserRepository userRepository;
     SnowflakeIdGenerator snowflakeIdGenerator;
+     CartMapper cartMapper;
     UserMapper userMapper;
 
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }
+
     @Transactional(rollbackOn = Exception.class)
     public UserResponse createUser(RegisterRequest registerRequest) {
-        User user =getCurrentUser.getCurrentUser();
-        if (roleRepository.findByName("USER").isEmpty()){
-            Role role = Role.builder()
-                    .name(PredefinedRole.USER.name())
-                    .description("quyền cơ bản trên he thong")
-                    .build();
-            roleRepository.save(role);
-        }
-//        user = userMapper.Register(registerRequest);
+        User user = new User();
+        CartResponse response=cartService.createCartForUser();
+        Cart cart = cartMapper.toEntity(response);
         user.setUsername(registerRequest.getUsername());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        var adminRole = roleRepository.findByName(PredefinedRole.USER.name())
+        Role adminRole = roleRepository.findByName(PredefinedRole.USER.name())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ROLE_NOT_EXIST));
+
         user.setFirstName(registerRequest.getFirstName());
         user.setLastName(registerRequest.getLastName());
         user.setDob(registerRequest.getDob());
@@ -70,6 +74,7 @@ public class UserService {
         roles.add(adminRole);
         user.setRoles(roles);
         try {
+            user.setCart(cart);
             user = userRepository.save(user);
         } catch (DataIntegrityViolationException exception) {
             throw new ApplicationException(ErrorCode.USERNAME_ALREADY_EXISTS);
