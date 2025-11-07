@@ -15,7 +15,6 @@ import java.util.UUID;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GuestCartResponse {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     UUID id;
     String guest_key;
     BigDecimal total_price;

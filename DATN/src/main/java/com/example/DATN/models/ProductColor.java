@@ -35,12 +35,14 @@ public class ProductColor extends BaseEntity{
     Product product;
 
     @OneToMany(mappedBy = "productColor"
+            , fetch = FetchType.LAZY
             , cascade = CascadeType.ALL
             , orphanRemoval = true)
     @JsonManagedReference
     List<ImageProduct> images = new ArrayList<>();
 
-    @OneToMany(mappedBy = "productColor",
+    @OneToMany(mappedBy = "productColor"
+            ,fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     @JsonManagedReference

@@ -44,8 +44,6 @@ public class User extends BaseEntity {
 
     LocalDate dob;
 
-    @Column(nullable = false)
-    boolean isGuest = false;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 50)
@@ -63,5 +61,10 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     List<Order> orders;
+
+    @OneToOne(mappedBy = "user"
+            , fetch = FetchType.LAZY)
+    @JsonManagedReference
+    UserAddress userAddress;
 
 }

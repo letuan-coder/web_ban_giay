@@ -1,6 +1,7 @@
 package com.example.DATN.models;
 
 import com.example.DATN.constant.OrderStatus;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -10,8 +11,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import java.math.BigDecimal;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -19,7 +19,6 @@ import java.util.List;
 @Table(name = "orders")
 public class Order extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -27,8 +26,9 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonManagedReference
     private List<OrderItem> items;
 
     @JoinColumn(name = "payment_method_id")
@@ -36,8 +36,13 @@ public class Order extends BaseEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private PaymentMethod paymentMethod;
 
+    private BigDecimal shippingFee;
+
     @NotNull
     private BigDecimal total_price;
+
+    @ManyToOne
+    UserAddress userAddress;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;

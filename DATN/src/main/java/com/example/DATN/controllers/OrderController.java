@@ -2,8 +2,10 @@ package com.example.DATN.controllers;
 
 import com.example.DATN.dtos.request.order.OrderRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
+import com.example.DATN.dtos.respone.order.OrderItemRespone;
 import com.example.DATN.dtos.respone.order.OrderRespone;
 import com.example.DATN.services.OrderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,17 +19,23 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public ApiResponse<OrderRespone> createOrder
-            (@RequestBody OrderRequest orderRequest) {
+    public ApiResponse<OrderRespone> createOrder(@RequestBody @Valid OrderRequest request) {
+        OrderRespone respone = orderService.createOrder(request);
         return ApiResponse.<OrderRespone>builder()
-                .data(orderService.createOrder(orderRequest))
+                .data(respone)
                 .build();
     }
 
     @GetMapping
     public ApiResponse<List<OrderRespone>> getOrdersByUser() {
+        List<OrderRespone> respone = orderService.getOrdersByUser();
+        for (OrderRespone orderRespone : respone) {
+            for (OrderItemRespone itemRespone : orderRespone.getItems()) {
+                System.out.println(itemRespone.getSizeName());
+            }
+        }
         return ApiResponse.<List<OrderRespone>>builder()
-                .data(orderService.getOrdersByUser())
+                .data(respone)
                 .build();
     }
 

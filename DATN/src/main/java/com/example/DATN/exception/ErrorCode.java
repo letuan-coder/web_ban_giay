@@ -71,6 +71,7 @@ public enum ErrorCode {
     NEWSLETTER_SUBSCRIPTION_NOT_FOUND(1025, "Newsletter subscription not found", HttpStatus.NOT_FOUND), // Re-numbered
 
     //CART
+    CART_EMPTY(1027,"cart is empty",HttpStatus.BAD_REQUEST),
     OUT_OF_STOCK(1028,"out of stock",HttpStatus.BAD_REQUEST),
     CART_ITEM_NOT_FOUND(1027,"item is empty", HttpStatus.NOT_FOUND),
     CART_NOT_FOUND(1026,"cart is not exsited",HttpStatus.NOT_FOUND),
@@ -78,8 +79,16 @@ public enum ErrorCode {
     // Order
     ORDER_ITEM_NOT_FOUND(1054,"Order item not found",HttpStatus.NOT_FOUND),
     ORDER_NOT_FOUND(1043, "Order not found", HttpStatus.NOT_FOUND),
-    PAYMENT_METHOD_NOT_FOUND(1044, "Payment method not found", HttpStatus.NOT_FOUND),
+    PAYMENT_METHOD_NOT_EXISTED(1044, "Payment method not existed", HttpStatus.NOT_FOUND),
+    PAYMENT_METHOD_EXISTED(1055, "Payment method existed", HttpStatus.BAD_REQUEST),
+    PAYMENT_METHOD_NOT_FOUND(2002,"Payment method not found ", HttpStatus.NOT_FOUND),
     INSUFFICIENT_STOCK(1045, "Insufficient stock", HttpStatus.BAD_REQUEST),
+
+    // Address
+    PROVINCE_NOT_FOUND(1056, "Province not found", HttpStatus.NOT_FOUND),
+    DISTRICT_NOT_FOUND(1057, "District not found", HttpStatus.NOT_FOUND),
+    COMMUNE_NOT_FOUND(1058, "Commune not found", HttpStatus.NOT_FOUND),
+    ADDRESS_NOT_FOUND(1059, "Address not found", HttpStatus.NOT_FOUND),
 
     // Generic
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR)

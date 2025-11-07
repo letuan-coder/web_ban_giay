@@ -31,8 +31,10 @@ public class CartController {
 
     @PostMapping
     public ApiResponse<CartResponse> createCart() {
+        CartResponse response=cartService.createCartForUser();
+
         return ApiResponse.<CartResponse>builder()
-                .data(cartService.createCartForUser())
+                .data(response)
                 .build();
     }
 

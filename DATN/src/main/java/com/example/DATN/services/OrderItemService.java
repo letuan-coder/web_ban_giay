@@ -7,11 +7,8 @@ import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.OrderItemMapper;
 import com.example.DATN.models.Order;
 import com.example.DATN.models.OrderItem;
-import com.example.DATN.models.ProductColor;
-import com.example.DATN.repositories.OrderItemRepository;
-import com.example.DATN.repositories.OrderRepository;
-import com.example.DATN.repositories.ProductColorRepository;
-import com.example.DATN.repositories.ProductRepository;
+import com.example.DATN.models.ProductVariant;
+import com.example.DATN.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,23 +24,20 @@ public class OrderItemService {
     private final ProductRepository productRepository;
     private final OrderItemMapper orderItemMapper;
     private final ProductColorRepository productColorRepository;
+    private final ProductVariantRepository productVariantRepository;
 
     @Transactional
     public OrderItemRespone addOrderItemToOrder(Long orderId, OrderItemRequest itemRequest) {
-
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
-
-        ProductColor product = productColorRepository.findById(itemRequest.getProductColorId())
-                .orElseThrow(()->new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
-
+        ProductVariant variant= productVariantRepository.findById(itemRequest.getProductVariantId())
+                .orElseThrow(()->new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
         OrderItem orderItem = orderItemMapper.toOrderItem(itemRequest);
         orderItem.setOrder(order);
-        orderItem.setProductColor(product);
-
+        orderItem.setProductVariant(variant);
+        orderItem.setQuantity(itemRequest.getQuantity());
         order.getItems().add(orderItem);
         updateOrderTotalPrice(order);
-
         orderItemRepository.save(orderItem);
         orderRepository.save(order);
 
@@ -57,7 +51,6 @@ public class OrderItemService {
 
         orderItem.setQuantity(quantity);
         updateOrderTotalPrice(orderItem.getOrder());
-
         orderItemRepository.save(orderItem);
 
         return orderItemMapper.toOrderItemRespone(orderItem);

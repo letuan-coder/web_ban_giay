@@ -4,7 +4,6 @@ import com.example.DATN.dtos.request.jwt.IntrospectRequest;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.services.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -20,16 +19,21 @@ import java.util.Objects;
 @Component
 
 public class CustomeJwtDecoder implements JwtDecoder {
-    @Value("${jwt.secret}")
-    private String signerKey;
-
-    @Autowired
+    private final String signerKey;
     private final AuthenticationService authenticationService;
-
     private NimbusJwtDecoder nimbusJwtDecoder;
 
-    public CustomeJwtDecoder(AuthenticationService authenticationService) {
+    public CustomeJwtDecoder(@Value("${jwt.secret}") String signerKey, AuthenticationService authenticationService) {
+        this.signerKey = signerKey;
         this.authenticationService = authenticationService;
+        SecretKeySpec secretKeySpec = new SecretKeySpec(
+                signerKey.getBytes(),
+                "HS512"
+        );
+        nimbusJwtDecoder = NimbusJwtDecoder
+                .withSecretKey(secretKeySpec)
+                .macAlgorithm(MacAlgorithm.HS512)
+                .build();
     }
 
     @Override
@@ -50,11 +54,13 @@ public class CustomeJwtDecoder implements JwtDecoder {
                     signerKey.getBytes(),
                     "HS512"
             );
+
             nimbusJwtDecoder = NimbusJwtDecoder
                     .withSecretKey(secretKeySpec)
                     .macAlgorithm(MacAlgorithm.HS512)
                     .build();
         }
+
         return nimbusJwtDecoder.decode(token);
     }
 }

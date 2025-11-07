@@ -9,7 +9,7 @@ import java.util.UUID;
 @Data
 @Builder
 public class OrderItemRequest {
-    private UUID productColorId;
+    private UUID productVariantId;
     private Integer quantity;
     private BigDecimal price;
 }

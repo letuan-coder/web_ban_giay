@@ -1,5 +1,6 @@
 package com.example.DATN.services;
 
+import com.example.DATN.constant.Is_Available;
 import com.example.DATN.dtos.request.product.ProductColorRequest;
 import com.example.DATN.dtos.request.product.ProductVariantRequest;
 import com.example.DATN.dtos.request.product.UpdateProductColorRequest;
@@ -79,13 +80,6 @@ public class ProductColorService {
                     (savedProductColor.getId(), request.getFiles(), request.getAltText()));
         }
 
-//        ProductColorResponse response = ProductColorResponse.builder()
-//                .id(savedProductColor.getId())
-////                .productResponse(productMapper.toProductResponse(savedProductColor.getProduct()))
-//                .color(colorMapper.toColorResponse(savedProductColor.getColor()))
-//                .variantResponses(productVariantMapper.toProductVariantResponse(savedProductColor.getVariants()))
-//                .images(imageProductMapper.toImageProductResponses(savedProductColor.getImages()))
-//                .build();
         ProductColorResponse response= productColorMapper.toProductColorResponse(savedProductColor);
         response.setVariantResponses(productVariantMapper.toProductVariantResponse(savedProductColor.getVariants()));
         return response;
@@ -111,6 +105,11 @@ public class ProductColorService {
 
         if (request.getIsAvailable() != null) {
             existingProductColor.setIsAvailable(request.getIsAvailable());
+            if(request.getIsAvailable()== Is_Available.NOT_AVAILABLE) {
+                List<ProductVariant> variants = productVariantRepository.findAllByproductColor(existingProductColor);
+                variants.forEach(variant -> variant.setIsAvailable(request.getIsAvailable()));
+                productVariantRepository.saveAll(variants);
+            }
         }
 
         if (request.getColorName() != null) {

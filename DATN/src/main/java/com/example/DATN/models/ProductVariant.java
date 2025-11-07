@@ -29,7 +29,7 @@ public class ProductVariant extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_color_id", nullable = false)
     @JsonBackReference
-    private ProductColor productColor;
+    ProductColor productColor;
 
     @ManyToOne
     @JoinColumn(name = "size_code")

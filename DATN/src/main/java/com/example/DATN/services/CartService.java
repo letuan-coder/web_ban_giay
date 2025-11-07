@@ -2,6 +2,7 @@ package com.example.DATN.services;
 
 import com.example.DATN.dtos.respone.cart.CartItemResponse;
 import com.example.DATN.dtos.respone.cart.CartResponse;
+import com.example.DATN.dtos.respone.cart.GuestCartResponse;
 import com.example.DATN.dtos.respone.product.ProductVariantResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
@@ -14,6 +15,7 @@ import com.example.DATN.models.User;
 import com.example.DATN.repositories.CartItemRepository;
 import com.example.DATN.repositories.CartRepository;
 import com.example.DATN.repositories.UserRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +25,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Service nghiệp vụ giỏ hàng
@@ -51,22 +52,7 @@ public class CartService {
     public CartResponse getCartByUserId() {
 //       //clear toàn bộ cache redis
 //       redisTemplate.getConnectionFactory().getConnection().flushAll();
-        String guestKey = getJwtIdForGuest.GetGuestKey();
-        if (guestKey != null && !guestKey.isEmpty()) {
-            String redisGuestKey = CART_REDIS_KEY_PREFIX + guestKey;
-            Object cachedGuestData = redisTemplate.opsForValue().get(redisGuestKey);
-            if (cachedGuestData != null) {
-                return objectMapper.convertValue(cachedGuestData, CartResponse.class);
-            }
-        }
-
         User user = getUserByJwtHelper.getCurrentUser();
-        String redisUserKey = CART_REDIS_KEY_PREFIX+ user.getId();
-        Object cachedUserData = redisTemplate.opsForValue().get(redisUserKey);
-        if (cachedUserData != null) {
-            return objectMapper.convertValue(cachedUserData, CartResponse.class);
-        }
-
         Cart cart = cartRepository.findByUser(user).orElseGet(() -> {
             Cart newCart = new Cart();
             newCart.setUser(user);
@@ -80,10 +66,6 @@ public class CartService {
                 .findByCart(cart).stream().map(cartItemMapper::toCartItemResponse).toList();
         BigDecimal total = Calculate_Total_Price(cartItemResponse);
         cartResponse.setTotal_price(total);
-
-        // Cache the cart for the user
-        redisTemplate.opsForValue().set(redisUserKey, cartResponse, 7, TimeUnit.DAYS);
-
         return cartResponse;
     }
 
@@ -93,23 +75,47 @@ public class CartService {
         return cartMapper.toCartResponse(respone);
     }
 
+    public Cart MergeCartForUser(User user) {
+        String guest_key = "cart:" + getJwtIdForGuest.GetGuestKey() + ":item";
+        Object cache = redisTemplate.opsForValue().get(guest_key);
+        if(cache==null){
+            Cart newCart =  Cart.builder()
+                    .user(user)
+                    .total_price(BigDecimal.ZERO)
+                    .items(new ArrayList<>())
+                    .build();
+            return cartRepository.save(newCart);
+
+        }
+        else {
+            GuestCartResponse guestCartResponse =
+                    objectMapper.convertValue(cache, new TypeReference<GuestCartResponse>() {
+                    });
+            List<CartItemResponse> listItem = new ArrayList<>();
+            for (CartItemResponse response : guestCartResponse.getCartItems()) {
+                listItem.add(response);
+            }
+            CartResponse newCartForUser = CartResponse.builder()
+                    .cartItems(listItem)
+                    .userId(user.getId())
+                    .total_price(guestCartResponse.getTotal_price())
+                    .build();
+            Cart cart = cartMapper.toEntity(newCartForUser);
+            return cartRepository.save(cart);
+        }
+    }
+
     @Transactional(rollbackOn = Exception.class)
     public CartResponse createCartForUser() {
         User user = getUserByJwtHelper.getCurrentUser();
-        // Nếu user đã có cart thì trả về cart đó luôn
         Cart cart = user.getCart();
         if (cart == null) {
-            cart = new Cart();
-            cart.setUser(user);
-            cart.setCreatedAt(LocalDateTime.now());
-            cart.setTotal_price(BigDecimal.ZERO);
+            cart = Cart.builder()
+                    .user(user)
+                    .total_price(BigDecimal.ZERO)
+                    .build();
             cart = cartRepository.save(cart);
         }
-        // Lưu cache vào Redis
-
-        CartResponse dto = cartMapper.toCartResponse(cart);
-        String redisUserKey = CART_REDIS_KEY_PREFIX+ user.getId(); // Consistent key
-        redisTemplate.opsForValue().set(redisUserKey, dto, 7, TimeUnit.DAYS); // Add expiration
         return cartMapper.toCartResponse(cart);
     }
 

@@ -1,5 +1,7 @@
 package com.example.DATN.models;
 
+import com.example.DATN.constant.Is_Available;
+import com.example.DATN.constant.PaymentMethodEnum;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,6 +10,7 @@ import java.util.List;
 
 @Setter
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -19,12 +22,19 @@ public class PaymentMethod extends BaseEntity {
     Long id;
 
     @Column(nullable = false, length = 255)
-     String name;
+    String displayName;
+
+    @Enumerated(EnumType.STRING)
+    PaymentMethodEnum Status;
 
     @Column(length = 1000)
-     String description;
+    String description;
 
     @OneToMany(mappedBy = "paymentMethod", fetch = FetchType.LAZY)
     List<Order> orders;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    Is_Available isAvailable=Is_Available.AVAILABLE;
 }
 

@@ -38,7 +38,7 @@ public class SecurityConfig {
                     ,"/api/products/search"
                     ,"/api/ghtk/create-order",
                     "/api/guest"};
-    private final String [] POST_PUBLIC_API={"/api/users/register","/api/ghtk/create-order"};
+    private final String [] POST_PUBLIC_API={"/api/ghtk/create-order"};
     @Value("${jwt.secret}")
     private String jwtSecret;
 
@@ -48,16 +48,17 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.cors(cors -> cors.configurationSource(corsConfigurationSource()));
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
+
         httpSecurity.authorizeHttpRequests(request -> request
                 .requestMatchers( PUBLIC_API).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/users")
                 .hasAuthority("USER_VIEW")
+                .requestMatchers(HttpMethod.GET,"/vnpay/**").permitAll()
                 .requestMatchers(HttpMethod.GET,"/api/products").permitAll()
                 .requestMatchers(HttpMethod.POST,POST_PUBLIC_API).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/brands/**", "/api/categories/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/provinces/**","/api/districts/**","/api/communes/**").permitAll()
                 .anyRequest().authenticated()
-
         );
         httpSecurity.oauth2ResourceServer(oauth2->
                 oauth2.jwt(jwtConfigurer->jwtConfigurer
