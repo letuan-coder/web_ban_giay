@@ -17,13 +17,13 @@ import java.text.ParseException;
 import java.util.Objects;
 
 @Component
-
 public class CustomeJwtDecoder implements JwtDecoder {
     private final String signerKey;
     private final AuthenticationService authenticationService;
     private NimbusJwtDecoder nimbusJwtDecoder;
 
-    public CustomeJwtDecoder(@Value("${jwt.secret}") String signerKey, AuthenticationService authenticationService) {
+    public CustomeJwtDecoder(@Value("${jwt.secret}") String signerKey,
+                             AuthenticationService authenticationService) {
         this.signerKey = signerKey;
         this.authenticationService = authenticationService;
         SecretKeySpec secretKeySpec = new SecretKeySpec(

@@ -10,6 +10,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "categories")
@@ -21,8 +22,6 @@ public class Category extends BaseEntity {
     @Column(nullable = false, length = 255)
     String name;
 
-    @Column(length = 1000)
-    String description;
 
     @OneToMany(mappedBy = "category"
             , fetch = FetchType.LAZY

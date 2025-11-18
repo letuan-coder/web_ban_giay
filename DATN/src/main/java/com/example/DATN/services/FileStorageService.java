@@ -21,7 +21,8 @@ import java.util.UUID;
 @Service
 public class FileStorageService {
 
-    private final Path storageFolder = Paths.get("uploads");
+//    private final Path storageFolder = Paths.get("../uploads");
+private final Path storageFolder = Paths.get("uploads");
     public FileStorageService() {
         try {
             Files.createDirectories(storageFolder);

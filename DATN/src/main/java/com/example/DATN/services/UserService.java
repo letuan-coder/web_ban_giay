@@ -55,9 +55,9 @@ public class UserService {
     CartMapper cartMapper;
     UserMapper userMapper;
 
-    @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getAllUsers() {
-        return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
+        return userRepository.findAll().stream()
+                .map(userMapper::toUserResponse).toList();
     }
 
     @Transactional(rollbackOn = Exception.class)
@@ -65,6 +65,9 @@ public class UserService {
         User user = new User();
         Long newId = snowflakeIdGenerator.nextId();
         user.setId(newId);
+        if(!registerRequest.getPassword().equals(registerRequest.getPassword())){
+            throw new ApplicationException(ErrorCode.PASSWORD_CONFIRM_NOT_MATCH);
+        }
         user.setUsername(registerRequest.getUsername());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         Role adminRole = roleRepository.findByName(PredefinedRole.USER.name())

@@ -1,0 +1,75 @@
+.container {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.card {
+  border-radius: 0.75rem;
+  border: none;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
+  }
+}
+
+.card-img-top {
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+  height: 180px; // Consistent image height
+  object-fit: cover;
+}
+
+.card-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #343a40;
+  margin-bottom: 0.5rem;
+}
+
+.card-text {
+  font-size: 0.9rem;
+  color: #6c757d;
+  line-height: 1.4;
+  flex-grow: 1; // Allow description to take available space
+}
+
+.text-primary {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #007bff !important;
+}
+
+.btn-outline-primary {
+  border-radius: 0.5rem;
+  border-color: #007bff;
+  color: #007bff;
+  &:hover {
+    background-color: #007bff;
+    color: #fff;
+  }
+}
+
+.btn-success, .btn-danger, .btn-primary {
+  border-radius: 0.5rem;
+}
+
+.alert {
+  border-radius: 0.5rem;
+}
+
+.spinner-border {
+  color: #007bff;
+}
+
+.form-check-input {
+  cursor: pointer;
+}

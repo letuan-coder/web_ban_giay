@@ -5,8 +5,10 @@ import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.SizeResponse;
 import com.example.DATN.services.SizeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -17,16 +19,20 @@ public class SizeController {
     private final SizeService sizeService;
 
     @PostMapping
-    public ApiResponse<SizeResponse> createSize(@RequestBody SizeRequest request) {
-        return ApiResponse.<SizeResponse>builder()
-                .data(sizeService.createSize(request))
+    public ResponseEntity<ApiResponse<List<SizeResponse>>> createSize(@RequestBody List<SizeRequest> requests) {
+        List<SizeResponse> responses = sizeService.createSize(requests);
+        ApiResponse response= ApiResponse.<List<SizeResponse>>builder()
+                .data(responses)
                 .build();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
     public ApiResponse<List<SizeResponse>> getSizes() {
+        List<SizeResponse> sizes =new ArrayList<>(sizeService.getSizes());
+        sizes.sort((s1, s2) -> Integer.compare(s1.getName(), s2.getName())); // Sort by name (Integer) ascending
         return ApiResponse.<List<SizeResponse>>builder()
-                .data(sizeService.getSizes())
+                .data(sizes)
                 .build();
     }
 

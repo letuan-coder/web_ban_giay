@@ -4,6 +4,7 @@ import com.example.DATN.dtos.request.brand.BrandRequest;
 import com.example.DATN.dtos.respone.brand.BrandResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
+import com.example.DATN.helper.FormatInputString;
 import com.example.DATN.mapper.BrandMapper;
 import com.example.DATN.models.Brand;
 import com.example.DATN.repositories.BrandRepository;
@@ -19,9 +20,11 @@ public class BrandService {
 
     private final BrandRepository brandRepository;
     private final BrandMapper brandMapper;
-
+    private final FormatInputString formatInputString;
     public BrandResponse createBrand(BrandRequest request) {
-        Brand brand = brandMapper.toBrand(request);
+        Brand brand =Brand.builder()
+                .name(formatInputString.formatInputString(request.getName()))
+                .build();
         brand = brandRepository.save(brand);
         return brandMapper.toBrandResponse(brand);
     }
@@ -47,6 +50,7 @@ public class BrandService {
     public BrandResponse updateBrand(Long id, BrandRequest request) {
         Brand brand = brandRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.BRAND_NOT_FOUND));
+        request.setName(formatInputString.formatInputString(request.getName()));
         brandMapper.updateBrand(brand, request);
         brand = brandRepository.save(brand);
         return brandMapper.toBrandResponse(brand);

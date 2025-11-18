@@ -23,6 +23,11 @@ public class ProductResponse {
     private String description;
     private Is_Available available;
     private List<ProductColorResponse> colorResponses;
+    private Long brandId;
+    private String brandName;
+    private String categoryName;
+    private Long categoryId;
     private LocalDate createdAt;
     private LocalDate updatedAt;
+    private double weight;
 }

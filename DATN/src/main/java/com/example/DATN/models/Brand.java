@@ -11,6 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
+@Builder
 @Table(name = "brands")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Brand extends BaseEntity {

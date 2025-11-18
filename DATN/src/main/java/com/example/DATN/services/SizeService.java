@@ -7,10 +7,13 @@ import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.SizeMapper;
 import com.example.DATN.models.Size;
 import com.example.DATN.repositories.SizeRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -18,15 +21,30 @@ public class SizeService {
 
     private final SizeRepository sizeRepository;
     private final SizeMapper sizeMapper;
-    private final String PREFIX = "SZ";
-
-    public static String generate(String prefix, long index) {
-        return prefix + String.format("%03d", index);
+    private final String PREFIX = "SZ_";
+    private String generateProductCode() {
+        return UUID.randomUUID().toString().substring(0, 5).toUpperCase();
     }
-    public SizeResponse createSize(SizeRequest request) {
-        Size size = sizeMapper.toSize(request);
-        size.setCode(generate(PREFIX, sizeRepository.count() +1));
-        return sizeMapper.toSizeResponse(sizeRepository.save(size));
+    public static String generate(String prefix, String index) {
+        return prefix + index;
+    }
+    @Transactional(rollbackOn = Exception.class)
+    public List<SizeResponse> createSize(List<SizeRequest> requests) {
+        List<SizeResponse> responses = new ArrayList<>();
+        for(SizeRequest request: requests) {
+            String sizeCode =generate(PREFIX, generateProductCode());
+            if(sizeRepository.existsByName(request.getName())==true){
+                continue;
+            }
+            Size size = Size.builder()
+                    .code(sizeCode)
+                    .name(request.getName())
+                    .build();
+            responses.add(sizeMapper.toSizeResponse(size));
+            sizeRepository.save(size);
+        }
+        return responses;
+
     }
 
     public List<SizeResponse> getSizes() {

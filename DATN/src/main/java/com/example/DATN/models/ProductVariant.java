@@ -8,6 +8,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -52,4 +54,7 @@ public class ProductVariant extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     Is_Available isAvailable = Is_Available.AVAILABLE;
+
+    @ManyToMany(mappedBy = "productVariants")
+    private Set<Promotion> promotions = new HashSet<>();
 }

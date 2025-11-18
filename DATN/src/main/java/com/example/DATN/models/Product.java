@@ -45,6 +45,8 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "category_id")
     Category category;
 
+    Double weight;
+
     @OneToMany(mappedBy = "product"
             ,fetch = FetchType.LAZY
             , cascade = CascadeType.ALL

@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class VnPaymentRequest {
-    private Integer amount;
+    private Long amount;
     private String bankCode;
-    private String language;
+    @Builder.Default
+    private String language="vn";
 }

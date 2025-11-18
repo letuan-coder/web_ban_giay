@@ -1,0 +1,53 @@
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-4">Thêm sản phẩm mới</h3>
+                    <form (ngSubmit)="createProduct()" class="position-relative">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Tên sản phẩm</label>
+                            <input type="text" id="name" [(ngModel)]="product.name" name="name" (input)="onNameInput()"
+                                class="form-control" required>
+                            <ul *ngIf="filteredProducts.length" class="list-group position-absolute w-100"
+                                style="z-index: 1000;">
+                                <li *ngFor="let suggestion of filteredProducts"
+                                    class="list-group-item list-group-item-action"
+                                    (click)="selectSuggestion(suggestion)">
+                                    {{ suggestion }}
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Mô tả</label>
+                            <textarea id="description" [(ngModel)]="product.description" name="description"
+                                class="form-control"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="weight" class="form-label">Khối lượng sản phẩm</label>
+                            <input type="text" id="weight" [(ngModel)]="product.weight" name="weight"
+                                class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="brand" class="form-label">Thương hiệu</label>
+                            <select [(ngModel)]="product.brandId" name="brandId" class="form-select" required>
+                                <option *ngFor="let b of brands" [value]="b.id">{{ b.name }}</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Danh mục</label>
+                            <select id="category" [(ngModel)]="product.categoryId" name="categoryId" class="form-select"
+                                required>
+                                <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" type="submit">Thêm sản phẩm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

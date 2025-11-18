@@ -1,0 +1,20 @@
+<h2 mat-dialog-title>Áp dụng khuyến mãi cho biến thể</h2>
+
+<div mat-dialog-content>
+  <p>Chọn khuyến mãi để áp dụng cho các biến thể đã chọn:</p>
+  <div class="form-group">
+    <label for="promotionSelect">Khuyến mãi:</label>
+    <select class="form-control" id="promotionSelect" [(ngModel)]="selectedPromotionId" name="selectedPromotion">
+      <option [ngValue]="null" disabled>-- Chọn khuyến mãi --</option>
+      <option *ngFor="let promo of promotions" [ngValue]="promo.id">{{ promo.name }} ({{ promo.discountValue }}% {{ promo.promotionType }})</option>
+    </select>
+  </div>
+</div>
+
+<div mat-dialog-actions class="d-flex justify-content-end">
+  <button mat-button class="btn btn-secondary me-2" (click)="onCancel()">Hủy</button>
+  <button mat-button class="btn btn-primary" (click)="applyPromotion()" [disabled]="loading || !selectedPromotionId">
+    <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    Áp dụng
+  </button>
+</div>

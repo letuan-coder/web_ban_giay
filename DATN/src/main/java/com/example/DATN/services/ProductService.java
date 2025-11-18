@@ -1,10 +1,12 @@
 package com.example.DATN.services;
 
+import cn.ipokerface.snowflake.SnowflakeIdGenerator;
 import com.example.DATN.constant.Util.SkuUtil;
 import com.example.DATN.dtos.request.product.ProductRequest;
 import com.example.DATN.dtos.respone.product.ProductResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
+import com.example.DATN.helper.FormatInputString;
 import com.example.DATN.mapper.ProductMapper;
 import com.example.DATN.models.Brand;
 import com.example.DATN.models.Category;
@@ -40,13 +42,11 @@ public class ProductService {
     private final ProductColorRepository productColorRepository;
     private final ProductMapper productMapper;
     private final SkuUtil skuConstant;
-
-    private final String PREFIX = "SHOES";
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
+    private final String PREFIX = "SHOES_";
     private final ColorRepository colorRepository;
+    private final FormatInputString formatInputString;
 
-    public static String generate(String prefix, long index) {
-        return prefix + String.format("%03d", index);
-    }
 
     public List<ProductResponse> getProductByProductCode(String productCode){
         List<Product> ListOfProduct= productRepository.findAllByProductCode(productCode);
@@ -54,21 +54,31 @@ public class ProductService {
                 .map(productMapper::toProductResponse)
                 .collect(Collectors.toList());
     }
+    private String generateProductCode() {
+        return UUID.randomUUID().toString().substring(0, 5).toUpperCase();
+    }
+
+    public static String generate(String prefix, String index) {
+        return prefix + index;
+    }
+
     @Transactional
     public ProductResponse createProduct(ProductRequest request) {
-        String productCode =generate(PREFIX, productRepository.count()+1);
         Brand brand = brandRepository.findById(request.getBrandId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.BRAND_NOT_FOUND));
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.CATEGORY_NOT_FOUND));
-        String formatProductName = request.getName().trim();
+       String formatProductName = formatInputString.formatInputString(request.getName().trim());
+       String productCode =(generate(PREFIX,generateProductCode()));
+       String formatDescription = formatInputString.formatInputString(request.getDescription().trim());
         Product product = productMapper.toProduct(request);
         product.setName(formatProductName);
-        product.setDescription(request.getDescription());
+        product.setDescription(formatDescription);
         product.setProductCode(productCode);
         product.setBrand(brand);
         product.setCategory(category);
         product.setSlug(toSlug(formatProductName));
+        product.setWeight(request.getWeight());
         Product savedProduct = productRepository.save(product);
         return productMapper.toProductResponse(savedProduct);
 
@@ -103,13 +113,13 @@ public class ProductService {
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.CATEGORY_NOT_FOUND));
 
-        existingProduct.setName(request.getName());
+        existingProduct.setName(formatInputString.formatInputString(request.getName()));
         existingProduct.setDescription(request.getDescription());
         existingProduct.setBrand(brand);
         existingProduct.setCategory(category);
         existingProduct.setSlug(toSlug(request.getName()));
         existingProduct.setUpdatedAt(LocalDateTime.now());
-
+        existingProduct.setWeight(request.getWeight());
         Product updatedProduct = productRepository.save(existingProduct);
         return productMapper.toProductResponse(updatedProduct);
     }
@@ -170,7 +180,6 @@ public class ProductService {
                 if (categoryIdCell != null) {
                     request.setCategoryId((long) categoryIdCell.getNumericCellValue());
                 }
-
                 productRequests.add(request);
             }
 

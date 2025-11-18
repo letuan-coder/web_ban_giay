@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -93,7 +94,15 @@ public class ProductColorService {
     }
 
     public List<ProductColorResponse> getAllProductColors() {
-        return productColorRepository.findAll().stream()
+        List<ProductColor> colors = productColorRepository.findAll();
+        colors.sort(Comparator.comparingInt(pc ->
+                pc.getVariants()
+                        .stream()
+                        .mapToInt(v -> v.getSize().getName()) // giả sử size.name là kiểu int
+                        .min()
+                        .orElse(Integer.MAX_VALUE)
+        ));
+        return colors.stream()
                 .map(productColorMapper::toProductColorResponse)
                 .collect(Collectors.toList());
     }
@@ -159,10 +168,14 @@ public class ProductColorService {
         return productColorMapper.toProductColorResponse(updatedProductColor);
     }
 
-    @Transactional
-    public void deleteProductColor(UUID id) {
-        ProductColor productColor = productColorRepository.findById(id)
-                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
-        productColorRepository.delete(productColor);
-    }
+//    @Transactional
+//    public void deleteProductColor(UUID id) {
+//        ProductColor productColor = productColorRepository.findById(id)
+//                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
+//        for (ProductVariant variant : productColor.getVariants()) {
+//            ProductVariant variant = productVariantRepository.findById(productColor.getVariants()).orElseThrow();
+//        }
+//        productColorRepository.delete(productColor);
+//    }
+
 }

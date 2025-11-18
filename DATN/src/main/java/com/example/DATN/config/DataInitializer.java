@@ -15,10 +15,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -26,27 +23,24 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class DataInitializer implements ApplicationRunner {
-
+    private final VnpayRepository vnpayRepository;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
-
-    private final ColorRepository colorRepository;
-    private final SizeRepository sizeRepository;
     private final ProvinceRepository provinceRepository;
     private final DistrictRepository districtRepository;
     private final CommuneRepository communeRepository;
     private final ResourceLoader resourceLoader;
     private final ObjectMapper objectMapper;
 
+
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+
         log.info("==================================================");
         log.info("Master Data Initialization Started...");
         try {
             initializeGeography();
-            initializeColors();
-            initializeSizes();
             initializeRolesAndPermissions();
         } catch (Exception e) {
             log.error("Error during data initialization", e);
@@ -117,38 +111,6 @@ public class DataInitializer implements ApplicationRunner {
         log.info("Initialized {} communes.", communeDTOs.size());
     }
 
-    private void initializeColors() throws Exception {
-        if (colorRepository.count() > 0) {
-            log.info("Colors already initialized.");
-            return;
-        }
-        Resource resource = resourceLoader.getResource("classpath:data/size_and_color/colors.json");
-        List<ColorDTO> colorDTOs = objectMapper.readValue(resource.getInputStream(), new TypeReference<>() {});
-        colorDTOs.forEach(dto -> {
-            Color color = new Color();
-            color.setCode(dto.getCode());
-            color.setName(dto.getName());
-            color.setHexCode(dto.getHexCode());
-            colorRepository.save(color);
-        });
-        log.info("Initialized {} colors.", colorDTOs.size());
-    }
-
-    private void initializeSizes() throws Exception {
-        if (sizeRepository.count() > 0) {
-            log.info("Sizes already initialized.");
-            return;
-        }
-        Resource resource = resourceLoader.getResource("classpath:data/size_and_color/sizes.json");
-        List<SizeDTO> sizeDTOs = objectMapper.readValue(resource.getInputStream(), new TypeReference<>() {});
-        sizeDTOs.forEach(dto -> {
-            Size size = new Size();
-            size.setCode(dto.getCode());
-            size.setName(dto.getName());
-            sizeRepository.save(size);
-        });
-        log.info("Initialized {} sizes.", sizeDTOs.size());
-    }
 
     private void initializeRolesAndPermissions() throws Exception {
         Resource resource = resourceLoader.getResource("classpath:data/role_and_permission/role_and_permission.json");
@@ -199,10 +161,6 @@ public class DataInitializer implements ApplicationRunner {
         log.info("Role-Permission assignments checked/completed.");
     }
 
-    // --- Inner DTOs ---
-    @Data private static class TypeDTO { private String name; private List<String> sizes;}
-    @Data private static class ColorDTO { private String code; private String name; private String hexCode; }
-    @Data private static class SizeDTO { private String code; private Integer name; }
     @Data private static class RolePermissionConfig { private List<PermissionDTO> permissions; private List<RoleDTO> roles; private List<RolePermissionDTO> role_permissions; }
     @Data private static class PermissionDTO { private String code; private String description; }
     @Data private static class RoleDTO { private String role; private String description; }

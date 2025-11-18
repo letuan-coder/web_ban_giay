@@ -28,7 +28,6 @@ public class ProductController {
     private final ImageProductService imageProductService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<ProductResponse> createProduct(
             @RequestBody @Valid ProductRequest request) {
         return ApiResponse.<ProductResponse>builder()

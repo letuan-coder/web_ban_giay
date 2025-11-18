@@ -12,6 +12,7 @@ import java.util.List;
 public interface ProductVariantMapper {
     ProductVariant toEntity (ProductVariantResponse response);
 
+    @Mapping(target = "createdAt" ,source = "createdAt")
     @Mapping(target = "id", source = "id")
     ProductVariantResponse toProductVariantResponse(ProductVariant productVariant);
 

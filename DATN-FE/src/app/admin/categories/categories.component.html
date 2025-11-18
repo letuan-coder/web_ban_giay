@@ -1,0 +1,42 @@
+<div class="container mt-4">
+  <h2>Quản lý Danh mục</h2>
+
+  <!-- Add/Edit Form -->
+  <div *ngIf="showForm" class="card my-4">
+    <div class="card-body">
+      <h5 class="card-title">{{ selectedCategory.id ? 'Chỉnh sửa Danh mục' : 'Thêm Danh mục mới' }}</h5>
+      <form (ngSubmit)="saveCategory()">
+        <div class="mb-3">
+          <label for="categoryName" class="form-label">Tên danh mục</label>
+          <input type="text" class="form-control" id="categoryName" [(ngModel)]="selectedCategory.name" name="name" required>
+        </div>
+        <button type="submit" class="btn btn-primary me-2">Lưu</button>
+        <button type="button" class="btn btn-secondary" (click)="resetForm()">Hủy</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Button -->
+  <button *ngIf="!showForm" class="btn btn-success mb-3" (click)="showAddForm()">Thêm Danh mục</button>
+
+  <!-- Categories Table -->
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Tên</th>
+        <th scope="col">Hành động</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let category of categories">
+        <th scope="row">{{ category.id }}</th>
+        <td>{{ category.name }}</td>
+        <td>
+          <button class="btn btn-sm btn-warning me-2" (click)="selectCategory(category)">Sửa</button>
+          <button class="btn btn-sm btn-danger" (click)="deleteCategory(category.id)">Xóa</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

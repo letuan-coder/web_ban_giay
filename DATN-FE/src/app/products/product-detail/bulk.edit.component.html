@@ -1,0 +1,45 @@
+<div class="container mt-4">
+  <h3>Sửa hàng loạt biến thể sản phẩm</h3>
+
+  <table class="table table-bordered table-striped mt-3">
+    <thead>
+      <tr>
+        <th>Tên size</th>
+        <th>Giá</th>
+        <th>Tồn kho</th>
+        <th>Trạng thái</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let v of variants">
+        <td>
+          <input [(ngModel)]="v.size.name" 
+                 (ngModelChange)="onFieldChange(v)" 
+                 [ngModelOptions]="{standalone: true}" />
+        </td>
+        <td>
+          <input [currencyMask]="{ prefix: '', thousands: '.', decimal: '.', align: 'right', precision: 0 }"
+                 type="text" inputmode="decimal"
+                 [(ngModel)]="v.price"
+                 (ngModelChange)="onFieldChange(v)" 
+                 [ngModelOptions]="{standalone: true}" />
+        </td>
+        <td>
+          <input type="number" [(ngModel)]="v.stock" 
+                 (ngModelChange)="onFieldChange(v)" 
+                 [ngModelOptions]="{standalone: true}" />
+        </td>
+        <td>
+          <select [(ngModel)]="v.isAvailable" 
+                  (ngModelChange)="onFieldChange(v)" 
+                  [ngModelOptions]="{standalone: true}">
+            <option value="AVAILABLE">Còn hàng</option>
+            <option value="OUT_OF_STOCK">Hết hàng</option>
+          </select>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <button class="btn btn-primary mt-3" (click)="saveAllChanges()">💾 Lưu thay đổi</button>
+</div>

@@ -1,0 +1,120 @@
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="m-0">Quản lý Khuyến mãi</h2>
+      <button class="btn btn-success" (click)="openCreateForm()">
+        <i class="bi bi-plus-lg"></i> Thêm Khuyến mãi
+      </button>
+    </div>
+  
+    <!-- Form for creating/editing promotions -->
+    <div *ngIf="showForm" class="card mb-4">
+      <div class="card-body">
+        <h3 class="card-title">{{ isEditing ? 'Chỉnh sửa' : 'Tạo mới' }} Khuyến mãi</h3>
+        <form (ngSubmit)="handleSubmit()">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="name" class="form-label">Tên Khuyến mãi</label>
+              <input type="text" id="name" class="form-control" [(ngModel)]="currentPromotion.name" name="name" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="description" class="form-label">Mô tả</label>
+              <input type="text" id="description" class="form-control" [(ngModel)]="currentPromotion.description" name="description">
+            </div>
+          </div>
+  
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="promotionType" class="form-label">Loại Khuyến mãi</label>
+              <select id="promotionType" class="form-select" [(ngModel)]="currentPromotion.promotionType" name="promotionType">
+                <option *ngFor="let type of promotionTypes" [value]="type">{{ type }}</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="discountValue" class="form-label">Giá trị</label>
+              <input type="number" id="discountValue" class="form-control" [(ngModel)]="currentPromotion.discountValue" name="discountValue" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="active" class="form-label">Trạng thái</label>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="active" [(ngModel)]="currentPromotion.active" name="active">
+                    <label class="form-check-label" for="active">{{ currentPromotion.active ? 'Hoạt động' : 'Không hoạt động' }}</label>
+                </div>
+            </div>
+          </div>
+  
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="startDate" class="form-label">Ngày bắt đầu</label>
+              <input type="datetime-local" id="startDate" class="form-control" [(ngModel)]="currentPromotion.startDate" name="startDate" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="endDate" class="form-label">Ngày kết thúc</label>
+              <input type="datetime-local" id="endDate" class="form-control" [(ngModel)]="currentPromotion.endDate" name="endDate" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Áp dụng cho các biến thể sản phẩm</label>
+            <div class="row">
+              <div *ngFor="let variant of productVariants" class="col-md-4">
+                <div class="form-check">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    [value]="variant.id" 
+                    [checked]="currentPromotion.productVariantIds?.includes(variant.id)"
+                    (change)="onVariantSelectionChange(variant.id, $event)">
+                  <label class="form-check-label">
+                    {{ variant.sku }} - {{ variant.size?.name }}
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+  
+          <div class="d-flex justify-content-end">
+            <button type="button" class="btn btn-secondary me-2" (click)="closeForm()">Hủy</button>
+            <button type="submit" class="btn btn-primary">{{ isEditing ? 'Cập nhật' : 'Lưu' }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  
+    <!-- Table of promotions -->
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Tên</th>
+                    <th>Loại</th>
+                    <th>Giá trị</th>
+                    <th>Bắt đầu</th>
+                    <th>Kết thúc</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let promotion of promotions">
+                    <td>{{ promotion.name }}</td>
+                    <td>{{ promotion.promotionType }}</td>
+                    <td>{{ promotion.discountValue }}</td>
+                    <td>{{ promotion.startDate | date:'short' }}</td>
+                    <td>{{ promotion.endDate | date:'short' }}</td>
+                    <td>
+                      <span class="badge" [ngClass]="{'bg-success': promotion.active, 'bg-danger': !promotion.active}">
+                        {{ promotion.active ? 'Hoạt động' : 'Không hoạt động' }}
+                      </span>
+                    </td>
+                    <td>
+                      <button class="btn btn-sm btn-primary me-2" (click)="openEditForm(promotion)">Sửa</button>
+                      <button class="btn btn-sm btn-danger" (click)="deletePromotion(promotion.id)">Xóa</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+        </div>
+    </div>
+  </div>
+  

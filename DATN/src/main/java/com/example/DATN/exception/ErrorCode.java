@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatusCode;
 @AllArgsConstructor
 public enum ErrorCode {
     // Auth & User
+    PASSWORD_CONFIRM_NOT_MATCH(1039, "Password and confirm password do not match", HttpStatus.BAD_REQUEST),
     ROLE_NOT_FOUND(1036,"ROLE NOT FOUND",HttpStatus.NOT_FOUND),
     EXPIRED_TOKEN(1001, "TOKEN EXPIRED", HttpStatus.UNAUTHORIZED),
     USERNAME_INVALID(1003, "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
@@ -28,7 +29,12 @@ public enum ErrorCode {
     // Validation
     INVALID_VALIDATION(1016, "Invalid validation", HttpStatus.BAD_REQUEST),
 
+    //PROMOTION
+    INVALID_PROMOTION_DATES(1087,"Invalid promotion dates",HttpStatus.BAD_REQUEST),
+    PROMOTION_NOT_FOUND(1088,"Promotion not found",HttpStatus.NOT_FOUND),
+
     // Product
+
     PRODUCT_NOT_AVAILABLE(1099,"product is not available",HttpStatus.BAD_REQUEST),
     INVALID_HEX_CODE(1038, "Invalid hex color code", HttpStatus.BAD_REQUEST),
     HEXCODE_ALREADY_EXISTS  (1037, "Hex code already exists", HttpStatus.BAD_REQUEST),
@@ -79,6 +85,7 @@ public enum ErrorCode {
     // Order
     ORDER_ITEM_NOT_FOUND(1054,"Order item not found",HttpStatus.NOT_FOUND),
     ORDER_NOT_FOUND(1043, "Order not found", HttpStatus.NOT_FOUND),
+    ORDER_STATUS_INVALID(1060, "Order status is invalid", HttpStatus.BAD_REQUEST),
     PAYMENT_METHOD_NOT_EXISTED(1044, "Payment method not existed", HttpStatus.NOT_FOUND),
     PAYMENT_METHOD_EXISTED(1055, "Payment method existed", HttpStatus.BAD_REQUEST),
     PAYMENT_METHOD_NOT_FOUND(2002,"Payment method not found ", HttpStatus.NOT_FOUND),
@@ -91,6 +98,7 @@ public enum ErrorCode {
     ADDRESS_NOT_FOUND(1059, "Address not found", HttpStatus.NOT_FOUND),
 
     // Generic
+
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR)
     ;
 

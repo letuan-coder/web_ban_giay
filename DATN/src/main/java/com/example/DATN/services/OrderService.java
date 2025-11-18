@@ -83,4 +83,26 @@ public class OrderService {
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
         return orderMapper.toResponse(order);
     }
+
+    public Order findOrderById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
+    }
+
+    @Transactional
+    public void updateOrderStatus(Long orderId,
+                                  String newStatus,
+                                  String expectedOldStatus) {
+        Order order = findOrderById(orderId);
+        OrderStatus expectedStatusEnum = OrderStatus.valueOf(expectedOldStatus.toUpperCase());
+        OrderStatus newStatusEnum = OrderStatus.valueOf(newStatus.toUpperCase());
+
+        if (order.getOrderStatus() == expectedStatusEnum) {
+            order.setOrderStatus(newStatusEnum);
+            orderRepository.save(order);
+        } else {
+
+            throw new ApplicationException(ErrorCode.ORDER_STATUS_INVALID);
+        }
+    }
 }

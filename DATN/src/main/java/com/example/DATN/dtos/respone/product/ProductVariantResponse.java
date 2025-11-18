@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -22,5 +23,5 @@ public class ProductVariantResponse {
     private BigDecimal discountPrice;
     private Integer stock;
     private String sku;
-
+    private LocalDate createdAt;
 }

@@ -13,7 +13,6 @@ import com.example.DATN.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,14 +66,10 @@ public class ImageProductService {
                     ? altTexts.get(i) : productColor.getProduct().getName(); // Default altText to product name
 
             String generatedFileName = fileStorageService.storeFile(file, productSlug);
-            String imageUrl = UriComponentsBuilder.fromPath("/uploads/")
-                    .path(generatedFileName)
-                    .build()
-                    .toUriString();
             ImageProduct imageProduct = ImageProduct.builder()
                     .productColor(productColor)
                     .altText(altText)
-                    .imageUrl(imageUrl)
+                    .imageUrl(generatedFileName)
                     .build();
             newImages.add(imageProduct);
         }

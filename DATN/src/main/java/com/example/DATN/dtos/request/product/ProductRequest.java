@@ -20,7 +20,7 @@ public class ProductRequest {
 
     @NotNull(message = "BRAND_ID_REQUIRED")
     private Long brandId;
-
+    private Double weight;
     @NotNull(message = "CATEGORY_ID_REQUIRED")
     private Long categoryId;
 }

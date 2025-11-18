@@ -1,0 +1,234 @@
+<div class="container mt-5" *ngIf="product">
+  <!-- Product Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-1">{{ product.name }}</h2>
+      <p class="text-muted mb-0">Mã sản phẩm: {{product.productCode}}</p>
+      <p class="text-muted mb-0">Ngày tạo: {{product.createdAt| date:'short'}}</p>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" (click)="toggleAddVariantForm()">
+        <i class="bi bi-plus-lg"></i> {{ showAddVariantForm ? 'Đóng' : 'Thêm phiên bản' }}
+      </button>
+      <!-- <button class="btn btn-secondary" (click)="toggleEditProductForm()">
+        <i class="bi bi-pencil-square"></i> {{ showEditProductForm ? 'Đóng' : 'Sửa sản phẩm' }}
+      </button> -->
+    </div>
+  </div>
+  <p>{{ product.description}}</p>
+
+
+  <div class="card mb-4" *ngIf="showAddVariantForm">
+    <div class="card-header">
+      <h4 class="mb-0">Thêm phiên bản màu sắc mới</h4>
+    </div>
+    <div class="card-body">
+      <form (ngSubmit)="saveNewVariant()">
+        <div class="row">
+          <!-- Color and Availability -->
+          <div class="col-md-6 mb-3">
+            <label for="colorSelection" class="form-label">Màu sắc</label>
+            <div class="input-group">
+              <button class="btn btn-outline-secondary" type="button" (click)="isNewColor = !isNewColor">
+                {{ isNewColor ? 'Chọn màu đã có' : 'Thêm màu mới' }}
+              </button>
+              <select *ngIf="!isNewColor" class="form-select" id="colorSelection"
+                [(ngModel)]="newVariantRequest.selectedColorCode" name="selectedColorCode" required>
+                <option [ngValue]="null" disabled>-- Chọn màu --</option>
+                <option *ngFor="let color of availableColors" [ngValue]="color.name">{{ color.name }}</option>
+              </select>
+              <input *ngIf="isNewColor" type="text" class="form-control" id="newColorName"
+                [(ngModel)]="newVariantRequest.newColorName" name="newColorName" required
+                placeholder="Nhập tên màu mới">
+              <input *ngIf="isNewColor" type="text" value="#" class="form-control" id="newColorName"
+                [(ngModel)]="newVariantRequest.newColorCode" name="newCOlorCode" required placeholder="#FFFFFF">
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Image Upload -->
+        <div class="mb-3">
+          <label for="images" class="form-label">Hình ảnh cho màu này (TỐI ĐA 5 ẢNH)</label>
+          <input type="file" class="form-control" multiple (change)="onFileSelected($event)">
+        </div>
+
+        <hr>
+        <h5>Các nhóm Size / Giá / Tồn kho</h5>
+        <div class="card mb-3" *ngFor="let variantGroup of newVariantRequest.variantRequests; let i = index">
+          <div class="card-body">
+            <div class="d-flex justify-content-end" *ngIf="newVariantRequest.variantRequests.length > 1">
+              <button type="button" class="btn-close" aria-label="Close" (click)="removeVariantGroup(i)"></button>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Size (chọn một hoặc nhiều)</label>
+                <div>
+                  <input type="checkbox" [checked]="isAllSelected(variantGroup)"
+                    (change)="toggleSelectAllSizes(variantGroup, $event)">
+                  <strong>Chọn tất cả</strong>
+                </div>
+
+                <div *ngFor="let size of availableSizes">
+                  <input type="checkbox" [checked]="variantGroup.sizes.includes(size.code)"
+                    [disabled]="isSizeDisabled(size.code, variantGroup)" (change)="toggleSize(size.code, variantGroup)">
+                  {{ size.name }}
+                </div>
+              </div>
+              <div class="col-md-3 mb-3">
+                <label class="form-label">Giá</label>
+                <input [currencyMask]="{ prefix: '', thousands: '.', decimal: '.', align: 'right',
+         precision: 0 }" type="text" inputmode="decimal" class="form-control" [(ngModel)]="variantGroup.price"
+                  (ngModelChange)="onPriceChange(i)" [name]="'price' + i" required>
+              </div>
+              <div class="col-md-3 mb-3">
+                <label class="form-label">Tồn kho</label>
+                <input type="number" class="form-control" [(ngModel)]="variantGroup.stock" [name]="'stock' + i"
+                  required>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline-secondary btn-sm mb-3" (click)="addVariantGroup()">Thêm nhóm
+          size</button>
+
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-end">
+          <button type="button" class="btn btn-secondary me-2" (click)="toggleAddVariantForm()">Hủy</button>
+          <button type="submit" class="btn btn-success">Lưu phiên bản</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-12" *ngFor="let colorVariant of product?.colorResponses">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="mb-0">Màu: {{ colorVariant.color.name }}</h4>
+          <button class="btn btn-sm btn-info ms-2" [routerLink]="['/product-variants/update', colorVariant.id]">
+            <i class="bi bi-pencil"></i> Cập nhật
+          </button>
+          <button class="btn btn-sm btn-danger ms-2" (click)="deleteProductColor(colorVariant.id)">
+            <i class="bi bi-trash"></i> Xóa màu
+          </button>
+        </div>
+        <div class="card-body">
+          <!-- Images for this color -->
+          <div class="d-flex justify-content-end mb-2" *ngIf="selectedImageIds.size > 0">
+            <button class="btn btn-danger btn-sm" (click)="deleteSelectedImages()">
+              Xóa ({{selectedImageIds.size}}) ảnh đã chọn
+            </button>
+          </div>
+          <div class="row mb-3" *ngIf="colorVariant.images">
+            <div class="col-md-3 col-sm-4 col-6 mb-2" *ngFor="let image of colorVariant.images">
+              <div class="position-relative">
+                <img [src]="'http://localhost:8080/api/images/view/' + image.imageUrl" class="img-fluid rounded"
+                  [alt]="image.altText">
+                <div class="position-absolute top-0 start-0 p-2">
+                  <input class="form-check-input" type="checkbox" (change)="onImageSelectionChange($event, image.id)">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!colorVariant.images" class="text-muted mb-3">
+            <p>Chưa có hình ảnh cho màu này.</p>
+          </div>
+
+          <!-- Variants Table (Size, Price, Stock) -->
+          <h5>Chi tiết phiên bản:</h5>
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+              <thead class="table-light">
+                <tr>
+                  <th scope="col">Chọn</th>
+                  <th scope="col">
+                    SKU
+                    <button class="btn btn-link p-0 ms-1" (click)="sortVariants('sku')">
+                      <i class="bi" [ngClass]="{
+             'bi-arrow-down-up': sortColumn !== 'sku',
+             'bi-arrow-down': sortColumn === 'sku' && sortDirection === 'asc',
+             'bi-arrow-up': sortColumn === 'sku' && sortDirection === 'desc'
+           }"></i>
+                    </button>
+                  </th>
+                  <th scope="col">
+                    Size
+                    <button class="btn btn-link p-0 ms-1" (click)="sortVariants('size')">
+                      <i class="bi" [ngClass]="{
+             'bi-arrow-down-up': sortColumn !== 'size',
+             'bi-arrow-down': sortColumn === 'size' && sortDirection === 'asc',
+             'bi-arrow-up': sortColumn === 'size' && sortDirection === 'desc'
+           }"></i>
+                    </button>
+                  </th>
+                  <th scope="col">
+                    Giá
+                    <button class="btn btn-link p-0 ms-1" (click)="sortVariants('price')">
+                      <i class="bi" [ngClass]="{
+             'bi-arrow-down-up': sortColumn !== 'price',
+             'bi-arrow-down': sortColumn === 'price' && sortDirection === 'asc',
+             'bi-arrow-up': sortColumn === 'price' && sortDirection === 'desc'
+           }"></i>
+                    </button>
+                  </th>
+                  <th scope="col">
+                    Tồn kho
+                    <button class="btn btn-link p-0 ms-1" (click)="sortVariants('stock')">
+                      <i class="bi" [ngClass]="{
+             'bi-arrow-down-up': sortColumn !== 'stock',
+             'bi-arrow-down': sortColumn === 'stock' && sortDirection === 'asc',
+             'bi-arrow-up': sortColumn === 'stock' && sortDirection === 'desc'
+           }"></i>
+                    </button>
+                  </th>
+                  <th scope="col">Ngày tạo</th>
+                  <th scope="col">Trạng thái</th>
+                  <th scope="col">Hành động</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr *ngFor="let variant of colorVariant.variantResponses">
+                  <td><input type="checkbox" (change)="onSelectProduct($event, variant.id)"></td>
+                  <td>{{ variant.sku }}</td>
+
+                  <td>{{ variant.size?.name }}</td>
+                  <td>{{ variant.price | currency:'VND':'symbol':'1.0-0' }}</td>
+                  <td>{{ variant.stock }}</td>
+                  <td>{{ variant.createdAt}}</td>
+                  <td>
+                    <span class="badge"
+                      [ngClass]="{'bg-success': variant.isAvailable === 'AVAILABLE', 'bg-danger': variant.isAvailable !== 'AVAILABLE'}">
+                      {{ variant.isAvailable === 'AVAILABLE' ? 'Đang bán' : 'Ngừng bán' }}
+                    </span>
+                  </td>
+                  <td>
+
+                    <div *ngIf="selectedProductIds.size > 0" class="action-bar">
+                      <button class="btn btn-sm btn-secondary me-2" (click)="openBulkEdit()">✏️ Sửa hàng loạt</button>
+                      <button class="btn btn-sm btn-info me-2" (click)="openApplyPromotionDialog()">🎁 Áp dụng khuyến mãi</button>
+                      <button class="btn btn-sm btn-danger" (click)="deleteVariant(variant.id)">
+                        <i class="bi bi-trash"></i> Xóa
+                      </button>
+                    </div>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="!product?.colorResponses" class="col-12">
+      <div class="alert alert-info">Sản phẩm này chưa có phiên bản màu sắc hoặc kích thước nào.</div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="loading" class="text-center py-5">
+  <div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>
+</div>
+
+<div *ngIf="error" class="container mt-5">
+  <div class="alert alert-danger">{{ error }}</div>
+</div>

@@ -1,0 +1,61 @@
+.card {
+  border-radius: 0.75rem;
+  border: none;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  color: #343a40;
+  font-weight: 600;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #495057;
+}
+
+.form-control, .form-select {
+  border-radius: 0.5rem;
+  border-color: #ced4da;
+  transition: all 0.2s ease-in-out;
+
+  &:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+}
+
+.list-group {
+  border-radius: 0.5rem;
+  overflow: hidden;
+  .list-group-item {
+    border-left: none;
+    border-right: none;
+    &:first-child {
+      border-top-left-radius: 0.5rem;
+      border-top-right-radius: 0.5rem;
+    }
+    &:last-child {
+      border-bottom-left-radius: 0.5rem;
+      border-bottom-right-radius: 0.5rem;
+    }
+    &:hover {
+      background-color: #f8f9fa;
+      cursor: pointer;
+    }
+  }
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+  border-radius: 0.5rem;
+  &:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+  }
+}
+
+.alert {
+  border-radius: 0.5rem;
+}

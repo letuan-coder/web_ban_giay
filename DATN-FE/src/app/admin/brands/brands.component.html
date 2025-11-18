@@ -1,0 +1,42 @@
+<div class="container mt-4">
+  <h2>Quản lý Thương hiệu</h2>
+
+  <!-- Add/Edit Form -->
+  <div *ngIf="showForm" class="card my-4">
+    <div class="card-body">
+      <h5 class="card-title">{{ selectedBrand.id ? 'Chỉnh sửa Thương hiệu' : 'Thêm Thương hiệu mới' }}</h5>
+      <form (ngSubmit)="saveBrand()">
+        <div class="mb-3">
+          <label for="brandName" class="form-label">Tên thương hiệu</label>
+          <input type="text" class="form-control" id="brandName" [(ngModel)]="selectedBrand.name" name="name" required>
+        </div>
+        <button type="submit" class="btn btn-primary me-2">Lưu</button>
+        <button type="button" class="btn btn-secondary" (click)="resetForm()">Hủy</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Button -->
+  <button *ngIf="!showForm" class="btn btn-success mb-3" (click)="showAddForm()">Thêm Thương hiệu</button>
+
+  <!-- Brands Table -->
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Tên</th>
+        <th scope="col">Hành động</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let brand of brands">
+        <th scope="row">{{ brand.id }}</th>
+        <td>{{ brand.name }}</td>
+        <td>
+          <button class="btn btn-sm btn-warning me-2" (click)="selectBrand(brand)">Sửa</button>
+          <button class="btn btn-sm btn-danger" (click)="deleteBrand(brand.id)">Xóa</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

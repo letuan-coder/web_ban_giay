@@ -63,7 +63,6 @@ public class ProductVariantService {
                 Size size = sizeRepository.findByName(sizeRequest.getName()).orElseThrow(() ->
                         new ApplicationException(ErrorCode.SIZE_NOT_FOUND));
                 String skugenerate = productColor.getProduct().getProductCode() + "-" + productColor.getColor().getCode() + "-" + size.getCode();
-
                 ProductVariant productVariant = ProductVariant
                         .builder()
                         .productColor(productColor)
@@ -82,6 +81,7 @@ public class ProductVariantService {
                 .collect(Collectors.toList());
     }
 
+
     public ProductVariantResponse getProductVariantById(UUID id) {
         ProductVariant productVariant = productVariantRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
@@ -95,6 +95,25 @@ public class ProductVariantService {
                 .toList();
     }
 
+    public List<ProductVariantResponse> UpdateProductVariantById
+            (UUID variantId, UpdateProductVariantRequest request) {
+        ProductVariant productVariant = productVariantRepository.findById(variantId)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
+        if (request.getPrice() != null) {
+            productVariant.setPrice(request.getPrice());
+        }
+        if (request.getStock() != null) {
+            productVariant.setStock(request.getStock());
+        }
+        if (request.getDiscountPrice() != null) {
+            productVariant.setDiscountPrice(request.getDiscountPrice());
+        }
+        if (request.getSku() != null && !request.getSku().isEmpty()) {
+            productVariant.setSku(request.getSku());
+        }
+        productVariantRepository.save(productVariant);
+        return productVariantMapper.toProductVariantResponse(productVariantRepository.findAllByproductColor(productVariant.getProductColor()));
+    }
 
     @Transactional(rollbackFor = Exception.class)
     public List<ProductVariantResponse> updateProductVariant(
@@ -104,7 +123,7 @@ public class ProductVariantService {
         List<ProductVariant> ListexistingProductVariant = productVariantRepository.findAllByproductColor(productColor);
         List<ProductVariantResponse> updatedResponses = new ArrayList<>();
         for (ProductVariant existingProductVariant : ListexistingProductVariant) {
-            Optional< UpdateProductVariantRequest> optionalMatch = requests.stream()
+            Optional<UpdateProductVariantRequest> optionalMatch = requests.stream()
                     .filter(v -> v.getId().equals(existingProductVariant.getId()))
                     .findFirst();
             if (optionalMatch.isEmpty()) continue;
@@ -147,6 +166,13 @@ public class ProductVariantService {
         ProductVariant productVariant = productVariantRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
         productVariantRepository.delete(productVariant);
+    }
+
+    @Transactional
+    public void deleteProductColor(UUID id) {
+        ProductColor productColor = productColorRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
+        productColorRepository.delete(productColor);
     }
 
 

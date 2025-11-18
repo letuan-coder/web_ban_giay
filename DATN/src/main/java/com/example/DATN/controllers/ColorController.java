@@ -18,10 +18,10 @@ public class ColorController {
     private final ColorService colorService;
 
     @PostMapping
-    public ApiResponse<ColorResponse> createColor(
-            @RequestBody @Valid ColorRequest request) {
-        return ApiResponse.<ColorResponse>builder()
-                .data(colorService.createColor(request))
+    public ApiResponse<List<ColorResponse>> createColor(
+            @RequestBody @Valid List<ColorRequest> requests) {
+        return ApiResponse.<List<ColorResponse>>builder()
+                .data(colorService.addColorList(requests))
                 .build();
     }
 
