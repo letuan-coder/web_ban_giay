@@ -15,7 +15,12 @@ export class AppComponent {
   title = 'DATN-FE';
   showSearchBar: boolean = false;
   
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(private authService: AuthService, public router: Router) { }
+
+  get isAuthRoute(): boolean {
+    const url = this.router.url;
+    return url.startsWith('/login') || url.startsWith('/forgot-password') || url.startsWith('/reset-password');
+  }
 
   toggleSearchBar(): void {
     this.showSearchBar = !this.showSearchBar;

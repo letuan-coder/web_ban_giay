@@ -1,23 +1,24 @@
 package com.example.DATN.services;
 
 import cn.ipokerface.snowflake.SnowflakeIdGenerator;
+import com.example.DATN.constant.AuthProvider;
 import com.example.DATN.constant.PredefinedRole;
-import com.example.DATN.dtos.request.jwt.AuthenticationRequest;
-import com.example.DATN.dtos.request.jwt.IntrospectRequest;
-import com.example.DATN.dtos.request.jwt.LogoutRequest;
-import com.example.DATN.dtos.request.jwt.RefreshRequest;
+import com.example.DATN.dtos.request.jwt.*;
 import com.example.DATN.dtos.respone.jwt.AuthenticationResponse;
 import com.example.DATN.dtos.respone.jwt.IntrospectResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.GetJwtIdForGuest;
+import com.example.DATN.models.ForgotToken;
 import com.example.DATN.models.InvalidateToken;
 import com.example.DATN.models.Role;
 import com.example.DATN.models.User;
-import com.example.DATN.repositories.CategoryRepository;
-import com.example.DATN.repositories.InvalidateTokenRepository;
-import com.example.DATN.repositories.RoleRepository;
-import com.example.DATN.repositories.UserRepository;
+import com.example.DATN.repositories.*;
+import com.example.DATN.structure.MailStructure;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -29,12 +30,17 @@ import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.text.ParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.Date;
 import java.util.StringJoiner;
 import java.util.UUID;
@@ -44,10 +50,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class AuthenticationService {
+    private final ForgotTokenRepository forgotTokenRepository;
     private final CategoryRepository categoryRepository;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
+
+    @Value("${google.client-id}")
+    private String googleClientId;
 
     @Value("${jwt.valid-duration}")
     @NonFinal
@@ -64,6 +74,92 @@ public class AuthenticationService {
     private final GetJwtIdForGuest getJwtIdForGuest;
     private RedisTemplate redisTemplate;
     final InvalidateTokenRepository invalidateTokenRepository;
+    private final MailService mailService;
+
+    @Transactional
+    public void sendResetPassword(ForgotPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
+
+        String token = GenerateJwtForForgotPassword(request.getEmail());
+        ForgotToken forgotToken = ForgotToken.builder()
+                .email(request.getEmail())
+                .token(token)
+                .build();
+        forgotTokenRepository.save(forgotToken);
+        String htmlContent =
+                "Khôi phục mật khẩu vui lòng nhấn link bên dưới (** Điều chỉnh template sau **)"
+                        + "\nhttp://localhost:4200/reset-password?token="
+                        + token
+                        + "\n"
+                        + "Trân trọng!";
+        MailStructure mailStructure =
+                MailStructure.builder()
+                        .to(user.getEmail())
+                        .subject("Khôi phục mật khẩu")
+                        .content(htmlContent)
+                        .build();
+        // Gửi mail
+        mailService.sendMail(mailStructure);
+
+    }
+
+    public void resetPassword(ResetPasswordRequest request) throws ParseException, JOSEException {
+        ForgotToken forgotToken = forgotTokenRepository.findByToken(request.getToken())
+                .orElseThrow(() -> new ApplicationException(ErrorCode.EXPIRED_TOKEN));
+        verifiedToken(request.getToken(), false);
+        if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
+            throw new ApplicationException(ErrorCode.PASSWORD_CONFIRM_NOT_MATCH);
+        }
+        User user = userRepository.findByEmail(forgotToken.getEmail())
+                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    public AuthenticationResponse loginWithGoogle(String token) {
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                .setAudience(Collections.singletonList(googleClientId))
+                .build();
+
+        GoogleIdToken idToken;
+        try {
+            idToken = verifier.verify(token);
+        } catch (GeneralSecurityException | IOException e) {
+            throw new ApplicationException(ErrorCode.UNAUTHENTICATED, "Token verification failed.");
+        }
+
+        if (idToken == null) {
+            throw new ApplicationException(ErrorCode.UNAUTHENTICATED, "Invalid ID token.");
+        }
+
+        GoogleIdToken.Payload payload = idToken.getPayload();
+        String email = payload.getEmail();
+
+        User user = userRepository.findByEmail(email).orElseGet(() -> {
+            User newUser = new User();
+            newUser.setId(snowflakeIdGenerator.nextId());
+            newUser.setEmail(email);
+            newUser.setUsername(email);
+            newUser.setFirstName((String) payload.get("given_name"));
+            newUser.setLastName((String) payload.get("family_name"));
+            newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString())); // Generate a random password
+            newUser.setProvider(AuthProvider.GOOGLE);
+            Role userRole = roleRepository.findByName(PredefinedRole.USER.name())
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.ROLE_NOT_FOUND));
+            newUser.setRoles(Collections.singleton(userRole));
+
+            return userRepository.save(newUser);
+        });
+
+        String jwt = GenerateJWT(user);
+        return AuthenticationResponse.builder()
+                .token(jwt)
+                .success(true)
+                .message("Đăng nhập bằng Google thành công")
+                .build();
+    }
 
     public AuthenticationResponse createGuestAndAuthenticate() {
         String jwt = GenerateJwtForGuest();
@@ -115,7 +211,29 @@ public class AuthenticationService {
             throw new RuntimeException(e);
         }
     }
+    public String GenerateJwtForForgotPassword(String email) {
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + VALID_DURATION * 1000L);
 
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .subject("email_" + email)
+                .issuer("DATN.com")
+                .issueTime(new Date())
+                .expirationTime(expiryDate)
+                .jwtID(UUID.randomUUID().toString())
+                .claim("scope","forgot_password")
+                .build();
+        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
+        JWSObject jwsObject = new JWSObject(header, payload);
+        try {
+            jwsObject.sign(new MACSigner(jwtSecret.getBytes()));
+            return jwsObject.serialize();
+        } catch (JOSEException e) {
+            log.error("Error when sign jwt", e);
+            throw new RuntimeException(e);
+        }
+    }
     public String GetPermissionForRole(Role role) {
         StringJoiner stringJoiner = new StringJoiner(" ");
         stringJoiner.add("ROLE_" + role.getName());
@@ -184,7 +302,8 @@ public class AuthenticationService {
         SignedJWT signedJWT = SignedJWT.parse(token);
         String id = signedJWT.getJWTClaimsSet().getJWTID();
         Date expirationTime = (isRefresh)
-                ? new Date(signedJWT.getJWTClaimsSet().getIssueTime().toInstant().plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS).toEpochMilli())
+                ? new Date(signedJWT.getJWTClaimsSet().getIssueTime()
+                .toInstant().plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS).toEpochMilli())
                 : signedJWT.getJWTClaimsSet().getExpirationTime();
         var verified = signedJWT.verify(verifier);
         if (!(verified && expirationTime.after(new Date()))) {
@@ -198,7 +317,6 @@ public class AuthenticationService {
 
     public AuthenticationResponse RefreshToken(RefreshRequest request)
             throws ParseException, JOSEException {
-        //Kiểm tra token còn hợp lệ không
         var signedJWT = verifiedToken(request.getToken(), true);
         var jit = signedJWT.getJWTClaimsSet().getJWTID();
         var expiration = signedJWT.getJWTClaimsSet().getExpirationTime();

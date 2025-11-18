@@ -10,7 +10,6 @@ import com.example.DATN.services.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
@@ -29,7 +28,6 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    @PreAuthorize("hasRole('GUEST')")
     ApiResponse<UserResponse> createUser(
             @RequestBody @Valid RegisterRequest request) {
         return ApiResponse.<UserResponse>builder()
@@ -40,10 +38,6 @@ public class UserController {
 
     @GetMapping
     ApiResponse<List<UserResponse>> getAllUsers() {
-//        var authentication = SecurityContextHolder.getContext().getAuthentication();
-//        log.info("Authenticated? {}", authentication.isAuthenticated());
-//        log.info("Authorities: {}", authentication.getAuthorities());
-//        authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
         return ApiResponse.<List<UserResponse>>builder()
                 .data(userService.getAllUsers())
                 .build();

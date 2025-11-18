@@ -13,6 +13,8 @@ import java.util.UUID;
 public interface ProductVariantRepository extends JpaRepository<ProductVariant, UUID> {
     List<ProductVariant> findAllByproductColor(ProductColor productColor);
 
+    ProductVariant findByProductColor (ProductColor productColor);
+
     Optional<ProductVariant> findById(UUID id);
 
     Integer countById(UUID id);

@@ -72,9 +72,16 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     let label = '';
 
     if (this.selectedTimeFrame === 'monthly') {
-      labels = Object.keys(this.monthlyData);
-      data = Object.values(this.monthlyData);
-    } else {
+      // Get keys, sort them chronologically, and take the last 12
+      const sortedKeys = Object.keys(this.monthlyData).sort((a, b) => {
+        // Assuming keys are in 'YYYY-MM' format
+        return new Date(a).getTime() - new Date(b).getTime();
+      });
+      const last12MonthsKeys = sortedKeys.slice(-12);
+
+      labels = last12MonthsKeys;
+      data = last12MonthsKeys.map(key => this.monthlyData[key]);
+    } else { // yearly
       labels = Object.keys(this.yearlyData);
       data = Object.values(this.yearlyData);
     }

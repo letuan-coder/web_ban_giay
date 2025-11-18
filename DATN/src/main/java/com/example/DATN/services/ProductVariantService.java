@@ -1,16 +1,13 @@
 package com.example.DATN.services;
 
 
-import com.example.DATN.dtos.request.product.ProductVariantRequest;
 import com.example.DATN.dtos.request.SizeRequest;
+import com.example.DATN.dtos.request.product.ProductVariantRequest;
 import com.example.DATN.dtos.request.product.UpdateProductVariantRequest;
 import com.example.DATN.dtos.respone.product.ProductVariantResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
-import com.example.DATN.mapper.ColorMapper;
-import com.example.DATN.mapper.ImageProductMapper;
 import com.example.DATN.mapper.ProductVariantMapper;
-import com.example.DATN.mapper.SizeMapper;
 import com.example.DATN.models.ProductColor;
 import com.example.DATN.models.ProductVariant;
 import com.example.DATN.models.Size;
@@ -28,25 +25,15 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ProductVariantService {
-    //REPOSITORIES
-    private final ProductVariantRepository productVariantRepository;
-    private final ProductRepository productRepository;
-    private final ImageProductRepository imageProductRepository;
 
-    //MAPPERS
+    private final ProductVariantRepository productVariantRepository;
+
     private final ProductVariantMapper productVariantMapper;
-    private final SizeMapper sizeMapper;
-    private final ColorMapper colorMapper;
-    private final ImageProductMapper imageProductMapper;
-    //SERVICES
-    private final ProductService productService;
-    private final ImageProductService imageProductService;
-    private final ColorService colorService;
-    private final ColorRepository colorRepository;
+
     private final ProductColorRepository productColorRepository;
     private final SizeRepository sizeRepository;
 
-    private final UserRepository userRepository;
+
 
 
     @Transactional(rollbackFor = Exception.class)

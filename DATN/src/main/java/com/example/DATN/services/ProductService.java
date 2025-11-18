@@ -1,7 +1,6 @@
 package com.example.DATN.services;
 
 import cn.ipokerface.snowflake.SnowflakeIdGenerator;
-import com.example.DATN.constant.Util.SkuUtil;
 import com.example.DATN.dtos.request.product.ProductRequest;
 import com.example.DATN.dtos.respone.product.ProductResponse;
 import com.example.DATN.exception.ApplicationException;
@@ -11,6 +10,7 @@ import com.example.DATN.mapper.ProductMapper;
 import com.example.DATN.models.Brand;
 import com.example.DATN.models.Category;
 import com.example.DATN.models.Product;
+import com.example.DATN.models.ProductColor;
 import com.example.DATN.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +41,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductColorRepository productColorRepository;
     private final ProductMapper productMapper;
-    private final SkuUtil skuConstant;
+    private final ProductColorService productColorService;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
     private final String PREFIX = "SHOES_";
     private final ColorRepository colorRepository;
@@ -128,6 +128,10 @@ public class ProductService {
     public void deleteProduct(UUID id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
+        List<ProductColor> productColor = productColorRepository.findAllByProduct(product);
+        for (ProductColor pc : productColor) {
+            productColorService.deleteProductColor(pc.getId());
+        }
         productRepository.delete(product);
     }
 

@@ -43,11 +43,18 @@ export class AuthService {
         observer.complete();
       });
     }
-    return this.http.post<any>(environment.apiBaseUrl+'api/auth/logout', { token }).pipe(
+    return this.http.post<any>(environment.apiBaseUrl + 'api/auth/logout', { token }).pipe(
       tap(() => {
         this.clearToken();
       })
     );
   }
 
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post<any>(environment.apiBaseUrl + '/api/auth/forgot-password', { email });
+  }
+
+  resetPassword(token: string, newPassword: string,confirmNewPassword:string): Observable<any> {
+    return this.http.post<any>(environment.apiBaseUrl + '/api/auth/reset-password', { token, newPassword,confirmNewPassword});
+  }
 }

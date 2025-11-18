@@ -42,9 +42,7 @@ export class ProductEditComponent implements OnInit {
     this.loadCategories();
     this.route.paramMap.subscribe(params => {
       const productId = params.get('id');
-      console.log('productId before check:', productId); // Added log
       if (productId) {
-        console.log('Product ID from route:', productId); // Debug log
         this.productService.getById(productId).subscribe({
           next: (response: any) => {
             this.product = response.data;

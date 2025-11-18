@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +34,7 @@ public class ProductColor extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "product_id")
     @JsonBackReference
+            @OnDelete(action = OnDeleteAction.CASCADE)
     Product product;
 
     @OneToMany(mappedBy = "productColor"

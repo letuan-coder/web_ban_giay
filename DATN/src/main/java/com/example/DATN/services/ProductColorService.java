@@ -11,19 +11,13 @@ import com.example.DATN.dtos.respone.product.ProductVariantResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.*;
-import com.example.DATN.models.Color;
-import com.example.DATN.models.Product;
-import com.example.DATN.models.ProductColor;
-import com.example.DATN.models.ProductVariant;
+import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,16 +26,15 @@ public class ProductColorService {
     private final ProductColorRepository productColorRepository;
     private final ProductRepository productRepository;
     private final ColorRepository colorRepository;
-    private final ColorMapper colorMapper;
     private final ProductColorMapper productColorMapper;
     private final ProductVariantService productVariantService;
     private final ImageProductService imageProductService;
     private final ProductVariantMapper productVariantMapper;
-    private final ProductMapper productMapper;
-    private final ImageProductMapper imageProductMapper;
+
     private final ColorService colorService;
     private final ProductVariantRepository productVariantRepository;
-    private final NewsletterSubscriptionRepository newsletterSubscriptionRepository;
+
+    private final PromotionRepository promotionRepository;
 
     @Transactional(rollbackOn = Exception.class)
     public ProductColorResponse createProductColor(ProductColorRequest request) {
@@ -168,14 +161,20 @@ public class ProductColorService {
         return productColorMapper.toProductColorResponse(updatedProductColor);
     }
 
-//    @Transactional
-//    public void deleteProductColor(UUID id) {
-//        ProductColor productColor = productColorRepository.findById(id)
-//                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
-//        for (ProductVariant variant : productColor.getVariants()) {
-//            ProductVariant variant = productVariantRepository.findById(productColor.getVariants()).orElseThrow();
-//        }
-//        productColorRepository.delete(productColor);
-//    }
+    @Transactional
+    public void deleteProductColor(UUID id) {
+        ProductColor productColor = productColorRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
+        for (ProductVariant variant : productColor.getVariants()) {
+            List<Promotion> promotion = promotionRepository.findAllByProductVariants(variant);
+            promotion.stream().map(p -> {
+                p.getProductVariants().remove(variant);
+                promotionRepository.save(p);
+                return p;
+            }).collect(Collectors.toList());
+            productVariantRepository.delete(variant);
+        }
+        productColorRepository.delete(productColor);
+    }
 
 }

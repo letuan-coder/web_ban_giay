@@ -63,11 +63,18 @@ public class UserService {
     @Transactional(rollbackOn = Exception.class)
     public UserResponse createUser(RegisterRequest registerRequest) {
         User user = new User();
+        if(userRepository.existsByUsername(registerRequest.getUsername())){
+            throw new ApplicationException(ErrorCode.USERNAME_ALREADY_EXISTS);
+        }
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            throw new ApplicationException(ErrorCode.EMAIL_ALREADY_EXISTS);
+        }
         Long newId = snowflakeIdGenerator.nextId();
         user.setId(newId);
         if(!registerRequest.getPassword().equals(registerRequest.getPassword())){
             throw new ApplicationException(ErrorCode.PASSWORD_CONFIRM_NOT_MATCH);
         }
+
         user.setUsername(registerRequest.getUsername());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         Role adminRole = roleRepository.findByName(PredefinedRole.USER.name())

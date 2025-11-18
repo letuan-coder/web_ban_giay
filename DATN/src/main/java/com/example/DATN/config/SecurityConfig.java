@@ -41,6 +41,12 @@ public class SecurityConfig {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
+    @Value("${google.client-id}")
+    private String clientId;
+
+    @Value("${google.client-secret}")
+    private String clientSecret;
+
     @Autowired
     private CustomeJwtDecoder customeJwtDecoder;
 
@@ -53,8 +59,10 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/api/vnpay/return").permitAll()
                         .requestMatchers(PUBLIC_API).permitAll()
+
 //                .requestMatchers(HttpMethod.GET, "/api/users")
 //                .hasAuthority("USER_VIEW")
+                        .requestMatchers( "/google-login-test.html").permitAll()
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products").permitAll()
                         .requestMatchers(HttpMethod.POST, POST_PUBLIC_API).permitAll()

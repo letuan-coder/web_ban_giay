@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -49,5 +51,7 @@ public class Promotion extends BaseEntity {
             joinColumns = @JoinColumn(name = "promotion_id"),
             inverseJoinColumns = @JoinColumn(name = "product_variant_id")
     )
+    @OnDelete(action = OnDeleteAction.CASCADE)
+
     private Set<ProductVariant> productVariants = new HashSet<>();
 }
