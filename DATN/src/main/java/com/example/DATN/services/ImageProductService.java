@@ -86,8 +86,6 @@ public class ImageProductService {
         product.setAltText(altText);
         String generatedFileName = fileStorageService.storeThumbnailFile(file, productSlug);
         product.setThumbnailUrl(generatedFileName);
-
-
     }
 
     public void uploadBannerImages(
