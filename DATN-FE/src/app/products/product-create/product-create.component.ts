@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { ProductService, ProductCreateRequest } from '../../services/product.service';
 import { Brand, BrandService } from '../../services/brand.service';
 import { Category, CategoryService } from '../../services/category.service';
+import { NGX_CURRENCY_CONFIG, NgxCurrencyDirective } from 'ngx-currency';
 
 @Component({
   selector: 'app-product-create',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,NgxCurrencyDirective],
   templateUrl: './product-create.component.html',
   styleUrls: ['./product-create.component.scss']
 })
@@ -56,7 +57,7 @@ export class ProductCreateComponent implements OnInit {
     this.categoryService.getAll().subscribe((response: any) => {
       this.categories = response.data;
       if (this.categories.length > 0) {
-        this.product.categoryId = this.categories[0].id; // Select the first category
+        this.product.categoryId = this.categories[0].id; 
       }
     });
   }

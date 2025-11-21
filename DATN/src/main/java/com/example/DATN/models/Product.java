@@ -51,6 +51,7 @@ public class Product extends BaseEntity {
     @NotNull
     @Column(name = "thumbnail_url")
     String ThumbnailUrl;
+
     String altText;
 
     BigDecimal price;

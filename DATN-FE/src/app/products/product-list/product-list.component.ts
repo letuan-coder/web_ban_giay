@@ -20,12 +20,10 @@ export class ProductListComponent implements OnInit {
   error = '';
   selectedProductIds = new Set<string>();
 
-  // Pagination properties
   currentPage = 0;
   pageSize = 8;
   totalPages = 0;
 
-  // Search properties
   searchTerm = '';
   isSearch = false;
 
@@ -64,13 +62,13 @@ export class ProductListComponent implements OnInit {
 
   searchProducts(): void {
     if (!this.searchTerm.trim()) {
-      this.loadProducts(0); 
+      this.loadProducts(0);
       return;
     }
     this.loading = true;
     this.error = '';
     this.isSearch = true;
-    this.totalPages = 0; 
+    this.totalPages = 0;
     this.productService.search(this.searchTerm).subscribe({
       next: (res: any) => {
         this.processProducts(res.data);
@@ -86,25 +84,24 @@ export class ProductListComponent implements OnInit {
   }
 
   processProducts(products: any[]): void {
+
     const productsWithImages = products.map((product: any) => {
-      let imageUrl = ''; // Default empty image URL
-      if (product.colorResponses && product.colorResponses.length > 0) {
-        const firstColor = product.colorResponses[0];
-        if (firstColor.images && firstColor.images.length > 0) {
-          const firstImage = firstColor.images[0];
-          if (firstImage.imageUrl) {
-            imageUrl = `http://localhost:8080/api/images/view/${firstImage.imageUrl}`;
-          }
-        }
-      }
-      let price = 0;
-      const allVariants = product.colorResponses.flatMap((color: any) => color.variantResponses);
+      
+      let price = product.price || 0;
+      let ThumbnailUrl=product.ThumbnailUrl;
+      const allVariants = product.colorResponses?.flatMap((color: any) => color.variantResponses) || [];
+
       if (allVariants.length > 0) {
         price = Math.min(...allVariants.map((v: any) => Number(v.price)));
+
       }
-      return { ...product, imageUrl, price };
+
+      return { ...product,ThumbnailUrl, price };
+
     });
+
     this.products = productsWithImages;
+
   }
 
   goToPage(page: number): void {
@@ -148,7 +145,7 @@ export class ProductListComponent implements OnInit {
 
     this.loading = true;
     const deleteRequests = Array.from
-    (this.selectedProductIds).map(id => this.productService.deleteProduct(id));
+      (this.selectedProductIds).map(id => this.productService.deleteProduct(id));
 
     forkJoin(deleteRequests).subscribe({
       next: () => {

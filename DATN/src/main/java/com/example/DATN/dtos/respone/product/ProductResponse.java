@@ -25,6 +25,7 @@ public class ProductResponse {
     private Is_Available available;
     private List<ProductColorResponse> colorResponses;
     private String ThumbnailUrl;
+    private String altText;
     private BigDecimal price;
     private Long brandId;
     private String brandName;

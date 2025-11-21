@@ -32,7 +32,8 @@
 
                         <div class="mb-3">
                             <label for="price" class="form-label">Giá mặc định</label>
-                            <input type="number" id="price" [(ngModel)]="product.price" name="price"
+                            <input  [currencyMask]="{ prefix: '', thousands: '.', decimal: '.', align: 'left',
+         precision: 0 }" type="text" inputmode="numeric" id="price" [(ngModel)]="product.price" name="price"
                                 class="form-control" />
                         </div>
 

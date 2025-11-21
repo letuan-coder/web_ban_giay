@@ -21,6 +21,8 @@ public class ProductRequest {
     private String description;
     private String productCode;
     private MultipartFile file;
+    private String ThumbnailUrl;
+    private String altText;
     private BigDecimal price;
     @NotNull(message = "BRAND_ID_REQUIRED")
     private Long brandId;

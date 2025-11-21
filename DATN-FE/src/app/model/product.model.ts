@@ -11,7 +11,8 @@ export interface Product {
   categoryId:number;
   price?: number;
   weight?: number;
-  imageUrl?: string;
+  thumbnailUrl?:string;
+  altText?:string;
   slug:string
   createdAt:string;
   colorResponses: ColorVariantResponse[];

@@ -35,8 +35,9 @@ public class FileStorageService {
         }
     }
 
-
-    public String storeFile(MultipartFile file, String baseFileName) {
+    public String storeFile(
+            MultipartFile file,
+            String baseFileName) {
         if (file.isEmpty()) {
             throw new RuntimeException("Failed to store empty file.");
         }
@@ -44,21 +45,21 @@ public class FileStorageService {
             throw new ApplicationException(ErrorCode.FILE_SIZE_EXCEEDED);
         }
         String fileExtension = ".png";
-        String generatedFileName = baseFileName + "-" + UUID.randomUUID().toString().substring(0, 8) + fileExtension;
+        String generatedFileName = baseFileName + "-"
+                + UUID.randomUUID().toString().substring(0, 8) + fileExtension;
         Path destinationFilePath = this.storageFolder.
                 resolve(Paths.get(generatedFileName)).normalize().toAbsolutePath();
-
-
         try (InputStream inputStream = file.getInputStream()) {
             Files.copy(inputStream, destinationFilePath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException("Failed to store file.", e);
         }
-
         return generatedFileName;
     }
 
-    public String storeBannerFile(MultipartFile file, String baseFileName) {
+    public String storeBannerFile(
+            MultipartFile file,
+            String baseFileName) {
         if (file.isEmpty()) {
             throw new RuntimeException("Failed to store empty file.");
         }
@@ -77,11 +78,12 @@ public class FileStorageService {
         } catch (IOException e) {
             throw new RuntimeException("Failed to store file.", e);
         }
-
         return generatedFileName;
     }
 
-    public String storeThumbnailFile(MultipartFile file, String baseFileName) {
+    public String storeThumbnailFile(
+            MultipartFile file,
+            String baseFileName) {
         if (file.isEmpty()) {
             throw new RuntimeException("Failed to store empty file.");
         }
@@ -94,9 +96,10 @@ public class FileStorageService {
                         .substring(0, 8) + fileExtension;
         Path destinationFilePath = this.storageThumbnailFolder
                 .resolve(Paths.get(generatedFileName)).normalize().toAbsolutePath();
-
         try (InputStream inputStream = file.getInputStream()) {
-            Files.copy(inputStream, destinationFilePath, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(inputStream,
+                    destinationFilePath,
+                    StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException("Failed to store file.", e);
         }

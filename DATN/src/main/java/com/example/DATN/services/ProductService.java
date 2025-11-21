@@ -49,12 +49,13 @@ public class ProductService {
     private final FormatInputString formatInputString;
 
 
-    public List<ProductResponse> getProductByProductCode(String productCode){
-        List<Product> ListOfProduct= productRepository.findAllByProductCode(productCode);
+    public List<ProductResponse> getProductByProductCode(String productCode) {
+        List<Product> ListOfProduct = productRepository.findAllByProductCode(productCode);
         return ListOfProduct.stream()
                 .map(productMapper::toProductResponse)
                 .collect(Collectors.toList());
     }
+
     private String generateProductCode() {
         return UUID.randomUUID().toString().substring(0, 5).toUpperCase();
     }
@@ -67,11 +68,13 @@ public class ProductService {
     public ProductResponse createProduct(ProductRequest request) {
         Brand brand = brandRepository.findById(request.getBrandId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.BRAND_NOT_FOUND));
+
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.CATEGORY_NOT_FOUND));
-       String formatProductName = formatInputString.formatInputString(request.getName().trim());
-       String productCode =(generate(PREFIX,generateProductCode()));
-       String formatDescription = formatInputString.formatInputString(request.getDescription().trim());
+
+        String formatProductName = formatInputString.formatInputString(request.getName().trim());
+        String productCode = (generate(PREFIX, generateProductCode()));
+        String formatDescription = formatInputString.formatInputString(request.getDescription().trim());
         Product product = productMapper.toProduct(request);
         product.setName(formatProductName);
         product.setDescription(formatDescription);
@@ -81,15 +84,15 @@ public class ProductService {
         product.setSlug(toSlug(formatProductName));
         product.setWeight(request.getWeight());
         product.setPrice(request.getPrice());
-        product.setThumbnailUrl(""); // Placeholder to avoid NOT NULL constraint violation
+        product.setThumbnailUrl("");
         Product savedProduct = productRepository.save(product);
-        imageProductService.uploadThumbnailImages(savedProduct.getId(),request.getFile());
+        imageProductService.uploadThumbnailImages(savedProduct.getId(), request.getFile());
         return productMapper.toProductResponse(savedProduct);
 
     }
 
     public Page<ProductResponse> getAllProducts(Pageable pageable) {
-        Page<ProductResponse> responses= productRepository.findAll(pageable)
+        Page<ProductResponse> responses = productRepository.findAll(pageable)
                 .map(productMapper::toProductResponse);
 
         return responses;

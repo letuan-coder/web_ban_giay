@@ -78,14 +78,18 @@ public class ImageProductService {
 
     public void uploadThumbnailImages(
             UUID ProductId,
-            MultipartFile file) {
+            MultipartFile file)
+    {
         Product product = productRepository.findById(ProductId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
         String productSlug = product.getSlug();
+
         String altText = productSlug;
         product.setAltText(altText);
+
         String generatedFileName = fileStorageService.storeThumbnailFile(file, productSlug);
         product.setThumbnailUrl(generatedFileName);
+
     }
 
     public void uploadBannerImages(
