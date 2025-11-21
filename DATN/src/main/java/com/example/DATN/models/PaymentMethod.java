@@ -27,9 +27,6 @@ public class PaymentMethod extends BaseEntity {
     @Enumerated(EnumType.STRING)
     PaymentMethodEnum Status;
 
-    @Column(length = 1000)
-    String description;
-
     @OneToMany(mappedBy = "paymentMethod", fetch = FetchType.LAZY)
     List<Order> orders;
 

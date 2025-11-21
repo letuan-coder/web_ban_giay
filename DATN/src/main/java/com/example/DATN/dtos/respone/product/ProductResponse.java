@@ -23,6 +23,7 @@ public class ProductResponse {
     private String description;
     private Is_Available available;
     private List<ProductColorResponse> colorResponses;
+    private List<ImageProductResponse> images;
     private Long brandId;
     private String brandName;
     private String categoryName;

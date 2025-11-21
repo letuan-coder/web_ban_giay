@@ -4,12 +4,10 @@ import com.example.DATN.constant.Util.FileUtil;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.ImageProductMapper;
+import com.example.DATN.models.Banner;
 import com.example.DATN.models.ImageProduct;
 import com.example.DATN.models.ProductColor;
-import com.example.DATN.repositories.ColorRepository;
-import com.example.DATN.repositories.ImageProductRepository;
-import com.example.DATN.repositories.ProductColorRepository;
-import com.example.DATN.repositories.ProductRepository;
+import com.example.DATN.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +25,7 @@ public class ImageProductService {
     private final ProductRepository productRepository;
     private final ImageProductMapper imageProductMapper;
     private final ProductColorRepository productColorRepository;
+    private final BannerRepository bannerRepository;
 
     public static boolean isImageFile(MultipartFile file) {
         String contentType = file.getContentType();
@@ -50,8 +49,8 @@ public class ImageProductService {
             List<MultipartFile> files,
             List<String> altTexts) {
         ProductColor productColor = productColorRepository
-                .findById(ProductColorId).orElseThrow(()-> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
-        if (files.size() > FileUtil.FILE_LIMIT) { // Hardcoded FILE_LIMIT
+                .findById(ProductColorId).orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
+        if (files.size() > FileUtil.FILE_LIMIT) {
             throw new ApplicationException(ErrorCode.FILE_COUNT_EXCEEDED);
         }
 
@@ -76,11 +75,21 @@ public class ImageProductService {
         return imageProductRepository.saveAll(newImages);
     }
 
+    public void uploadBannerImages(
+            UUID BannerId,
+            MultipartFile file) {
+        Banner banner = bannerRepository.findById(BannerId)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.BANNER_NOT_FOUND));
+        String BannerFileName = banner.getBannerName();
+        String bannerUrl = fileStorageService.storeBannerFile(file, BannerFileName);
+        banner.setImageUrl(bannerUrl);
+    }
+
+
     public void deleteImage(Long imageId) {
         ImageProduct imageProduct = imageProductRepository.findById(imageId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.IMAGE_NOT_FOUND));
         fileStorageService.deleteFile(imageProduct.getImageUrl());
-
         imageProductRepository.delete(imageProduct);
     }
 }

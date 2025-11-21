@@ -1,5 +1,6 @@
 package com.example.DATN.models;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -21,7 +22,8 @@ public class Vnpay {
     @Id
     @UuidGenerator
     UUID id;
-    String vnp_TxnRef;
+    @Column(name = "vnp_txn_ref")
+    String vnpTxnRef;;
     String vnp_OrderInfo;
     String vnp_Amount;
     String vnp_ResponseCode;

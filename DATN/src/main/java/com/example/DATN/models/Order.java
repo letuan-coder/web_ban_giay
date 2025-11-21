@@ -9,6 +9,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -38,6 +39,8 @@ public class Order extends BaseEntity {
 
     private BigDecimal shippingFee;
 
+    private LocalDateTime receivedDate;
+
     @NotNull
     private BigDecimal total_price;
 
@@ -46,4 +49,7 @@ public class Order extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<OrderReturn> returns;
 }

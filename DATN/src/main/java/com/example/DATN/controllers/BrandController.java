@@ -19,6 +19,8 @@ public class BrandController {
     private final BrandService brandService;
 
     @PostMapping
+
+    //xoa dòng này
     @PreAuthorize("hasAuthority('CREATE_BRAND')")
     public ApiResponse<BrandResponse> createBrand(@RequestBody @Valid BrandRequest request) {
         return ApiResponse.<BrandResponse>builder()

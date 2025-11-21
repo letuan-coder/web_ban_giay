@@ -15,6 +15,7 @@ public interface ProductMapper {
     @Mapping(source = "category.id",target = "categoryId")
     @Mapping(source = "category.name",target = "categoryName")
     @Mapping(source = "brand.name",target = "brandName")
+    @Mapping(source = "productColors.",target =)
     ProductResponse toProductResponse(Product product);
 
     @Mapping(target = "slug", ignore = true)

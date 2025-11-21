@@ -21,15 +21,17 @@ import java.util.UUID;
 @Service
 public class FileStorageService {
 
-//    private final Path storageFolder = Paths.get("../uploads");
 private final Path storageFolder = Paths.get("uploads");
+private final Path storageBannerFolder= Paths.get("uploads/banners");
     public FileStorageService() {
         try {
             Files.createDirectories(storageFolder);
+            Files.createDirectories(storageBannerFolder);
         } catch (IOException e) {
             throw new RuntimeException("Cannot initialize storage folder", e);
         }
     }
+
 
     public String storeFile(MultipartFile file, String baseFileName) {
         if (file.isEmpty()) {
@@ -51,6 +53,30 @@ private final Path storageFolder = Paths.get("uploads");
 
         return generatedFileName;
     }
+    public String storeBannerFile(MultipartFile file, String baseFileName) {
+        if (file.isEmpty()) {
+            throw new RuntimeException("Failed to store empty file.");
+        }
+        if (file.getSize() >= FileUtil.MAX_FILE_SIZE_MB) {
+            throw new ApplicationException(ErrorCode.FILE_SIZE_EXCEEDED);
+        }
+        String fileExtension = ".png";
+        String generatedFileName = baseFileName + "-" +
+                UUID.randomUUID().toString()
+                        .substring(0, 8) + fileExtension;
+        Path destinationFilePath = this.storageBannerFolder
+                .resolve(Paths.get(generatedFileName)).normalize().toAbsolutePath();
+
+
+        try (InputStream inputStream = file.getInputStream()) {
+            Files.copy(inputStream, destinationFilePath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store file.", e);
+        }
+
+        return generatedFileName;
+    }
+
 
     public void deleteFile(String filename) {
         try {

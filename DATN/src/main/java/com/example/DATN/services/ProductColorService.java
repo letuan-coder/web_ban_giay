@@ -17,6 +17,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -165,6 +166,15 @@ public class ProductColorService {
     public void deleteProductColor(UUID id) {
         ProductColor productColor = productColorRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
+        if(productColor.getImages()!=null){
+            for(ImageProduct imgName : productColor.getImages()){
+                File file = new File("uploads/" + imgName.getImageUrl());
+                if (file.exists()) {
+                    file.delete();
+                }
+            }
+        }
+
         for (ProductVariant variant : productColor.getVariants()) {
             List<Promotion> promotion = promotionRepository.findAllByProductVariants(variant);
             promotion.stream().map(p -> {
@@ -173,7 +183,9 @@ public class ProductColorService {
                 return p;
             }).collect(Collectors.toList());
             productVariantRepository.delete(variant);
+
         }
+
         productColorRepository.delete(productColor);
     }
 

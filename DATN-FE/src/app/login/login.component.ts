@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute, RouterModule } from '@angular/router';
+import { Router, ActivatedRoute, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-login',
   standalone: true,
-   imports: [CommonModule, FormsModule, RouterModule],
+   imports: [CommonModule, FormsModule, RouterLinkActive],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })

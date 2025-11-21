@@ -66,7 +66,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products").permitAll()
                         .requestMatchers(HttpMethod.POST, POST_PUBLIC_API).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/brands/**", "/api/categories/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/brands/**", "/api/categories/**", "/api/banners/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/provinces/**", "/api/districts/**", "/api/communes/**").permitAll()
                         .anyRequest().authenticated()
         );
@@ -83,8 +83,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        //cổng admin
-        config.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:3000"));
+        config.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:5713"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

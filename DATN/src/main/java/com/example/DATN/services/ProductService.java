@@ -7,10 +7,7 @@ import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.FormatInputString;
 import com.example.DATN.mapper.ProductMapper;
-import com.example.DATN.models.Brand;
-import com.example.DATN.models.Category;
-import com.example.DATN.models.Product;
-import com.example.DATN.models.ProductColor;
+import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -87,6 +84,7 @@ public class ProductService {
     public Page<ProductResponse> getAllProducts(Pageable pageable) {
         Page<ProductResponse> responses= productRepository.findAll(pageable)
                 .map(productMapper::toProductResponse);
+
         return responses;
     }
 
@@ -131,6 +129,7 @@ public class ProductService {
         List<ProductColor> productColor = productColorRepository.findAllByProduct(product);
         for (ProductColor pc : productColor) {
             productColorService.deleteProductColor(pc.getId());
+
         }
         productRepository.delete(product);
     }

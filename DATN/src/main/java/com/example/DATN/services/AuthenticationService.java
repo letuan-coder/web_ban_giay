@@ -87,12 +87,22 @@ public class AuthenticationService {
                 .token(token)
                 .build();
         forgotTokenRepository.save(forgotToken);
-        String htmlContent =
-                "Khôi phục mật khẩu vui lòng nhấn link bên dưới (** Điều chỉnh template sau **)"
-                        + "\nhttp://localhost:4200/reset-password?token="
-                        + token
-                        + "\n"
-                        + "Trân trọng!";
+        String url = "http://localhost:4200/reset-password?token=" + token;
+
+        String htmlContent = """
+                <p>Khôi phục mật khẩu của bạn</p>
+                <p>Vui lòng nhấn vào link bên dưới để đặt lại mật khẩu:</p>
+                
+                <p>
+                    <a href="%s" target="_blank" 
+                       style="color:#1a73e8; font-weight:bold; text-decoration:none;">
+                        Nhấn vào đây để reset mật khẩu
+                    </a>
+                </p>
+                
+                <br>
+                <p>Trân trọng!</p>
+                """.formatted(url);
         MailStructure mailStructure =
                 MailStructure.builder()
                         .to(user.getEmail())
@@ -103,10 +113,29 @@ public class AuthenticationService {
         mailService.sendMail(mailStructure);
 
     }
+//
+//    public void sendOTP(ForgotPasswordRequest request)  {
+//        ForgotToken forgotToken = forgotTokenRepository.findByEmail(request.getEmail())
+//                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
+//        String otp = String.valueOf((int) ((Math.random() * 9 + 1) * 100000));
+//        // Lưu OTP vào Redis với thời gian hết hạn là 5 phút
+//        redisTemplate.opsForValue().set(forgotToken.getEmail(), otp, 5, java.util.concurrent.TimeUnit.MINUTES);
+//        String htmlContent =
+//                "Mã OTP của bạn là: " + otp + "\n Mã có hiệu lực trong 5 phút.";
+//        MailStructure mailStructure =
+//                MailStructure.builder()
+//                        .to(forgotToken.getEmail())
+//                        .subject("Mã OTP khôi phục mật khẩu")
+//                        .content(htmlContent)
+//                        .build();
+//        mailService.sendMail(mailStructure);
+//    }
+
 
     public void resetPassword(ResetPasswordRequest request) throws ParseException, JOSEException {
         ForgotToken forgotToken = forgotTokenRepository.findByToken(request.getToken())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.EXPIRED_TOKEN));
+
         verifiedToken(request.getToken(), false);
         if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
             throw new ApplicationException(ErrorCode.PASSWORD_CONFIRM_NOT_MATCH);
@@ -171,13 +200,17 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        //kiểm tra username có tồn tại không
         User user = userRepository.findByUsername(request.getUsername()).
                 orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
         boolean isPasswordMatch = passwordEncoder.matches(request.getPassword(), user.getPassword());
+        //kiểm tra password có đúng không
         if (!isPasswordMatch) {
             throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
         }
+        //generate jwt
         String jwt = GenerateJWT(user);
+        //trả lại jwt cho client
         return AuthenticationResponse.builder()
                 .token(jwt)
                 .success(true)
@@ -211,6 +244,7 @@ public class AuthenticationService {
             throw new RuntimeException(e);
         }
     }
+
     public String GenerateJwtForForgotPassword(String email) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         Date now = new Date();
@@ -222,7 +256,7 @@ public class AuthenticationService {
                 .issueTime(new Date())
                 .expirationTime(expiryDate)
                 .jwtID(UUID.randomUUID().toString())
-                .claim("scope","forgot_password")
+                .claim("scope", "forgot_password")
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);
@@ -234,6 +268,7 @@ public class AuthenticationService {
             throw new RuntimeException(e);
         }
     }
+
     public String GetPermissionForRole(Role role) {
         StringJoiner stringJoiner = new StringJoiner(" ");
         stringJoiner.add("ROLE_" + role.getName());

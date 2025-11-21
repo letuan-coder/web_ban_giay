@@ -65,6 +65,8 @@ public enum ErrorCode {
     //
     SIZE_NOT_ALLOW(1049, "size must be at least 20", HttpStatus.NOT_FOUND),
     TYPE_ALREADY_EXISTS(1050, "Type already exists", HttpStatus.BAD_REQUEST),
+    BANNER_NOT_FOUND(1070, "Banner not found", HttpStatus.NOT_FOUND),
+    BANNER_EXISTED(1071, "Banner already exists", HttpStatus.BAD_REQUEST),
 
     // File & Image
     FILE_EMPTY(1006, "File is empty", HttpStatus.BAD_REQUEST),
@@ -97,6 +99,17 @@ public enum ErrorCode {
     DISTRICT_NOT_FOUND(1057, "District not found", HttpStatus.NOT_FOUND),
     COMMUNE_NOT_FOUND(1058, "Commune not found", HttpStatus.NOT_FOUND),
     ADDRESS_NOT_FOUND(1059, "Address not found", HttpStatus.NOT_FOUND),
+
+    // Order Return
+    RETURN_PERIOD_EXPIRED(1060, "Return period has expired for this order.", HttpStatus.BAD_REQUEST),
+    RETURN_REQUEST_ALREADY_EXISTS(1061, "A return request for this order is already pending.", HttpStatus.BAD_REQUEST),
+    ORDER_NOT_RETURNABLE(1062, "Order cannot be returned.", HttpStatus.BAD_REQUEST),
+    RETURN_QUANTITY_INVALID(1063, "Return quantity exceeds ordered quantity or is invalid.", HttpStatus.BAD_REQUEST),
+    RETURN_REQUEST_NOT_FOUND(1064, "Return request not found.", HttpStatus.NOT_FOUND),
+    RETURN_STATUS_INVALID(1065, "Return request status is invalid for this operation.", HttpStatus.BAD_REQUEST),
+
+    //refund
+    REFUND_NOT_ALLOWDED(1128,"refund is not allowded",HttpStatus.BAD_REQUEST),
 
     // Generic
 

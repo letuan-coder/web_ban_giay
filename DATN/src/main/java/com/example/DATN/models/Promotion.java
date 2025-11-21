@@ -54,4 +54,6 @@ public class Promotion extends BaseEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
 
     private Set<ProductVariant> productVariants = new HashSet<>();
+
+
 }

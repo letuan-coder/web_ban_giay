@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class DataInitializer implements ApplicationRunner {
-    private final VnpayRepository vnpayRepository;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
     private final ProvinceRepository provinceRepository;

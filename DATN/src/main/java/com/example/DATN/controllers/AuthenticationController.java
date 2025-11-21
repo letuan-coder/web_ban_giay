@@ -97,6 +97,7 @@ public class AuthenticationController {
         );
     }
 
+
     @PostMapping("/reset-password")
     public ResponseEntity<ApiResponse<Void>> resetPassword(
             @RequestBody ResetPasswordRequest request) throws ParseException, JOSEException {

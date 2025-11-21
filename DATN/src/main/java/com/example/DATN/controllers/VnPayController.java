@@ -1,6 +1,7 @@
 package com.example.DATN.controllers;
 
 import com.example.DATN.config.VnPayConfig;
+import com.example.DATN.dtos.request.vnpay.VnPayRefundRequest;
 import com.example.DATN.dtos.request.vnpay.VnPaymentRequest;
 import com.example.DATN.dtos.request.vnpay.VnQueryRequest;
 import com.example.DATN.dtos.respone.vnpay.VnPayResponse;
@@ -9,6 +10,7 @@ import com.example.DATN.models.Order;
 import com.example.DATN.models.Vnpay;
 import com.example.DATN.repositories.VnpayRepository;
 import com.example.DATN.services.OrderService;
+import com.example.DATN.services.VnPayServices;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -28,11 +30,17 @@ import java.util.*;
 @RequestMapping("/api/vnpay")
 public class VnPayController {
 
+    @Autowired
+    private  VnPayServices vnpayServices;
     private final RestTemplate restTemplate;
     @Autowired
     private OrderService orderService;
     @Autowired
     private VnpayRepository vnpayRepository;
+    private final String vnp_Version = "2.1.0";
+    private final String vnp_Command = "pay";
+    private final String orderType = "other";
+    private final String vnp_TmnCode = VnPayConfig.vnp_TmnCode;
 
     public VnPayController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -51,9 +59,7 @@ public class VnPayController {
             }
             request.setAmount(order.getTotal_price().longValue());
             req.setAttribute("order", order.getId());
-            String vnp_Version = "2.1.0";
-            String vnp_Command = "pay";
-            String orderType = "other";
+
             long amount = request.getAmount() * 100L;
             String bankCode = request.getBankCode();
 
@@ -128,13 +134,12 @@ public class VnPayController {
     }
 
     @PostMapping("/query-payment")
-    public ResponseEntity<VnPayResponse> queryPayment(
+    public ResponseEntity<?> queryPayment(
             @RequestBody VnQueryRequest queryRequest, HttpServletRequest req) {
         try {
             String vnp_RequestId = VnPayConfig.getRandomNumber(8);
             String vnp_Version = "2.1.0";
             String vnp_Command = "querydr";
-            String vnp_TmnCode = VnPayConfig.vnp_TmnCode;
             String vnp_TxnRef = queryRequest.getOrderId();
             String vnp_OrderInfo = "Kiem tra ket qua GD OrderId:" + vnp_TxnRef;
             String vnp_TransDate = queryRequest.getTransDate();
@@ -162,33 +167,34 @@ public class VnPayController {
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Map<String, String>> entity = new HttpEntity<>(vnp_Params, headers);
             ResponseEntity<VnPayResponse> response = restTemplate.postForEntity(VnPayConfig.vnp_ApiUrl, entity, VnPayResponse.class);
-            return ResponseEntity.ok(response.getBody());
+
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            VnPayResponse errorResponse = new VnPayResponse();
-            errorResponse.setRspCode("99");
-            errorResponse.setMessage("An error occurred: " + e.getMessage());
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(errorResponse);
+                    .body(ErrorCode.PAYMENT_METHOD_NOT_EXISTED);
         }
+    }
+
+    @PostMapping("/refund")
+    public ResponseEntity<?> refundPayment(
+            @RequestBody VnPayRefundRequest refundRequest, HttpServletRequest req)
+    {
+        return vnpayServices.processRefund(refundRequest,req);
     }
 
     @GetMapping("/return")
     public String vnpayReturn(
-
-            Model model, HttpServletRequest request) {
-
+            Model model,
+            HttpServletRequest request) {
         // Lấy tham số từ VNPAY trả về
         Map<String, String[]> parameterMap = request.getParameterMap();
-
         // Đưa tất cả params sang giao diện Thymeleaf
         Map<String, String> param = new HashMap<>();
         parameterMap.forEach((k, v) -> param.put(k, v[0]));
-
-
         model.addAttribute("params", param);
         try {
-
         /*  IPN URL: Record payment results from VNPAY
         Implementation steps:
         Check checksum
@@ -240,7 +246,7 @@ public class VnPayController {
                                         .vnp_Amount(vnpAmount.toString())
                                         .vnp_OrderInfo(request.getParameter("vnp_OrderInfo"))
                                         .vnp_ResponseCode(request.getParameter("vnp_ResponseCode"))
-                                        .vnp_TxnRef(request.getParameter("vnp_TxnRef"))
+                                        .vnpTxnRef(request.getParameter("vnp_TxnRef"))
                                         .build();
                                 vnpayRepository.save(savedPayment);
                                 //Here Code update PaymnentStatus = 1 into your Database

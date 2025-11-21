@@ -1,0 +1,87 @@
+<div class="container">
+  <h1>Banners</h1>
+  <button (click)="openForm()" class="add-btn">Add New Banner</button>
+
+  <div *ngIf="showForm" class="form-container">
+    <h2>{{ isEditing ? 'Edit Banner' : 'Create Banner' }}</h2>
+    <form [formGroup]="bannerForm" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="bannerName">Banner Name</label>
+          <input id="bannerName" formControlName="bannerName" placeholder="Banner Name">
+        </div>
+
+        <div class="form-group">
+          <label for="type">Vị trí Banner</label>
+          <select id="type" formControlName="type">
+            <option [ngValue]="null" disabled>Select a type</option>
+            <option *ngFor="let type of bannerTypes" [value]="type">{{ type }}</option>
+          </select>
+        </div>
+
+        <div class="form-group" *ngIf="!isEditing">
+          <label for="fileInput">Hình Ảnh</label>
+          <input id="fileInput" type="file" (change)="onFileSelected($event)">
+        </div>
+
+        <div class="form-group">
+          <label for="redirectUrl">Dẫn Tới Sản Phẩm/Danh Mục/Thương Hiệu</label>
+          <input id="redirectUrl" formControlName="redirectUrl" placeholder="Redirect URL">
+        </div>
+
+        <div class="form-group">
+          <label for="sortOrder">Thứ Tự Slider</label>
+          <input id="sortOrder" type="number" formControlName="sortOrder" placeholder="Sort Order">
+        </div>
+        
+        <div class="form-group">
+            <label for="startAt">Ngày bắt đầu</label>
+            <input id="startAt" type="datetime-local" formControlName="startAt">
+        </div>
+
+        <div class="form-group">
+            <label for="endAt">Ngày kết thúc</label>
+            <input id="endAt" type="datetime-local" formControlName="endAt">
+        </div>
+
+        <div class="form-group-checkbox">
+          <label for="active">Sãn Sàng</label>
+          <input id="active" type="checkbox" formControlName="active">
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="bannerForm.invalid || (!selectedFile && !isEditing)">
+          {{ isEditing ? 'Update' : 'Create' }}
+        </button>
+        <button type="button" (click)="resetForm()">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Active</th>
+        <th>Sort Order</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let banner of banners">
+        <td><img [src]="banner.imageUrl" alt="{{banner.bannerName}}" width="100"></td>
+        <td>{{ banner.bannerName }}</td>
+        <td>{{ banner.type }}</td>
+        <td>{{ banner.active ? 'Yes' : 'No' }}</td>
+        <td>{{ banner.sortOrder }}</td>
+        <td>
+          <button (click)="editBanner(banner)">Edit</button>
+          <button (click)="deleteBanner(banner.id)" class="delete-btn">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

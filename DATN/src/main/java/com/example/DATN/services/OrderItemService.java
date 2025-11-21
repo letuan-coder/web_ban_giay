@@ -60,7 +60,6 @@ public class OrderItemService {
     public void removeOrderItem(Long itemId) {
         OrderItem orderItem = orderItemRepository.findById(itemId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_ITEM_NOT_FOUND));
-
         Order order = orderItem.getOrder();
         order.getItems().remove(orderItem);
         updateOrderTotalPrice(order);

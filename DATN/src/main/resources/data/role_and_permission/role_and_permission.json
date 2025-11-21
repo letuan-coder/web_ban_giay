@@ -22,6 +22,11 @@
     { "code": "BRAND_UPDATE", "description": "Cập nhật thương hiệu" },
     { "code": "BRAND_DELETE", "description": "Xóa thương hiệu" },
 
+    { "code": "BANNER_VIEW", "description": "Xem banner" },
+    { "code": "BANNER_CREATE", "description": "Tạo banner" },
+    { "code": "BANNER_UPDATE", "description": "Cập nhật banner" },
+    { "code": "BANNER_DELETE", "description": "Xóa banner" },
+
     { "code": "ORDER_VIEW", "description": "Xem đơn hàng" },
     { "code": "ORDER_CREATE", "description": "Tạo đơn hàng mới" },
     { "code": "ORDER_UPDATE", "description": "Cập nhật trạng thái đơn hàng" },
@@ -76,6 +81,7 @@
       "role": "ADMIN",
       "permissions": [
         "BRAND_VIEW", "BRAND_CREATE","BRAND_UPDATE","BRAND_DELETE",
+        "BANNER_VIEW", "BANNER_CREATE", "BANNER_UPDATE", "BANNER_DELETE",
         "USER_VIEW", "USER_CREATE", "USER_UPDATE", "USER_DELETE", "USER_ROLE_ASSIGN",
         "PRODUCT_VIEW", "PRODUCT_SEARCH", "PRODUCT_CREATE", "PRODUCT_UPDATE", "PRODUCT_DELETE",
         "CATEGORY_VIEW", "CATEGORY_CREATE", "CATEGORY_UPDATE", "CATEGORY_DELETE",
