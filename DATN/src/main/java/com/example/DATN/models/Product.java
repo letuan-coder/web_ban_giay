@@ -3,9 +3,11 @@ package com.example.DATN.models;
 import com.example.DATN.constant.Is_Available;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,7 +37,7 @@ public class Product extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    Is_Available available=Is_Available.NOT_AVAILABLE;
+    Is_Available available = Is_Available.NOT_AVAILABLE;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id")
@@ -46,9 +48,15 @@ public class Product extends BaseEntity {
     Category category;
 
     Double weight;
+    @NotNull
+    @Column(name = "thumbnail_url")
+    String ThumbnailUrl;
+    String altText;
+
+    BigDecimal price;
 
     @OneToMany(mappedBy = "product"
-            ,fetch = FetchType.LAZY
+            , fetch = FetchType.LAZY
             , cascade = CascadeType.ALL
             , orphanRemoval = true)
     @JsonManagedReference

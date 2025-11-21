@@ -10,6 +10,8 @@ export interface ProductCreateRequest {
   brandId: number;
   categoryId: number;
   weight: number;
+  price?: number;
+  file?: File;
 }
 export interface updateProductRequest {
   name: string;
@@ -31,7 +33,19 @@ export class ProductService {
     return this.http.get<any>(`${this.baseUrl}?page=${page}&size=${size}`);
   }
   createProduct(product: ProductCreateRequest): Observable<any> {
-    return this.http.post(this.baseUrl, product);
+    const formData = new FormData();
+    formData.append('name', product.name);
+    formData.append('description', product.description);
+    formData.append('brandId', product.brandId.toString());
+    formData.append('categoryId', product.categoryId.toString());
+    formData.append('weight', product.weight.toString());
+    if (product.price) {
+      formData.append('price', product.price.toString());
+    }
+    if (product.file) {
+      formData.append('file', product.file);
+    }
+    return this.http.post(this.baseUrl, formData);
   }
   // bạn có thể thêm create/update/delete nếu muốn
   deleteProduct(id: string): Observable<any> {

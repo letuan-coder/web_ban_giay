@@ -6,6 +6,7 @@ import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.ImageProductMapper;
 import com.example.DATN.models.Banner;
 import com.example.DATN.models.ImageProduct;
+import com.example.DATN.models.Product;
 import com.example.DATN.models.ProductColor;
 import com.example.DATN.repositories.*;
 import lombok.RequiredArgsConstructor;
@@ -73,6 +74,20 @@ public class ImageProductService {
             newImages.add(imageProduct);
         }
         return imageProductRepository.saveAll(newImages);
+    }
+
+    public void uploadThumbnailImages(
+            UUID ProductId,
+            MultipartFile file) {
+        Product product = productRepository.findById(ProductId)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
+        String productSlug = product.getSlug();
+        String altText = productSlug;
+        product.setAltText(altText);
+        String generatedFileName = fileStorageService.storeThumbnailFile(file, productSlug);
+        product.setThumbnailUrl(generatedFileName);
+
+
     }
 
     public void uploadBannerImages(

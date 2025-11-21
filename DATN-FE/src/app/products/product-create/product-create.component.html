@@ -31,6 +31,18 @@
                         </div>
 
                         <div class="mb-3">
+                            <label for="price" class="form-label">Giá mặc định</label>
+                            <input type="number" id="price" [(ngModel)]="product.price" name="price"
+                                class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Ảnh sản phẩm</label>
+                            <input type="file" id="file" (change)="onFileSelected($event)" name="file"
+                                class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
                             <label for="brand" class="form-label">Thương hiệu</label>
                             <select [(ngModel)]="product.brandId" name="brandId" class="form-select" required>
                                 <option *ngFor="let b of brands" [value]="b.id">{{ b.name }}</option>

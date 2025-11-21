@@ -25,6 +25,8 @@ export class ProductCreateComponent implements OnInit {
     weight: 0,
     brandId: 0,
     categoryId: 0,
+    price: 0,
+    file: undefined
   };
 
   loading = false;
@@ -59,6 +61,12 @@ export class ProductCreateComponent implements OnInit {
     });
   }
 
+  onFileSelected(event: any) {
+    if (event.target.files.length > 0) {
+      this.product.file = event.target.files[0];
+    }
+  }
+
   onNameInput() {
     const input = this.product.name.toLowerCase();
     this.filteredProducts = this.productsExisting
@@ -91,7 +99,9 @@ export class ProductCreateComponent implements OnInit {
           name: '',
           description: '',
           brandId: this.brands.length > 0 ? this.brands[0].id : 0,
-          categoryId: this.categories.length > 0 ? this.categories[0].id : 0
+          categoryId: this.categories.length > 0 ? this.categories[0].id : 0,
+          price: 0,
+          file: undefined
         };
         this.filteredProducts = [];
       },

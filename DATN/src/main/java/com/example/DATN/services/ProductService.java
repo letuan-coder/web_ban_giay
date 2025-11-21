@@ -1,14 +1,19 @@
 package com.example.DATN.services;
 
-import cn.ipokerface.snowflake.SnowflakeIdGenerator;
 import com.example.DATN.dtos.request.product.ProductRequest;
 import com.example.DATN.dtos.respone.product.ProductResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.FormatInputString;
 import com.example.DATN.mapper.ProductMapper;
-import com.example.DATN.models.*;
-import com.example.DATN.repositories.*;
+import com.example.DATN.models.Brand;
+import com.example.DATN.models.Category;
+import com.example.DATN.models.Product;
+import com.example.DATN.models.ProductColor;
+import com.example.DATN.repositories.BrandRepository;
+import com.example.DATN.repositories.CategoryRepository;
+import com.example.DATN.repositories.ProductColorRepository;
+import com.example.DATN.repositories.ProductRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
@@ -33,15 +38,14 @@ import java.util.stream.Collectors;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final ProductVariantRepository productVariantRepository;
+
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
     private final ProductColorRepository productColorRepository;
     private final ProductMapper productMapper;
     private final ProductColorService productColorService;
-    private final SnowflakeIdGenerator snowflakeIdGenerator;
     private final String PREFIX = "SHOES_";
-    private final ColorRepository colorRepository;
+    private final ImageProductService imageProductService;
     private final FormatInputString formatInputString;
 
 
@@ -76,7 +80,10 @@ public class ProductService {
         product.setCategory(category);
         product.setSlug(toSlug(formatProductName));
         product.setWeight(request.getWeight());
+        product.setPrice(request.getPrice());
+        product.setThumbnailUrl(""); // Placeholder to avoid NOT NULL constraint violation
         Product savedProduct = productRepository.save(product);
+        imageProductService.uploadThumbnailImages(savedProduct.getId(),request.getFile());
         return productMapper.toProductResponse(savedProduct);
 
     }

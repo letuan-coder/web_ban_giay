@@ -7,7 +7,10 @@ import com.example.DATN.models.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {ImageProductMapper.class, ProductColorMapper.class})
+@Mapper(componentModel = "spring", uses = {
+        ImageProductMapper.class,
+        ProductColorMapper.class,
+        ProductVariantMapper.class})
 public interface ProductMapper {
     @Mapping(source = "available",target = "available")
     @Mapping(source = "productColors", target = "colorResponses")
@@ -15,13 +18,13 @@ public interface ProductMapper {
     @Mapping(source = "category.id",target = "categoryId")
     @Mapping(source = "category.name",target = "categoryName")
     @Mapping(source = "brand.name",target = "brandName")
-    @Mapping(source = "productColors.",target =)
     ProductResponse toProductResponse(Product product);
 
     @Mapping(target = "slug", ignore = true)
     @Mapping(target = "brand", ignore = true)
     @Mapping(target = "category", ignore = true)
-    @Mapping(target = "category.id", source = "categoryId")
-    @Mapping(target = "brand.id", source = "brandId")
+    @Mapping(target = "price", source = "price")
+    @Mapping(target = "brand.id",source = "brandId")
+    @Mapping(target = "category.id",source = "categoryId")
     Product toProduct(ProductRequest productRequest);
 }
