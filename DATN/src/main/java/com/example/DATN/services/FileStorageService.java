@@ -112,10 +112,27 @@ public class FileStorageService {
             throw new RuntimeException("Failed to delete file: " + filename, e);
         }
     }
+    private Path findFileInAllFolders(String filename) {
+        Path[] folders = {
+                storageFolder,
+                storageBannerFolder,
+                storageThumbnailFolder
+        };
 
+        for (Path folder : folders) {
+            Path filePath = folder.resolve(filename).normalize();
+            if (Files.exists(filePath)) {
+                return filePath;
+            }
+        }
+        return null;
+    }
     public Resource loadFileAsResource(String filename) {
         try {
-            Path filePath = this.storageFolder.resolve(filename).normalize();
+            Path filePath = findFileInAllFolders(filename);
+            if (filePath == null) {
+                throw new ApplicationException(ErrorCode.FILE_EMPTY);
+            }
             Resource resource = new UrlResource(filePath.toUri());
             if (resource.exists() || resource.isReadable()) {
                 return resource;
@@ -129,16 +146,18 @@ public class FileStorageService {
 
     public String getMediaTypeForFileName(String filename) {
         try {
-            Path filePath = this.storageFolder.resolve(filename).normalize();
-            String contentType = Files.probeContentType(filePath);
-            if (contentType == null) {
-                // Fallback to a default if probeContentType returns null
-                contentType = "application/octet-stream";
+            Path filePath = findFileInAllFolders(filename);
+            if (filePath == null) {
+                return "application/octet-stream";
             }
+
+            String contentType = Files.probeContentType(filePath);
+            if (contentType == null) contentType = "application/octet-stream";
+
             return contentType;
-        } catch (IOException ex) {
-            // Log the exception or handle it as appropriate
-            return "application/octet-stream"; // Default fallback
+
+        } catch (Exception e) {
+            return "application/octet-stream";
         }
     }
 }

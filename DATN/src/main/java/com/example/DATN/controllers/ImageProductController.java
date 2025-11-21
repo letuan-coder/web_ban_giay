@@ -2,6 +2,7 @@
 package com.example.DATN.controllers;
 
 import com.example.DATN.dtos.respone.ApiResponse;
+import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.services.FileStorageService;
 import com.example.DATN.services.ImageProductService;
 import lombok.RequiredArgsConstructor;
@@ -35,10 +36,12 @@ public class ImageProductController {
 
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\"" + resource.getFilename() + "\"")
                     .body(resource);
-        } catch (RuntimeException e) {
+        } catch (ApplicationException e) {
             return ResponseEntity.notFound().build();
         }
     }
+
 }
