@@ -10,6 +10,7 @@ import com.example.DATN.mapper.ProductMapper;
 import com.example.DATN.models.Brand;
 import com.example.DATN.models.Category;
 import com.example.DATN.models.Product;
+import com.example.DATN.models.ProductColor;
 import com.example.DATN.repositories.BrandRepository;
 import com.example.DATN.repositories.CategoryRepository;
 import com.example.DATN.repositories.ProductColorRepository;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.Normalizer;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -120,17 +122,43 @@ public class ProductService {
     }
 
     public ProductResponse getProductById(UUID id) {
-        // Placeholder for getting product by ID
-        return null;
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
+        return productMapper.toProductResponse(product);
     }
 
+    @Transactional
     public ProductResponse updateProduct(UUID id, ProductRequest request) {
-        // Placeholder for updating product
-        return null;
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        Brand brand = brandRepository.findById(request.getBrandId())
+                .orElseThrow(() -> new ApplicationException(ErrorCode.BRAND_NOT_FOUND));
+
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new ApplicationException(ErrorCode.CATEGORY_NOT_FOUND));
+
+        existingProduct.setName(formatInputString.formatInputString(request.getName()));
+        existingProduct.setDescription(request.getDescription());
+        existingProduct.setBrand(brand);
+        existingProduct.setCategory(category);
+        existingProduct.setSlug(toSlug(request.getName()));
+        existingProduct.setUpdatedAt(LocalDateTime.now());
+        existingProduct.setWeight(request.getWeight());
+        Product updatedProduct = productRepository.save(existingProduct);
+        return productMapper.toProductResponse(updatedProduct);
     }
 
+    @Transactional
     public void deleteProduct(UUID id) {
-        // Placeholder for deleting product
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
+        List<ProductColor> productColor = productColorRepository.findAllByProduct(product);
+        for (ProductColor pc : productColor) {
+            productColorService.deleteProductColor(pc.getId());
+
+        }
+        productRepository.delete(product);
     }
 
     private ProductResponse mapProductToProductResponse(Product product) {

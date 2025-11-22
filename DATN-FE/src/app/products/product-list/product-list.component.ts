@@ -20,7 +20,7 @@ export class ProductListComponent implements OnInit {
   error = '';
   selectedProductIds = new Set<string>();
 
-  currentPage = 0;
+  currentPage = 1;
   pageSize = 8;
   totalPages = 0;
 
