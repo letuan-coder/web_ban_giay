@@ -2,7 +2,6 @@ package com.example.DATN.models;
 
 import com.example.DATN.constant.Is_Available;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -38,21 +37,19 @@ public class ProductVariant extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "size_code")
-    @JsonManagedReference
     Size size;
 
     BigDecimal price;
 
     BigDecimal discountPrice;
 
-    Integer stock;
+    @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL)
+    private Set<Stock> stocks = new HashSet<>();
+
 
     @Column(nullable = false, unique = true)
     String sku;
 
-    @ManyToOne
-    @JsonBackReference
-    CartItem cartItem;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -60,4 +57,5 @@ public class ProductVariant extends BaseEntity {
 
     @ManyToMany(mappedBy = "productVariants")
     private Set<Promotion> promotions = new HashSet<>();
+
 }

@@ -1,6 +1,6 @@
 package com.example.DATN.dtos.respone.user;
 
-import com.example.DATN.dtos.respone.order.OrderRespone;
+import com.example.DATN.dtos.respone.order.OrderResponse;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -20,5 +20,5 @@ public class UserResponse {
     String lastName;
     LocalDate dob;
     Set<UserRoleResponse> roles;
-    List<OrderRespone> orders;
+    List<OrderResponse> orders;
 }

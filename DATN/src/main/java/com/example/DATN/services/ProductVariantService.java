@@ -8,18 +8,13 @@ import com.example.DATN.dtos.respone.product.ProductVariantResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.ProductVariantMapper;
-import com.example.DATN.models.ProductColor;
-import com.example.DATN.models.ProductVariant;
-import com.example.DATN.models.Size;
+import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +25,8 @@ public class ProductVariantService {
     private final ProductVariantMapper productVariantMapper;
     private final ProductColorRepository productColorRepository;
     private final SizeRepository sizeRepository;
+    private final StockRepository stockRepository;
+    private final WareHouseRepository wareHouseRepository;
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -38,6 +35,7 @@ public class ProductVariantService {
              List<ProductVariantRequest> requests) {
         ProductColor productColor = productColorRepository.findById(productcolorId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
+
 
         List<ProductVariant> productVariants = new ArrayList<>();
         for (ProductVariantRequest request : requests) {
@@ -49,12 +47,13 @@ public class ProductVariantService {
                 ProductVariant productVariant = ProductVariant
                         .builder()
                         .productColor(productColor)
-                        .stock(request.getStock())
+                        .stocks(null)
                         .size(size)
                         .sku(skugenerate)
                         .price(request.getPrice())
                         .build();
                 productVariants.add(productVariant);
+
             }
         }
 
@@ -85,9 +84,7 @@ public class ProductVariantService {
         if (request.getPrice() != null) {
             productVariant.setPrice(request.getPrice());
         }
-        if (request.getStock() != null) {
-            productVariant.setStock(request.getStock());
-        }
+
         if (request.getDiscountPrice() != null) {
             productVariant.setDiscountPrice(request.getDiscountPrice());
         }
@@ -116,11 +113,6 @@ public class ProductVariantService {
             if (match.getPrice() != null) {
                 existingProductVariant.setPrice(match.getPrice());
             }
-
-            if (match.getStock() != null) {
-                existingProductVariant.setStock(match.getStock());
-            }
-            ;
             Size size = existingProductVariant.getSize();
 
             if (match.getSize() != null && match.getSize().getName() != null) {

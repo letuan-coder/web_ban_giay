@@ -2,19 +2,19 @@ package com.example.DATN.dtos.request;
 
 import com.example.DATN.constant.BannerType;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 public class BannerRequest {
-    private UUID id;
-    @NotNull(message = "Image URL is required")
     private String imageUrl;
 
     private String bannerName;
@@ -31,5 +31,6 @@ public class BannerRequest {
 
     @NotNull(message = "Banner type is required")
     private BannerType type;
+
     private MultipartFile file;
 }

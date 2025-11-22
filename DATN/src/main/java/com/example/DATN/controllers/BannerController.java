@@ -8,6 +8,7 @@ import com.example.DATN.services.BannerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,11 +18,12 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/banners")
 @RequiredArgsConstructor
+@Controller
 public class BannerController {
 
     private final BannerService bannerService;
 
-    @PostMapping(value = "/formdata", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<BannerResponse> createBanner(
             @RequestPart("data") @Valid BannerRequest request,
             @RequestPart("file") MultipartFile file) {
@@ -33,8 +35,9 @@ public class BannerController {
 
     @GetMapping
     public ApiResponse<List<BannerResponse>> getAllBanners() {
+        List<BannerResponse> response = bannerService.getAllBanners();
         return ApiResponse.<List<BannerResponse>>builder()
-                .data(bannerService.getAllBanners())
+                .data(response)
                 .build();
     }
 
@@ -45,9 +48,10 @@ public class BannerController {
                 .build();
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ApiResponse<BannerResponse> updateBanner(
-            @PathVariable UUID id, @RequestBody @Valid BannerRequest request) {
+            @PathVariable UUID id,
+            @RequestBody @Valid BannerRequest request) {
         return ApiResponse.<BannerResponse>builder()
                 .data(bannerService.updateBanner(id, request))
                 .build();

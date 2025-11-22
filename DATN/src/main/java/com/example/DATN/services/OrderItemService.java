@@ -1,7 +1,7 @@
 package com.example.DATN.services;
 
 import com.example.DATN.dtos.request.order.OrderItemRequest;
-import com.example.DATN.dtos.respone.order.OrderItemRespone;
+import com.example.DATN.dtos.respone.order.OrderItemResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.OrderItemMapper;
@@ -27,7 +27,7 @@ public class OrderItemService {
     private final ProductVariantRepository productVariantRepository;
 
     @Transactional
-    public OrderItemRespone addOrderItemToOrder(Long orderId, OrderItemRequest itemRequest) {
+    public OrderItemResponse addOrderItemToOrder(Long orderId, OrderItemRequest itemRequest) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
         ProductVariant variant= productVariantRepository.findById(itemRequest.getProductVariantId())
@@ -41,11 +41,11 @@ public class OrderItemService {
         orderItemRepository.save(orderItem);
         orderRepository.save(order);
 
-        return orderItemMapper.toOrderItemRespone(orderItem);
+        return orderItemMapper.toOrderItemResponse(orderItem);
     }
 
     @Transactional
-    public OrderItemRespone updateOrderItemQuantity(Long itemId, int quantity) {
+    public OrderItemResponse updateOrderItemQuantity(Long itemId, int quantity) {
         OrderItem orderItem = orderItemRepository.findById(itemId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_ITEM_NOT_FOUND));
 
@@ -53,7 +53,7 @@ public class OrderItemService {
         updateOrderTotalPrice(orderItem.getOrder());
         orderItemRepository.save(orderItem);
 
-        return orderItemMapper.toOrderItemRespone(orderItem);
+        return orderItemMapper.toOrderItemResponse(orderItem);
     }
 
     @Transactional
@@ -68,10 +68,10 @@ public class OrderItemService {
         orderRepository.save(order);
     }
 
-    public OrderItemRespone getOrderItemById(Long itemId) {
+    public OrderItemResponse getOrderItemById(Long itemId) {
         OrderItem orderItem = orderItemRepository.findById(itemId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_ITEM_NOT_FOUND));
-        return orderItemMapper.toOrderItemRespone(orderItem);
+        return orderItemMapper.toOrderItemResponse(orderItem);
     }
 
     private void updateOrderTotalPrice(Order order) {

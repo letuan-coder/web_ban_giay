@@ -55,6 +55,9 @@ public class Product extends BaseEntity {
     String altText;
 
     BigDecimal price;
+    @ManyToOne
+    @JoinColumn(name = "warehouse_id")
+    private WareHouse wareHouse;
 
     @OneToMany(mappedBy = "product"
             , fetch = FetchType.LAZY

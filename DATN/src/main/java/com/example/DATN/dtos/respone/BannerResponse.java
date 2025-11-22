@@ -15,6 +15,7 @@ import java.util.UUID;
 @Setter
 public class BannerResponse {
     private UUID id;
+    private String bannerName;
     private String imageUrl;
     private String redirectUrl;
     private Integer sortOrder;

@@ -4,7 +4,7 @@ import cn.ipokerface.snowflake.SnowflakeIdGenerator;
 import com.example.DATN.constant.Is_Available;
 import com.example.DATN.constant.OrderStatus;
 import com.example.DATN.dtos.request.order.OrderRequest;
-import com.example.DATN.dtos.respone.order.OrderRespone;
+import com.example.DATN.dtos.respone.order.OrderResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.GetUserByJwtHelper;
@@ -40,7 +40,7 @@ public class OrderService {
     private final ProductVariantRepository productVariantRepository;
 
     @Transactional(rollbackOn = Exception.class)
-    public OrderRespone createOrder(OrderRequest request) {
+    public OrderResponse createOrder(OrderRequest request) {
         User user = getUserByJwtHelper.getCurrentUser();
         List<ProductVariant> listProductVariant =
                 productVariantRepository.findAllById(request.getProductColorId()) ;
@@ -74,14 +74,14 @@ public class OrderService {
         return orderMapper.toResponse(orderRepository.save(order));
     }
 
-    public List<OrderRespone> getOrdersByUser() {
+    public List<OrderResponse> getOrdersByUser() {
         User user = getUserByJwtHelper.getCurrentUser();
         List<Order> orders = orderRepository.findByUser(user);
        return orders.stream().map(orderMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
-    public OrderRespone getOrderById(Long orderId) {
+    public OrderResponse getOrderById(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
         return orderMapper.toResponse(order);

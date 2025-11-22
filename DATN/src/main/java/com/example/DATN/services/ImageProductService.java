@@ -100,6 +100,7 @@ public class ImageProductService {
         String BannerFileName = banner.getBannerName();
         String bannerUrl = fileStorageService.storeBannerFile(file, BannerFileName);
         banner.setImageUrl(bannerUrl);
+        bannerRepository.save(banner);
     }
 
 

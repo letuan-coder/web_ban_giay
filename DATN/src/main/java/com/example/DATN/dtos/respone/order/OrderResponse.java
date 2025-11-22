@@ -10,9 +10,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class OrderRespone {
+public class OrderResponse {
     private Long id;
-    private List<OrderItemRespone> items;
+    private List<OrderItemResponse> items;
     private String paymentMethodName;
     private OrderStatus orderStatus;
     private BigDecimal totalPrice;

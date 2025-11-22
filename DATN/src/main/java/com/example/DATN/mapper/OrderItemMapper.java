@@ -1,7 +1,7 @@
 package com.example.DATN.mapper;
 
 import com.example.DATN.dtos.request.order.OrderItemRequest;
-import com.example.DATN.dtos.respone.order.OrderItemRespone;
+import com.example.DATN.dtos.respone.order.OrderItemResponse;
 import com.example.DATN.models.ImageProduct;
 import com.example.DATN.models.OrderItem;
 import org.mapstruct.Mapper;
@@ -12,7 +12,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring",uses = {ProductVariantMapper.class})
 public interface OrderItemMapper {
-    OrderItem toEntity(OrderItemRespone respone);
+    OrderItem toEntity(OrderItemResponse respone);
 
     OrderItem toOrderItem(OrderItemRequest request);
 
@@ -22,7 +22,7 @@ public interface OrderItemMapper {
     @Mapping(target = "sizeName",source = "productVariant.size.name")
     @Mapping(target = "price", source = "price")
     @Mapping(target = "image", source = "productVariant.productColor.images", qualifiedByName = "getFirstImageUrl")
-    OrderItemRespone toOrderItemRespone(OrderItem orderItem);
+    OrderItemResponse toOrderItemResponse(OrderItem orderItem);
 
     @Named("getFirstImageUrl")
     default String getFirstImageUrl(List<ImageProduct> images) {

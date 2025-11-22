@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
-@EntityScan(basePackages = "com.example.DATN.models")
+//@EntityScan(basePackages = "com.example.DATN.models")
 @EnableCaching
 public class DatnApplication {
 

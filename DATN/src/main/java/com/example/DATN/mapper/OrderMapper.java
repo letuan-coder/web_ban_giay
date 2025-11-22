@@ -1,7 +1,7 @@
 package com.example.DATN.mapper;
 
 import com.example.DATN.dtos.request.order.OrderRequest;
-import com.example.DATN.dtos.respone.order.OrderRespone;
+import com.example.DATN.dtos.respone.order.OrderResponse;
 import com.example.DATN.models.Order;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,6 +14,6 @@ public interface OrderMapper {
     @Mapping(target = "totalPrice",source = "total_price")
     @Mapping(target = "items",source = "items")
     @Mapping(target = "created_At",source = "createdAt")
-    OrderRespone toResponse(Order oder);
+    OrderResponse toResponse(Order oder);
 
 }

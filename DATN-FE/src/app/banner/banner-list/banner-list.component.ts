@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-
 import { CommonModule } from '@angular/common';
+import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-drop';
 import { Banner, BannerType } from '../../model/banner.model';
 import { BannerService } from '../../services/banner.service';
 
 @Component({
   selector: 'app-banner-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DragDropModule],
   templateUrl: './banner-list.component.html',
   styleUrls: ['./banner-list.component.scss']
 })
@@ -42,7 +42,18 @@ export class BannerListComponent implements OnInit {
 
   loadBanners(): void {
     this.bannerService.getBanners().subscribe(response => {
-      this.banners = response.data;
+      this.banners = response.data.sort((a, b) => a.sortOrder - b.sortOrder);
+    });
+  }
+
+  drop(event: CdkDragDrop<Banner[]>) {
+    moveItemInArray(this.banners, event.previousIndex, event.currentIndex);
+    const updatedBanners = this.banners.map((banner, index) => ({
+      ...banner,
+      sortOrder: index
+    }));
+    this.bannerService.updateSortOrder(updatedBanners).subscribe(() => {
+      this.loadBanners();
     });
   }
 
@@ -64,15 +75,12 @@ export class BannerListComponent implements OnInit {
     };
 
     if (this.isEditing) {
-      // Update logic
       this.bannerService.updateBanner(this.selectedBannerId!, bannerData).subscribe(() => {
         this.resetForm();
         this.loadBanners();
       });
     } else {
-      // Create logic
       if (!this.selectedFile) {
-        // Handle error: file is required for creation
         console.error('File is required to create a banner.');
         return;
       }
@@ -112,8 +120,8 @@ export class BannerListComponent implements OnInit {
 
   resetForm(): void {
     this.bannerForm.reset({
-        sortOrder: 0,
-        active: true,
+      sortOrder: 0,
+      active: true,
     });
     this.selectedFile = null;
     this.isEditing = false;
@@ -122,7 +130,7 @@ export class BannerListComponent implements OnInit {
     // Reset file input
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
     if (fileInput) {
-        fileInput.value = '';
+      fileInput.value = '';
     }
   }
 

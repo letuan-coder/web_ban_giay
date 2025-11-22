@@ -1,5 +1,6 @@
 package com.example.DATN.controllers;
 
+import com.example.DATN.constant.ProductStatus;
 import com.example.DATN.dtos.request.product.ProductRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.PageResponse;
@@ -9,13 +10,12 @@ import com.example.DATN.services.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -45,11 +45,33 @@ public class ProductController {
 
     @GetMapping
     public ApiResponse<PageResponse<ProductResponse>> getAllProducts(
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<ProductResponse> productPage = productService.getAllProducts(pageable);
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "15") int limit,
+            @RequestParam(name = "name", required = false) String productName,
+            @RequestParam(name = "sort_by", required = false) String sortBy,
+            @RequestParam(name = "sort_order", defaultValue = "desc") String sortOrder,
+            @RequestParam(name = "price_min", required = false) Double priceMin,
+            @RequestParam(name = "price_max", required = false) Double priceMax,
+            @RequestParam(name = "status", required = false) ProductStatus status
+    ) {
+        Sort sort;
+        if (!"price".equalsIgnoreCase(sortBy)) {
+            sort = "asc".equalsIgnoreCase(sortOrder)
+                            ? Sort.by("createdAt").ascending()
+                            : Sort.by("createdAt").descending();
+        } else {
+            sort = Sort.unsorted();
+        }
+        sort = sortOrder.equalsIgnoreCase("desc") ? sort.descending() : sort.ascending();
+        Pageable pageable = PageRequest.of(page - 1, limit, sort);
+
+
+        Page<ProductResponse> productPage = productService.getAllProducts(productName, priceMin, priceMax, status, pageable);
+
         PageResponse<ProductResponse> pageResponse = PageResponse.<ProductResponse>builder()
-                .page(productPage.getNumber())
+                .page(productPage.getNumber() + 1)
                 .size(productPage.getSize())
+                .limit(limit)
                 .totalElements(productPage.getTotalElements())
                 .totalPages(productPage.getTotalPages())
                 .content(productPage.getContent())
@@ -58,6 +80,7 @@ public class ProductController {
                 .data(pageResponse)
                 .build();
     }
+
 
     @GetMapping("/code/{productCode}")
     public ApiResponse<List<ProductResponse>> getProductByProductCode(

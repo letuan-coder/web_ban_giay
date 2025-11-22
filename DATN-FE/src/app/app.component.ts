@@ -8,7 +8,8 @@ import { MatDialogModule } from '@angular/material/dialog'; // Added MatDialogMo
   selector: 'app-root',
   templateUrl: './app.component.html',
   standalone: true, // Changed to true
-  imports: [CommonModule, RouterOutlet, RouterModule, MatDialogModule], // Added imports array
+  imports: [CommonModule, RouterOutlet, RouterModule, MatDialogModule
+], // Added imports array
   styleUrl: './app.component.css'
 })
 export class AppComponent {

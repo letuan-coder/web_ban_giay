@@ -43,9 +43,7 @@ public class CartItemGuestService {
         if (variant.getIsAvailable() == Is_Available.NOT_AVAILABLE) {
             throw new ApplicationException(ErrorCode.PRODUCT_NOT_AVAILABLE);
         } else {
-            if (request.getQuantity() > variant.getStock()) {
-                throw new ApplicationException(ErrorCode.OUT_OF_STOCK);
-            }
+
             for (CartItemResponse responseItem: listItem) {
                 if (responseItem.getProductVariant().getId().equals(request.getProductVariantId())) {
                     responseItem.setQuantity(responseItem.getQuantity()+request.getQuantity());

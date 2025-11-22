@@ -33,15 +33,15 @@
           <label for="sortOrder">Thứ Tự Slider</label>
           <input id="sortOrder" type="number" formControlName="sortOrder" placeholder="Sort Order">
         </div>
-        
+
         <div class="form-group">
-            <label for="startAt">Ngày bắt đầu</label>
-            <input id="startAt" type="datetime-local" formControlName="startAt">
+          <label for="startAt">Ngày bắt đầu</label>
+          <input id="startAt" type="datetime-local" formControlName="startAt">
         </div>
 
         <div class="form-group">
-            <label for="endAt">Ngày kết thúc</label>
-            <input id="endAt" type="datetime-local" formControlName="endAt">
+          <label for="endAt">Ngày kết thúc</label>
+          <input id="endAt" type="datetime-local" formControlName="endAt">
         </div>
 
         <div class="form-group-checkbox">
@@ -62,21 +62,31 @@
   <table>
     <thead>
       <tr>
-        <th>Image</th>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Active</th>
-        <th>Sort Order</th>
-        <th>Actions</th>
+        <th>Drag</th>
+        <th>Hình ảnh </th>
+        <th>Tên Banner</th>
+        <th>Loại Banner</th>
+        <th>Đang chạy</th>
+        <th>Thự tự Sắp xếp</th>
+        <th>Ngày bắt đầu</th>
+        <th>Ngày kết thúc</th>
+        <th>Dẫn tới</th>
+        <th>Hành động</th>
       </tr>
     </thead>
-    <tbody>
-      <tr *ngFor="let banner of banners">
-        <td><img [src]="banner.imageUrl" alt="{{banner.bannerName}}" width="100"></td>
+    <tbody cdkDropList (cdkDropListDropped)="drop($event)">
+      <tr *ngFor="let banner of banners" cdkDrag>
+        <td class="drag-handle" cdkDragHandle>&#x2630;</td>
+        <td><img [src]="'http://localhost:8080/api/images/view/'+banner.imageUrl" alt="{{banner.bannerName}}"
+            width="100"></td>
         <td>{{ banner.bannerName }}</td>
         <td>{{ banner.type }}</td>
-        <td>{{ banner.active ? 'Yes' : 'No' }}</td>
+        <td>{{ banner.active ? 'Đang chạy' : 'Đã ngưng' }}</td>
         <td>{{ banner.sortOrder }}</td>
+        <td>{{ banner.startAt | date:'dd/MM/yyyy HH:mm':'UTC+7' }}</td>
+        <td>{{ banner.endAt | date:'dd/MM/yyyy HH:mm':'UTC+7'}}</td>
+        <td>{{ banner.redirectUrl }}</td>
+
         <td>
           <button (click)="editBanner(banner)">Edit</button>
           <button (click)="deleteBanner(banner.id)" class="delete-btn">Delete</button>

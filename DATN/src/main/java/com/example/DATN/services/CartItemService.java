@@ -107,9 +107,7 @@ public class CartItemService {
         if (variant.getIsAvailable() == Is_Available.NOT_AVAILABLE) {
             throw new ApplicationException(ErrorCode.PRODUCT_NOT_AVAILABLE);
         }
-        if (variant.getStock() < request.getQuantity()) {
-            throw new ApplicationException(ErrorCode.OUT_OF_STOCK);
-        }
+
         CartItem cartItem = null;
         List<CartItemResponse> currentCartItemResponses = new ArrayList<>();
         Optional<CartItem> existingItemOptional = cartItemRepository.findByCartAndProductVariant(cart, variant);

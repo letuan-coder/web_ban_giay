@@ -27,9 +27,13 @@ public class BannerService {
     public BannerResponse createBanner(BannerRequest request) {
         Banner banner = Banner.builder()
                 .bannerName(request.getBannerName())
+                .sortOrder(request.getSortOrder())
                 .startAt(request.getStartAt())
+                .redirectUrl(request.getRedirectUrl())
                 .endAt(request.getEndAt())
-                .active(true)
+                .active(request.getActive())
+                .type(request.getType())
+                .imageUrl("")
                 .build();
         Banner savedBanner=bannerRepository.save(banner);
         imageProductService.uploadBannerImages(savedBanner.getId(),request.getFile());

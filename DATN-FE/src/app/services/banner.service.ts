@@ -18,14 +18,18 @@ export class BannerService {
   }
 
   createBanner(formData: FormData): Observable<ApiResponse<Banner>> {
-    return this.http.post<ApiResponse<Banner>>(`${this.apiUrl}/formdata`, formData);
+    return this.http.post<ApiResponse<Banner>>(`${this.apiUrl}`, formData);
   }
 
   updateBanner(id: string, banner: any): Observable<ApiResponse<Banner>> {
-    return this.http.put<ApiResponse<Banner>>(`${this.apiUrl}/${id}`, banner);
+    return this.http.patch<ApiResponse<Banner>>(`${this.apiUrl}/${id}`, banner);
   }
 
   deleteBanner(id: string): Observable<ApiResponse<string>> {
     return this.http.delete<ApiResponse<string>>(`${this.apiUrl}/${id}`);
+  }
+
+  updateSortOrder(banners: Banner[]): Observable<ApiResponse<Banner[]>> {
+    return this.http.post<ApiResponse<Banner[]>>(`${this.apiUrl}/sort-order`, banners);
   }
 }

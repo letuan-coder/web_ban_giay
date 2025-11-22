@@ -142,26 +142,26 @@ public class OrderReturnService {
     }
 
 
-    @Transactional
-    public OrderReturn completeReturnRequest(Long returnId) {
-        // Add logic to check if user is admin
-        OrderReturn orderReturn = orderReturnRepository.findById(returnId)
-                .orElseThrow(() -> new ApplicationException(ErrorCode.RETURN_REQUEST_NOT_FOUND));
-
-        if (orderReturn.getStatus() != OrderReturnStatus.APPROVED) {
-            throw new ApplicationException(ErrorCode.RETURN_STATUS_INVALID);
-        }
-
-        // Restore stock
-        for (OrderReturnItem item : orderReturn.getReturnItems()) {
-            ProductVariant variant = item.getOrderItem().getProductVariant();
-            variant.setStock(variant.getStock() + item.getQuantity());
-            productVariantRepository.save(variant);
-        }
-
-        orderReturn.setStatus(OrderReturnStatus.COMPLETED);
-        return orderReturnRepository.save(orderReturn);
-    }
+//    @Transactional
+//    public OrderReturn completeReturnRequest(Long returnId) {
+//        // Add logic to check if user is admin
+//        OrderReturn orderReturn = orderReturnRepository.findById(returnId)
+//                .orElseThrow(() -> new ApplicationException(ErrorCode.RETURN_REQUEST_NOT_FOUND));
+//
+//        if (orderReturn.getStatus() != OrderReturnStatus.APPROVED) {
+//            throw new ApplicationException(ErrorCode.RETURN_STATUS_INVALID);
+//        }
+//
+//        // Restore stock
+//        for (OrderReturnItem item : orderReturn.getReturnItems()) {
+//            ProductVariant variant = item.getOrderItem().getProductVariant();
+//            variant.setStocks(variant. + item.getQuantity());
+//            productVariantRepository.save(variant);
+//        }
+//
+//        orderReturn.setStatus(OrderReturnStatus.COMPLETED);
+//        return orderReturnRepository.save(orderReturn);
+//    }
 
     // Add methods to find/get return requests for users or admins
 }
