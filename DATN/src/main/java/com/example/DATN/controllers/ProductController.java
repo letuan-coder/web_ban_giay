@@ -46,7 +46,7 @@ public class ProductController {
     @GetMapping
     public ApiResponse<PageResponse<ProductResponse>> getAllProducts(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "15") int limit,
+            @RequestParam(defaultValue = "1") int limit,
             @RequestParam(name = "name", required = false) String productName,
             @RequestParam(name = "sort_by", required = false) String sortBy,
             @RequestParam(name = "sort_order", defaultValue = "desc") String sortOrder,
@@ -54,19 +54,17 @@ public class ProductController {
             @RequestParam(name = "price_max", required = false) Double priceMax,
             @RequestParam(name = "status", required = false) ProductStatus status
     ) {
-        Sort sort;
-        if (!"price".equalsIgnoreCase(sortBy)) {
-            sort = "asc".equalsIgnoreCase(sortOrder)
-                            ? Sort.by("createdAt").ascending()
-                            : Sort.by("createdAt").descending();
-        } else {
-            sort = Sort.unsorted();
-        }
-        sort = sortOrder.equalsIgnoreCase("desc") ? sort.descending() : sort.ascending();
+        String sortField = (sortBy == null || sortBy.trim().isEmpty()) ? "createdAt" : sortBy.trim();
+
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortOrder)
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Sort sort = Sort.by(direction, sortField);
         Pageable pageable = PageRequest.of(page - 1, limit, sort);
 
-
-        Page<ProductResponse> productPage = productService.getAllProducts(productName, priceMin, priceMax, status, pageable);
+        Page<ProductResponse> productPage = productService.getAllProducts(
+                productName, priceMin, priceMax, status, pageable);
 
         PageResponse<ProductResponse> pageResponse = PageResponse.<ProductResponse>builder()
                 .page(productPage.getNumber() + 1)
@@ -76,6 +74,7 @@ public class ProductController {
                 .totalPages(productPage.getTotalPages())
                 .content(productPage.getContent())
                 .build();
+
         return ApiResponse.<PageResponse<ProductResponse>>builder()
                 .data(pageResponse)
                 .build();
