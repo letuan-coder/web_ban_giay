@@ -108,9 +108,9 @@ public class ProductService {
 
     public Page<ProductResponse> getAllProducts(
             String productName, Double priceMin, Double priceMax,
-            ProductStatus status,Long brandId,Long categoryId, Pageable pageable) {
+            ProductStatus status,Long brandId,Long categoryId, String sizeCode,String colorCode,Pageable pageable) {
         Page<Product> productsPage = productRepository.findAll(filterProducts(productName,
-                priceMin, priceMax, status,brandId,categoryId),pageable);
+                priceMin, priceMax, status,brandId,categoryId,colorCode,sizeCode),pageable);
         return productsPage.map(this::mapProductToProductResponse);
     }
 

@@ -8,7 +8,7 @@ import { environment } from '../../enviroment/enviroment';
 })
 export class ProductVariantService {
   private apiUrl = environment.apiBaseUrl + '/api/product-variants';
-
+  
   constructor(private http: HttpClient) { }
 
   getAllVariants(): Observable<any> {
@@ -23,5 +23,8 @@ export class ProductVariantService {
   }
   deleteProductColor(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+  search(id:string):Observable<any> {
+    return this.http.get(`${this.apiUrl}/sku/${id}`);
   }
 }

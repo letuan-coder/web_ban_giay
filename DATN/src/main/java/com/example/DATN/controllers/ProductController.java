@@ -48,6 +48,8 @@ public class ProductController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "15") int limit,
             @RequestParam(name = "name", required = false) String productName,
+            @RequestParam(required = false) String sizeCode,
+            @RequestParam(required = false) String colorCode,
             @RequestParam(required = false) Long category_id,
             @RequestParam(required = false) Long brand_id,
             @RequestParam(name = "sort_by", required = false) String sortBy,
@@ -65,7 +67,7 @@ public class ProductController {
         Sort sort = Sort.by(direction, sortField);
         Pageable pageable = PageRequest.of(page - 1, limit, sort);
         Page<ProductResponse> productPage = productService.getAllProducts(
-                productName, priceMin, priceMax, status, brand_id, category_id, pageable);
+                productName, priceMin, priceMax, status, brand_id, category_id,sizeCode,colorCode,pageable);
         PageResponse<ProductResponse> pageResponse = PageResponse.<ProductResponse>builder()
                 .page(productPage.getNumber() + 1)
                 .size(productPage.getSize())

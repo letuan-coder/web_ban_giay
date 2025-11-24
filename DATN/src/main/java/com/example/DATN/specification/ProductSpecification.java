@@ -1,7 +1,9 @@
 package com.example.DATN.specification;
 
 import com.example.DATN.constant.ProductStatus;
-import com.example.DATN.models.Product;
+import com.example.DATN.models.*;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -12,7 +14,7 @@ import java.util.List;
 public class ProductSpecification {
 
     public static Specification<Product> filterProducts(
-            String productName, Double priceMin, Double priceMax, ProductStatus status,Long brandId,Long categoryId) {
+            String productName, Double priceMin, Double priceMax, ProductStatus status,Long brandId,Long categoryId,String colorCode,String sizeCode) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -37,6 +39,21 @@ public class ProductSpecification {
             if (brandId!=null){
                 predicates.add(criteriaBuilder.equal(root.get("brand").get("id"), brandId));
             }
+            if (colorCode != null && !colorCode.isEmpty()) {
+                Join<Product, ProductColor> productColorJoin = root.join("productColors", JoinType.INNER);
+                Join<ProductColor, Color> colorJoin = productColorJoin.join("color", JoinType.INNER);
+
+                predicates.add(criteriaBuilder.equal(colorJoin.get("code"), colorCode));
+            }
+
+            if (sizeCode != null && !sizeCode.isEmpty()) {
+                Join<Product, ProductColor> pcJoin = root.join("productColors", JoinType.INNER);
+                Join<ProductColor, ProductVariant> variantJoin = pcJoin.join("variants", JoinType.INNER);
+                Join<ProductVariant, Size> sizeJoin = variantJoin.join("size", JoinType.INNER);
+
+                predicates.add(criteriaBuilder.equal(sizeJoin.get("code"), sizeCode));
+            }
+
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
