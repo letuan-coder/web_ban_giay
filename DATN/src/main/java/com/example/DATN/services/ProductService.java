@@ -107,7 +107,8 @@ public class ProductService {
     public Page<ProductResponse> getAllProducts(
             String productName, Double priceMin, Double priceMax,
             ProductStatus status,Long brandId,Long categoryId, Pageable pageable) {
-        Page<Product> productsPage = productRepository.findAll(filterProducts(productName, priceMin, priceMax, status,brandId,categoryId),pageable);
+        Page<Product> productsPage = productRepository.findAll(filterProducts(productName,
+                priceMin, priceMax, status,brandId,categoryId),pageable);
         return productsPage.map(this::mapProductToProductResponse);
     }
 
@@ -139,7 +140,6 @@ public class ProductService {
 
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.CATEGORY_NOT_FOUND));
-
         existingProduct.setName(formatInputString.formatInputString(request.getName()));
         existingProduct.setDescription(request.getDescription());
         existingProduct.setBrand(brand);
@@ -147,9 +147,24 @@ public class ProductService {
         existingProduct.setSlug(toSlug(request.getName()));
         existingProduct.setUpdatedAt(LocalDateTime.now());
         existingProduct.setWeight(request.getWeight());
+        existingProduct.setPrice(request.getPrice());
+
         Product updatedProduct = productRepository.save(existingProduct);
         return productMapper.toProductResponse(updatedProduct);
     }
+
+    @Transactional
+    public ProductResponse updateProductWithImage(UUID id, ProductRequest request, MultipartFile file) {
+        ProductResponse updatedProductResponse = updateProduct(id, request);
+
+        imageProductService.uploadThumbnailImages(id, file);
+
+        Product productWithImage = productRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        return productMapper.toProductResponse(productWithImage);
+    }
+
 
     @Transactional
     public void deleteProduct(UUID id) {

@@ -66,7 +66,7 @@ public class ProductController {
         Pageable pageable = PageRequest.of(page - 1, limit, sort);
 
         Page<ProductResponse> productPage = productService.getAllProducts(
-                productName, priceMin, priceMax, status, brand_id,category_id,pageable);
+                productName, priceMin, priceMax, status, brand_id, category_id, pageable);
 
         PageResponse<ProductResponse> pageResponse = PageResponse.<ProductResponse>builder()
                 .page(productPage.getNumber() + 1)
@@ -109,7 +109,8 @@ public class ProductController {
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<ProductResponse> updateProduct(
-            @PathVariable UUID id, @RequestBody @Valid ProductRequest request) {
+            @PathVariable UUID id,
+            @RequestBody @Valid ProductRequest request) {
         return ApiResponse.<ProductResponse>builder()
                 .data(productService.updateProduct(id, request))
                 .build();
@@ -123,4 +124,15 @@ public class ProductController {
         return ApiResponse.<Void>builder().build();
     }
 
+    @PatchMapping("/{id}/images")
+    public ApiResponse<ProductResponse> uploadWithImage(
+            @PathVariable UUID id,
+            @RequestPart("data") ProductRequest request,
+            @RequestPart("file") MultipartFile file)
+    {
+        ProductResponse response= productService.updateProductWithImage(id,request,file);
+        return ApiResponse.<ProductResponse>builder()
+                .data(response)
+                .build();
+    }
 }

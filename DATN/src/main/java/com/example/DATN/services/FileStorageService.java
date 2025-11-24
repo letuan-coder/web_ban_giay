@@ -109,7 +109,10 @@ public class FileStorageService {
 
     public void deleteFile(String filename) {
         try {
-            Path filePath = this.storageFolder.resolve(filename).normalize().toAbsolutePath();
+            Path filePath = findFileInAllFolders(filename);
+            if(filePath==null){
+                throw new ApplicationException(ErrorCode.FILE_EMPTY);
+            }
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
             throw new RuntimeException("Failed to delete file: " + filename, e);

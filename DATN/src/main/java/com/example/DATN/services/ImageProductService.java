@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -104,10 +105,24 @@ public class ImageProductService {
     }
 
 
-    public void deleteImage(Long imageId) {
-        ImageProduct imageProduct = imageProductRepository.findById(imageId)
-                .orElseThrow(() -> new ApplicationException(ErrorCode.IMAGE_NOT_FOUND));
-        fileStorageService.deleteFile(imageProduct.getImageUrl());
-        imageProductRepository.delete(imageProduct);
+    public void deleteImage(UUID id) {
+        Optional<ImageProduct> imageProductOpt = imageProductRepository.
+                findById(id);
+        if(imageProductOpt.isPresent()){
+            ImageProduct imageProduct= imageProductOpt.get();
+            fileStorageService.deleteFile(imageProduct.getImageUrl());
+            imageProductRepository.delete(imageProduct);
+        }
+        else{
+            Optional<Product> thumbnailProduct = productRepository.findById(id);
+            if(thumbnailProduct.isPresent()){
+                Product product = thumbnailProduct.get();
+                fileStorageService.deleteFile(product.getThumbnailUrl());
+                product.setThumbnailUrl("");
+                productRepository.save(product);
+            }
+        }
+
+
     }
 }
