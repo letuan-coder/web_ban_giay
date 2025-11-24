@@ -1,8 +1,7 @@
 package com.example.DATN.specification;
 
 import com.example.DATN.constant.ProductStatus;
-import com.example.DATN.models.*;
-import jakarta.persistence.criteria.Join;
+import com.example.DATN.models.Product;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -13,7 +12,7 @@ import java.util.List;
 public class ProductSpecification {
 
     public static Specification<Product> filterProducts(
-            String productName, Double priceMin, Double priceMax, ProductStatus status,Long brandId,Long categoryId,Integer size,String color) {
+            String productName, Double priceMin, Double priceMax, ProductStatus status,Long brandId,Long categoryId) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -37,26 +36,8 @@ public class ProductSpecification {
             }
             if (brandId!=null){
                 predicates.add(criteriaBuilder.equal(root.get("brand").get("id"), brandId));
+
             }
-
-            // Correctly join for size filtering
-            if (size != null) {
-                Join<Product, ProductColor> productColorJoin = root.join("productColors");
-                Join<ProductColor, ProductVariant> productVariantJoin = productColorJoin.join("variants");
-                Join<ProductVariant, Size> sizeJoin = productVariantJoin.join("size");
-                predicates.add(criteriaBuilder.equal(sizeJoin.get("name"), size.toString()));
-            }
-
-            // Correctly join for color filtering
-            if (color != null && !color.isEmpty()) {
-                Join<Product, ProductColor> productColorJoin = root.join("productColors");
-                Join<ProductColor, Color> colorJoin = productColorJoin.join("color");
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(colorJoin.get("name")), "%" + color.toLowerCase() + "%"));
-            }
-
-            // Add distinct to avoid duplicate products from joins
-            query.distinct(true);
-
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
