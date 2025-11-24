@@ -12,7 +12,7 @@ import java.util.List;
 public class ProductSpecification {
 
     public static Specification<Product> filterProducts(
-            String productName, Double priceMin, Double priceMax, ProductStatus status) {
+            String productName, Double priceMin, Double priceMax, ProductStatus status,Long brandId,Long categoryId) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -31,7 +31,13 @@ public class ProductSpecification {
             if (status != null) {
                 predicates.add(criteriaBuilder.equal(root.get("available"), status));
             }
+            if (categoryId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("category").get("id"), categoryId));
+            }
+            if (brandId!=null){
+                predicates.add(criteriaBuilder.equal(root.get("brand").get("id"), brandId));
 
+            }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }

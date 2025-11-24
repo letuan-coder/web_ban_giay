@@ -118,6 +118,7 @@ public enum ErrorCode {
     STORE_NOT_FOUND
             (1099, "Return request status is invalid for this operation.", HttpStatus.BAD_REQUEST),
 
+    STOCK_NOT_FOUND(1100, "Stock not found", HttpStatus.NOT_FOUND),
 
     //refund
     REFUND_NOT_ALLOWDED(1128, "refund is not allowded", HttpStatus.BAD_REQUEST),

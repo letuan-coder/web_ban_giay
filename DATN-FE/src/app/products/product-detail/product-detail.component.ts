@@ -53,8 +53,8 @@ export class ProductDetailComponent implements OnInit {
     private sizeService: SizeService,
     private productColorService: ProductColorService,
     private router: Router,
-    private productVariantService: ProductVariantService, // Inject ProductVariantService
-    private dialog: MatDialog // Inject MatDialog
+    private productVariantService: ProductVariantService, 
+    private dialog: MatDialog
   ) { }
 
   ngOnInit(): void {
@@ -148,7 +148,6 @@ export class ProductDetailComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        // If promotion was applied successfully, refresh product details
         const productId = this.route.snapshot.paramMap.get('id');
         if (productId) {
           this.loadProductDetails(productId);

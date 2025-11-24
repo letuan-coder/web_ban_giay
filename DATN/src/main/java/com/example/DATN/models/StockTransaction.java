@@ -29,9 +29,23 @@ public class StockTransaction extends BaseEntity{
     @JoinColumn(name = "supplier_id")
     private Supplier supplier;
 
+    // For TRANSFERS or internal movements
     @ManyToOne
-    @JoinColumn(name = "warehouse_id")
-    private WareHouse wareHouse;
+    @JoinColumn(name = "from_warehouse_id")
+    private WareHouse fromWareHouse;
+
+    @ManyToOne
+    @JoinColumn(name = "from_store_id")
+    private Store fromStore;
+
+    // Destination of the transaction
+    @ManyToOne
+    @JoinColumn(name = "to_warehouse_id")
+    private WareHouse toWareHouse;
+
+    @ManyToOne
+    @JoinColumn(name = "to_store_id")
+    private Store toStore;
 
     @OneToMany(mappedBy = "transaction",
             cascade = CascadeType.ALL,

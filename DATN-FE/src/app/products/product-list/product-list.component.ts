@@ -21,7 +21,7 @@ export class ProductListComponent implements OnInit {
   selectedProductIds = new Set<string>();
 
   currentPage = 1;
-  pageSize = 8;
+  pageSize = 15;
   totalPages = 0;
 
   searchTerm = '';
@@ -105,7 +105,7 @@ export class ProductListComponent implements OnInit {
   }
 
   goToPage(page: number): void {
-    if (page >= 0 && page < this.totalPages) {
+    if (page >= 1 && page < this.totalPages) {
       this.loadProducts(page);
     }
   }

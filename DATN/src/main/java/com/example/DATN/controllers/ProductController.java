@@ -46,8 +46,10 @@ public class ProductController {
     @GetMapping
     public ApiResponse<PageResponse<ProductResponse>> getAllProducts(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "1") int limit,
+            @RequestParam(defaultValue = "15") int limit,
             @RequestParam(name = "name", required = false) String productName,
+            @RequestParam(required = false) Long category_id,
+            @RequestParam(required = false) Long brand_id,
             @RequestParam(name = "sort_by", required = false) String sortBy,
             @RequestParam(name = "sort_order", defaultValue = "desc") String sortOrder,
             @RequestParam(name = "price_min", required = false) Double priceMin,
@@ -64,7 +66,7 @@ public class ProductController {
         Pageable pageable = PageRequest.of(page - 1, limit, sort);
 
         Page<ProductResponse> productPage = productService.getAllProducts(
-                productName, priceMin, priceMax, status, pageable);
+                productName, priceMin, priceMax, status, brand_id,category_id,pageable);
 
         PageResponse<ProductResponse> pageResponse = PageResponse.<ProductResponse>builder()
                 .page(productPage.getNumber() + 1)

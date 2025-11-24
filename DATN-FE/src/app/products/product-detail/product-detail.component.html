@@ -192,7 +192,6 @@
                 <tr *ngFor="let variant of colorVariant.variantResponses">
                   <td><input type="checkbox" (change)="onSelectProduct($event, variant.id)"></td>
                   <td>{{ variant.sku }}</td>
-
                   <td>{{ variant.size?.name }}</td>
                   <td>{{ variant.price | currency:'VND':'symbol':'1.0-0' }}</td>
                   <td>{{ variant.stock }}</td>

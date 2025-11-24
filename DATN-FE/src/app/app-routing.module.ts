@@ -12,6 +12,8 @@ import { BrandsComponent } from './admin/brands/brands.component';
 import { PromotionsComponent } from './products/promotions/promotions.component';
 import { CategoriesComponent } from './admin/categories/categories.component';
 import { BannerListComponent } from './banner/banner-list/banner-list.component';
+import { StoresComponent } from './admin/stores/stores.component';
+import { StocksComponent } from './admin/stocks/stocks.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -27,5 +29,7 @@ export const routes: Routes = [
   { path: 'admin/categories', component: CategoriesComponent },
   { path: 'admin/brands', component: BrandsComponent },
   { path: 'admin/banners', component: BannerListComponent },
+  { path: 'admin/stores', component: StoresComponent },
+  { path: 'admin/stocks', component: StocksComponent },
   { path: 'promotions', component: PromotionsComponent }
 ];

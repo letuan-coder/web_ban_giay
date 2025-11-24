@@ -2,6 +2,7 @@ package com.example.DATN.controllers;
 
 import com.example.DATN.constant.BannerType;
 import com.example.DATN.dtos.request.BannerRequest;
+import com.example.DATN.dtos.request.banner.BannerSortRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.BannerResponse;
 import com.example.DATN.services.BannerService;
@@ -38,6 +39,15 @@ public class BannerController {
         List<BannerResponse> response = bannerService.getAllBanners();
         return ApiResponse.<List<BannerResponse>>builder()
                 .data(response)
+                .build();
+    }
+
+    @PatchMapping("/sort-order")
+    ApiResponse<Void> sortOrder(
+            @RequestBody List<BannerSortRequest> requests) {
+        bannerService.sortOrderBanner(requests);
+        return ApiResponse.<Void>builder()
+                .data(null)
                 .build();
     }
 

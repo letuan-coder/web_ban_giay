@@ -2,6 +2,7 @@ package com.example.DATN.services;
 
 import com.example.DATN.constant.BannerType;
 import com.example.DATN.dtos.request.BannerRequest;
+import com.example.DATN.dtos.request.banner.BannerSortRequest;
 import com.example.DATN.dtos.respone.BannerResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
@@ -10,6 +11,7 @@ import com.example.DATN.models.Banner;
 import com.example.DATN.repositories.BannerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,8 +37,8 @@ public class BannerService {
                 .type(request.getType())
                 .imageUrl("")
                 .build();
-        Banner savedBanner=bannerRepository.save(banner);
-        imageProductService.uploadBannerImages(savedBanner.getId(),request.getFile());
+        Banner savedBanner = bannerRepository.save(banner);
+        imageProductService.uploadBannerImages(savedBanner.getId(), request.getFile());
         return bannerMapper.toBannerResponse(savedBanner);
     }
 
@@ -46,8 +48,17 @@ public class BannerService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public void sortOrderBanner(List<BannerSortRequest> requests) {
+        for (BannerSortRequest req : requests) {
+            Banner banner = bannerRepository.findById(req.getId())
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.BANNER_NOT_FOUND));
+            bannerRepository.updateSortOrder(req.getId(), req.getSortOrder());
+        }
+    }
+
     public List<BannerResponse> getAllBanners() {
-               return bannerRepository.findAll().stream()
+        return bannerRepository.findAll().stream()
                 .map(bannerMapper::toBannerResponse)
                 .collect(Collectors.toList());
     }

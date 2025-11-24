@@ -55,7 +55,7 @@ public class ProductService {
 //    }
 
     private String generateProductCode() {
-        return UUID.randomUUID().toString().substring(0, 5).toUpperCase();
+        return UUID.randomUUID().toString().substring(0, 3).toUpperCase();
     }
 
     public static String generate(String prefix, String index) {
@@ -104,8 +104,10 @@ public class ProductService {
         // Placeholder for excel import logic
     }
 
-    public Page<ProductResponse> getAllProducts(String productName, Double priceMin, Double priceMax, ProductStatus status, Pageable pageable) {
-        Page<Product> productsPage = productRepository.findAll(filterProducts(productName, priceMin, priceMax, status), pageable);
+    public Page<ProductResponse> getAllProducts(
+            String productName, Double priceMin, Double priceMax,
+            ProductStatus status,Long brandId,Long categoryId, Pageable pageable) {
+        Page<Product> productsPage = productRepository.findAll(filterProducts(productName, priceMin, priceMax, status,brandId,categoryId),pageable);
         return productsPage.map(this::mapProductToProductResponse);
     }
 
