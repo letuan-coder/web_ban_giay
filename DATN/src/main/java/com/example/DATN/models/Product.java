@@ -30,6 +30,8 @@ public class Product extends BaseEntity {
     @Column(nullable = false)
     String slug;
 
+
+    @Column(columnDefinition = "TEXT")
     String description;
 
     @Column(nullable = false, unique = true)

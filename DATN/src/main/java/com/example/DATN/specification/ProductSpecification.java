@@ -36,7 +36,6 @@ public class ProductSpecification {
             }
             if (brandId!=null){
                 predicates.add(criteriaBuilder.equal(root.get("brand").get("id"), brandId));
-
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };

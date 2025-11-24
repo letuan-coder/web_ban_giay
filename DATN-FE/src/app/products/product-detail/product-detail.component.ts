@@ -18,7 +18,7 @@ import { forkJoin } from 'rxjs';
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgxCurrencyDirective, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './product-detail.component.html',
   styleUrls: ['./product-detail.component.scss']
 })

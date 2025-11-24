@@ -2,6 +2,14 @@ package com.example.DATN.repositories;
 
 import com.example.DATN.models.Supplier;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
+@Repository
 public interface SupplierRepository extends JpaRepository<Supplier, Long> {
+    Optional<Supplier> findByName(String name);
+    Optional<Supplier> findByTaxCode(String taxCode);
+    Optional<Supplier> findByEmail(String email);
+    Optional<Supplier> findByPhoneNumber(String phoneNumber);
 }

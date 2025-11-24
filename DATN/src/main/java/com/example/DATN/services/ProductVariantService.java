@@ -27,6 +27,7 @@ public class ProductVariantService {
     private final SizeRepository sizeRepository;
     private final StockRepository stockRepository;
     private final WareHouseRepository wareHouseRepository;
+    private final ProductRepository productRepository;
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -36,21 +37,22 @@ public class ProductVariantService {
         ProductColor productColor = productColorRepository.findById(productcolorId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
 
-
         List<ProductVariant> productVariants = new ArrayList<>();
         for (ProductVariantRequest request : requests) {
 
             for (SizeRequest sizeRequest : request.getSizes()) {
+
                 Size size = sizeRepository.findByName(sizeRequest.getName()).orElseThrow(() ->
                         new ApplicationException(ErrorCode.SIZE_NOT_FOUND));
-                String skugenerate = productColor.getProduct().getProductCode() + "-" + productColor.getColor().getCode() + "-" + size.getCode();
+                String skugenerate = productColor.getProduct().getProductCode() + "-" +
+                        productColor.getColor().getCode() + "-" + size.getCode();
                 ProductVariant productVariant = ProductVariant
                         .builder()
                         .productColor(productColor)
                         .stocks(null)
                         .size(size)
                         .sku(skugenerate)
-                        .price(request.getPrice())
+                        .price(productColor.getProduct().getPrice())
                         .build();
                 productVariants.add(productVariant);
 
@@ -69,6 +71,12 @@ public class ProductVariantService {
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
         return productVariantMapper.toProductVariantResponse(productVariant);
     }
+    public ProductVariantResponse getProductVariantBySKU(String sku) {
+        ProductVariant productVariant = productVariantRepository.findBysku(sku)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
+        return productVariantMapper.toProductVariantResponse(productVariant);
+    }
+
 
     public List<ProductVariantResponse> getallproductvariant() {
         return productVariantRepository.findAll()

@@ -6,6 +6,7 @@ import com.example.DATN.dtos.respone.product.ProductResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.FormatInputString;
+import com.example.DATN.mapper.ProductColorMapper;
 import com.example.DATN.mapper.ProductMapper;
 import com.example.DATN.models.Brand;
 import com.example.DATN.models.Category;
@@ -46,6 +47,7 @@ public class ProductService {
     private final String PREFIX = "SHOES_";
     private final ImageProductService imageProductService;
     private final FormatInputString formatInputString;
+    private final ProductColorMapper productColorMapper;
 //
 //    public List<ProductResponse> getProductByProductCode(String productCode) {
 //        List<Product> ListOfProduct = productRepository.findAllByProductCode(productCode);
@@ -148,7 +150,6 @@ public class ProductService {
         existingProduct.setUpdatedAt(LocalDateTime.now());
         existingProduct.setWeight(request.getWeight());
         existingProduct.setPrice(request.getPrice());
-
         Product updatedProduct = productRepository.save(existingProduct);
         return productMapper.toProductResponse(updatedProduct);
     }
@@ -190,6 +191,11 @@ public class ProductService {
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
                 .weight(product.getWeight())
                 .ThumbnailUrl(product.getThumbnailUrl())
+                .brandId(product.getBrand().getId())
+                .categoryId(product.getCategory().getId())
+                .createdAt(product.getCreatedAt())
+                .updatedAt(product.getUpdatedAt())
+                .colorResponses(productColorMapper.toProductColorResponses(product.getProductColors()))
                 .altText(product.getAltText())
                 .price(product.getPrice())
                 .build();

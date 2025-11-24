@@ -75,17 +75,7 @@
                   {{ size.name }}
                 </div>
               </div>
-              <div class="col-md-3 mb-3">
-                <label class="form-label">Giá</label>
-                <input [currencyMask]="{ prefix: '', thousands: '.', decimal: '.', align: 'right',
-         precision: 0 }" type="text" inputmode="decimal" class="form-control" [(ngModel)]="variantGroup.price"
-                  (ngModelChange)="onPriceChange(i)" [name]="'price' + i" required>
-              </div>
-              <div class="col-md-3 mb-3">
-                <label class="form-label">Tồn kho</label>
-                <input type="number" class="form-control" [(ngModel)]="variantGroup.stock" [name]="'stock' + i"
-                  required>
-              </div>
+            
             </div>
           </div>
         </div>

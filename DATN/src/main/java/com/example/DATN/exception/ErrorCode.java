@@ -120,6 +120,13 @@ public enum ErrorCode {
 
     STOCK_NOT_FOUND(1100, "Stock not found", HttpStatus.NOT_FOUND),
 
+    // Supplier
+    SUPPLIER_NOT_FOUND(1101, "Supplier not found", HttpStatus.NOT_FOUND),
+    SUPPLIER_NAME_EXISTED(1102, "Supplier name already existed", HttpStatus.BAD_REQUEST),
+    SUPPLIER_TAXCODE_EXISTED(1103, "Supplier tax code already existed", HttpStatus.BAD_REQUEST),
+    SUPPLIER_EMAIL_EXISTED(1104, "Supplier email already existed", HttpStatus.BAD_REQUEST),
+    SUPPLIER_PHONE_EXISTED(1105, "Supplier phone number already existed", HttpStatus.BAD_REQUEST),
+
     //refund
     REFUND_NOT_ALLOWDED(1128, "refund is not allowded", HttpStatus.BAD_REQUEST),
 

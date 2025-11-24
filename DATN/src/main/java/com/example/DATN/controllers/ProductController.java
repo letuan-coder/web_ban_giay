@@ -64,10 +64,8 @@ public class ProductController {
 
         Sort sort = Sort.by(direction, sortField);
         Pageable pageable = PageRequest.of(page - 1, limit, sort);
-
         Page<ProductResponse> productPage = productService.getAllProducts(
                 productName, priceMin, priceMax, status, brand_id, category_id, pageable);
-
         PageResponse<ProductResponse> pageResponse = PageResponse.<ProductResponse>builder()
                 .page(productPage.getNumber() + 1)
                 .size(productPage.getSize())
@@ -76,7 +74,6 @@ public class ProductController {
                 .totalPages(productPage.getTotalPages())
                 .content(productPage.getContent())
                 .build();
-
         return ApiResponse.<PageResponse<ProductResponse>>builder()
                 .data(pageResponse)
                 .build();

@@ -49,6 +49,14 @@ public class ProductVariantController {
                 .build();
     }
 
+    @GetMapping("/sku/{sku}")
+    public ApiResponse<ProductVariantResponse> getProductVariantBySKU(
+                @PathVariable String sku) {
+        return ApiResponse.<ProductVariantResponse>builder()
+                .data(productVariantService.getProductVariantBySKU(sku))
+                .build();
+    }
+
     @PatchMapping("/colors/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<ProductVariantResponse>>> updateProductVariantByColor(
