@@ -48,11 +48,11 @@ export class BannerListComponent implements OnInit {
 
   drop(event: CdkDragDrop<Banner[]>) {
     moveItemInArray(this.banners, event.previousIndex, event.currentIndex);
-    const updatedBanners = this.banners.map((banner, index) => ({
-      ...banner,
+    const updatedSortOrderPayload = this.banners.map((banner, index) => ({
+      id: banner.id,
       sortOrder: index
     }));
-    this.bannerService.updateSortOrder(updatedBanners).subscribe(() => {
+    this.bannerService.updateSortOrder(updatedSortOrderPayload).subscribe(() => {
       this.loadBanners();
     });
   }

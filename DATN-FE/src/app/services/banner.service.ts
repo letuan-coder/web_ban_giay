@@ -29,7 +29,7 @@ export class BannerService {
     return this.http.delete<ApiResponse<string>>(`${this.apiUrl}/${id}`);
   }
 
-  updateSortOrder(banners: Banner[]): Observable<ApiResponse<Banner[]>> {
-    return this.http.post<ApiResponse<Banner[]>>(`${this.apiUrl}/sort-order`, banners);
+  updateSortOrder(banners: { id: string; sortOrder: number }[]): Observable<ApiResponse<any>> {
+    return this.http.patch<ApiResponse<any>>(`${this.apiUrl}/sort-order`, banners);
   }
 }

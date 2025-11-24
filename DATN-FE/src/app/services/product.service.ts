@@ -19,13 +19,14 @@ export interface updateProductRequest {
   weight: number;
   brandId: number;
   categoryId: number;
+  price?: number;
 }
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
   private baseUrl = environment.apiBaseUrl+'/api/products';
-
+  private deleteUrl = environment.apiBaseUrl+'/api/images'
   constructor(private http: HttpClient) { }
 
 
@@ -54,6 +55,19 @@ export class ProductService {
   updateProduct(product:updateProductRequest,id:string): Observable<any> {
     return this.http.patch(`${this.baseUrl}/${id}`, product);
   }
+
+  updateProductWithImage(product: updateProductRequest, id: string,file:File): Observable<any> {
+    const formData = new FormData();
+    const productBlob = new Blob([JSON.stringify(product)], { type: 'application/json' });
+    formData.append('data', productBlob);
+    formData.append('file', file);
+    return this.http.patch(`${this.baseUrl}/${id}/images`, formData);
+  }
+
+  deleteProductImage(id: string): Observable<any> {
+    return this.http.delete(`${this.deleteUrl}/${id}`);
+  }
+
   getById(id: string): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/${id}`);
   }

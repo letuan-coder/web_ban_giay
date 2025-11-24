@@ -1,36 +1,64 @@
 <div class="container my-4">
   <h2>Chỉnh sửa sản phẩm</h2>
 
-  <div *ngIf="message" class="alert" [ngClass]="{'alert-success': message.includes('thành công')
-  , 'alert-danger': message.includes('thất bại') || message.includes('Failed')}">
+  <div *ngIf="message" class="alert" [ngClass]="{'alert-success': message.includes('thành công'), 'alert-danger': message.includes('thất bại') || message.includes('Failed')}">
     {{ message }}
   </div>
 
   <div *ngIf="product">
     <form (ngSubmit)="updateProduct()">
+      <!-- Text Fields -->
       <div class="mb-3">
         <label for="productName" class="form-label">Tên sản phẩm</label>
-        <input type="text" class="form-control" id="productName"  [(ngModel)]="Updateproduct.name" name="name" required>
+        <input type="text" class="form-control" id="productName" [(ngModel)]="Updateproduct.name" name="name" required>
       </div>
-
       <div class="mb-3">
         <label for="productDescription" class="form-label">Mô tả</label>
         <textarea class="form-control" id="productDescription" [(ngModel)]="Updateproduct.description" name="description" rows="3"></textarea>
       </div>
 
-      <div class="mb-3">
-        <label for="productBrand" class="form-label">Thương hiệu</label>
-        <select class="form-select" id="productBrand" [(ngModel)]="Updateproduct.brandId" name="brandId" required>
-          <option *ngFor="let brand of brands" [ngValue]="brand.id">{{ brand.name }}</option>
-        </select>
+      <!-- Numeric Fields -->
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="productPrice" class="form-label">Giá</label>
+          <input  [currencyMask]="{ prefix: '', thousands: '.', decimal: '.', align: 'left',
+         precision: 0 }" inputmode="numeric" type="text" class="form-control" id="productPrice" [(ngModel)]="Updateproduct.price" name="price" required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="productWeight" class="form-label">Cân nặng (gram)</label>
+          <input type="number" class="form-control" id="productWeight" [(ngModel)]="Updateproduct.weight" name="weight" required>
+        </div>
       </div>
 
-      <div class="mb-3">
-        <label for="productCategory" class="form-label">Danh mục</label>
-        <select class="form-select" id="productCategory" [(ngModel)]="Updateproduct.categoryId" name="categoryId" required>
-          <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
-        </select>
+      <!-- Select Fields -->
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="productBrand" class="form-label">Thương hiệu</label>
+          <select class="form-select" id="productBrand" [(ngModel)]="Updateproduct.brandId" name="brandId" required>
+            <option *ngFor="let brand of brands" [ngValue]="brand.id">{{ brand.name }}</option>
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="productCategory" class="form-label">Danh mục</label>
+          <select class="form-select" id="productCategory" [(ngModel)]="Updateproduct.categoryId" name="categoryId" required>
+            <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
+          </select>
+        </div>
       </div>
+
+      <!-- Image Management -->
+      <div class="mb-3">
+        <label class="form-label">Hình ảnh sản phẩm</label>
+        <div *ngIf="product.thumbnailUrl" class="current-image-container">
+          <img [src]="'http://localhost:8080/api/images/view/' + product.thumbnailUrl" alt="Product Image" class="img-thumbnail mb-2" width="200">
+          <button type="button" class="btn btn-danger btn-sm" (click)="deleteImage()" [disabled]="loading">Xóa ảnh</button>
+        </div>
+        <div *ngIf="!product.thumbnailUrl">
+          <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*">
+          <div class="form-text">Vui lòng chọn ảnh mới để tải lên.</div>
+        </div>
+      </div>
+
 
       <button type="submit" class="btn btn-primary" [disabled]="loading">
         <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>

@@ -6,11 +6,12 @@ import { Product } from "../../model/product.model"
 import { FormsModule } from '@angular/forms';
 import { Brand, BrandService } from '../../services/brand.service';
 import { Category, CategoryService } from '../../services/category.service';
+import { NgxCurrencyDirective } from 'ngx-currency';
 
 @Component({
   selector: 'app-product-edit',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,NgxCurrencyDirective],
   templateUrl: './product-edit.component.html',
   styleUrl: './product-edit.component.scss'
 })
@@ -21,6 +22,7 @@ export class ProductEditComponent implements OnInit {
   categories: Category[] = [];
   loading = false;
   message = '';
+  selectedFile: File | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -30,11 +32,12 @@ export class ProductEditComponent implements OnInit {
     private router: Router
   ) { }
   Updateproduct: updateProductRequest = {
-    weight: 0,  
+    weight: 0,
     name: '',
     description: '',
     brandId: 0,
     categoryId: 0,
+    price: 0,
   };
   ngOnInit(): void {
     console.log('ProductEditComponent ngOnInit called.'); // Added log
@@ -52,7 +55,8 @@ export class ProductEditComponent implements OnInit {
                 name: this.product?.name,
                 description: this.product.description|| '',
                 brandId: this.product.brandId ||1,
-                categoryId: this.product.categoryId||1
+                categoryId: this.product.categoryId||1,
+                price: this.product.price || 0,
               };
             }
           },
@@ -62,6 +66,32 @@ export class ProductEditComponent implements OnInit {
           }
 
         });
+      }
+    });
+  }
+
+  onFileSelected(event: any): void {
+    this.selectedFile = event.target.files[0] ?? null;
+  }
+
+  deleteImage(): void {
+    if (!this.product || !this.product.id) {
+      this.message = 'Product ID is missing.';
+      return;
+    }
+    this.loading = true;
+    this.productService.deleteProductImage(this.product.id).subscribe({
+      next: () => {
+        this.loading = false;
+        this.message = 'Xóa hình ảnh thành công.';
+        if(this.product) {
+          this.product.thumbnailUrl = undefined;
+        }
+      },
+      error: (err) => {
+        this.loading = false;
+        this.message = 'Xóa hình ảnh thất bại.';
+        console.error(err);
       }
     });
   }
@@ -87,17 +117,32 @@ export class ProductEditComponent implements OnInit {
     this.loading = true;
     this.message = '';
 
-    this.productService.updateProduct(this.Updateproduct, this.product.id).subscribe({
-      next: (res) => {
-        this.loading = false;
-        this.message = 'Update product successfully';
-        this.router.navigate(['/products']);
-      },
-      error: (err) => {
-        this.loading = false;
-        console.error(err);
-        this.message = 'Failed to update product.';
-      }
-    });
+    if (this.selectedFile) {
+      this.productService.updateProductWithImage(this.Updateproduct, this.product.id, this.selectedFile).subscribe({
+        next: (res) => {
+          this.loading = false;
+          this.message = 'Cập nhật sản phẩm và hình ảnh thành công';
+          this.router.navigate(['/products']);
+        },
+        error: (err) => {
+          this.loading = false;
+          console.error(err);
+          this.message = 'Cập nhật sản phẩm và hình ảnh thất bại.';
+        }
+      });
+    } else {
+      this.productService.updateProduct(this.Updateproduct, this.product.id).subscribe({
+        next: (res) => {
+          this.loading = false;
+          this.message = 'Cập nhật sản phẩm thành công';
+          this.router.navigate(['/products']);
+        },
+        error: (err) => {
+          this.loading = false;
+          console.error(err);
+          this.message = 'Cập nhật sản phẩm thất bại.';
+        }
+      });
+    }
   }
 }
