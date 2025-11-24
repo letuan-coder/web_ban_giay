@@ -105,7 +105,7 @@ export class ProductListComponent implements OnInit {
   }
 
   goToPage(page: number): void {
-    if (page >= 1 && page < this.totalPages) {
+    if (page >= 0 && page < this.totalPages) {
       this.loadProducts(page);
     }
   }

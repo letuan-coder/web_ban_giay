@@ -20,7 +20,7 @@ public class ProductColorController {
 
     private final ProductColorService productColorService;
 
-    @PostMapping(value = "/{productId}" , consumes = "multipart/form-data")
+    @PostMapping(value = "/{productId}", consumes = "multipart/form-data")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<ProductColorResponse> createProductColor
             (@PathVariable UUID productId,

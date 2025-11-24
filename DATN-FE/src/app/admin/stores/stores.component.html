@@ -1,0 +1,85 @@
+<div class="container mt-4">
+  <h2>Quản lý Cửa hàng</h2>
+
+  <!-- Add/Edit Form -->
+  <div *ngIf="showForm" class="card my-4">
+    <div class="card-body">
+      <h5 class="card-title">{{ selectedStore.id ? 'Chỉnh sửa Cửa hàng' : 'Thêm Cửa hàng mới' }}</h5>
+      <form (ngSubmit)="saveStore()">
+        <div class="mb-3">
+          <label for="storeName" class="form-label">Tên cửa hàng</label>
+          <input type="text" class="form-control" id="storeName" [(ngModel)]="selectedStore.name" name="name" required>
+        </div>
+        
+        <!-- Location Dropdowns -->
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label for="province" class="form-label">Tỉnh/Thành phố</label>
+            <select id="province" class="form-select" [(ngModel)]="selectedProvinceCode" name="province" (change)="onProvinceChange()">
+              <option [ngValue]="01" disabled>Chọn Tỉnh/Thành phố</option>
+              <option *ngFor="let province of provinces" [value]="province.code">{{ province.nameWithType }}</option>
+            </select>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="district" class="form-label">Quận/Huyện</label>
+            <select id="district" class="form-select" [(ngModel)]="selectedDistrictCode" name="district" (change)="onDistrictChange()" [disabled]="!selectedProvinceCode">
+              <option [ngValue]="null" disabled>Chọn Quận/Huyện</option>
+              <option *ngFor="let district of districts" [value]="district.code">{{ district.nameWithType }}</option>
+            </select>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="commune" class="form-label">Phường/Xã</label>
+            <select id="commune" class="form-select" [(ngModel)]="selectedCommuneCode" name="commune" [disabled]="!selectedDistrictCode">
+              <option [ngValue]="null" disabled>Chọn Phường/Xã</option>
+              <option *ngFor="let commune of communes" [value]="commune.code">{{ commune.nameWithType }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="storeAddressDetail" class="form-label">Địa chỉ chi tiết (Số nhà, tên đường)</label>
+          <input type="text" class="form-control" id="storeAddressDetail" [(ngModel)]="selectedStore.addressDetail" name="addressDetail">
+        </div>
+
+        <div class="mb-3">
+          <label for="storePhone" class="form-label">Số điện thoại</label>
+          <input type="text" class="form-control" id="storePhone" [(ngModel)]="selectedStore.phoneNumber" name="phoneNumber">
+        </div>
+        <div class="mb-3 form-check">
+          <input type="checkbox" class="form-check-input" id="storeActive" [(ngModel)]="selectedStore.active" name="active">
+          <label class="form-check-label" for="storeActive">Hoạt động</label>
+        </div>
+        <button type="submit" class="btn btn-primary me-2">Lưu</button>
+        <button type="button" class="btn btn-secondary" (click)="resetForm()">Hủy</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Button -->
+  <button *ngIf="!showForm" class="btn btn-success mb-3" (click)="showAddForm()">Thêm Cửa hàng</button>
+
+  <!-- Stores Table -->
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Tên cửa hàng</th>
+        <th scope="col">Địa chỉ</th>
+        <th scope="col">Số điện thoại</th>
+        <th scope="col">Hành động</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let store of stores">
+        <th scope="row">{{ store.id }}</th>
+        <td>{{ store.name }}</td>
+        <td>{{ store.location }}</td>
+        <td>{{ store.phoneNumber }}</td>
+        <td>
+          <button class="btn btn-sm btn-warning me-2" (click)="selectStore(store)">Sửa</button>
+          <button class="btn btn-sm btn-danger" (click)="deleteStore(store.id)">Xóa</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

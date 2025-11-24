@@ -1,0 +1,136 @@
+<div class="container my-4">
+  <h2>Tạo Phiếu Kho</h2>
+
+  <div *ngIf="message" class="alert"
+    [ngClass]="{'alert-success': message.includes('thành công'), 'alert-danger': message.includes('thất bại')}">
+    {{ message }}
+  </div>
+
+  <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()">
+    <!-- Transaction Header -->
+    <div class="card mb-4">
+      <div class="card-header">Thông tin chung</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label for="type" class="form-label">Loại Phiếu <span class="text-danger">*</span></label>
+            <select id="type" formControlName="type" class="form-select">
+              <option value="" disabled>Chọn loại phiếu</option>
+              <option *ngFor="let type of transactionTypes" [value]="type">
+                {{ type === 'IN' ? 'Nhập kho' : (type === 'OUT' ? 'Xuất kho' : 'Chuyển kho') }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Fields for IN -->
+          <ng-container *ngIf="transactionForm.get('type')?.value === 'IN'">
+            <div class="col-md-4 mb-3">
+              <label for="supplierId" class="form-label">Nhà Cung Cấp <span class="text-danger">*</span></label>
+              <select id="supplierId" formControlName="supplierId" class="form-select">
+                <option [ngValue]="null" disabled>Chọn nhà cung cấp</option>
+                <option *ngFor="let supplier of suppliers" [value]="supplier.id">{{ supplier.name }}</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="toStoreIdIn" class="form-label">Nhập tới Cửa Hàng <span class="text-danger">*</span></label>
+              <select id="toStoreIdIn" formControlName="toStoreId" class="form-select">
+                <option [ngValue]="null" disabled>Chọn cửa hàng</option>
+                <option *ngFor="let store of stores" [value]="store.id">{{ store.name }}</option>
+              </select>
+            </div>
+          </ng-container>
+
+          <!-- Fields for OUT -->
+          <ng-container *ngIf="transactionForm.get('type')?.value === 'OUT'">
+            <div class="col-md-4 mb-3">
+              <label for="fromStoreIdOut" class="form-label">Xuất từ Cửa Hàng <span class="text-danger">*</span></label>
+              <select id="fromStoreIdOut" formControlName="fromStoreId" class="form-select">
+                <option [ngValue]="null" disabled>Chọn cửa hàng</option>
+                <option *ngFor="let store of stores" [value]="store.id">{{ store.name }}</option>
+              </select>
+            </div>
+          </ng-container>
+
+          <!-- Fields for TRANSFER -->
+          <ng-container *ngIf="transactionForm.get('type')?.value === 'TRANSFER'">
+            <div class="col-md-4 mb-3">
+              <label for="fromStoreIdTransfer" class="form-label">Từ Cửa Hàng <span class="text-danger">*</span></label>
+              <select id="fromStoreIdTransfer" formControlName="fromStoreId" class="form-select">
+                <option [ngValue]="null" disabled>Chọn cửa hàng</option>
+                <option *ngFor="let store of stores" [value]="store.id">{{ store.name }}</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="toStoreIdTransfer" class="form-label">Tới Cửa Hàng <span class="text-danger">*</span></label>
+              <select id="toStoreIdTransfer" formControlName="toStoreId" class="form-select">
+                <option [ngValue]="null" disabled>Chọn cửa hàng</option>
+                <option *ngFor="let store of stores" [value]="store.id">{{ store.name }}</option>
+              </select>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transaction Items -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Chi tiết sản phẩm</span>
+        <button type="button" class="btn btn-sm btn-success" (click)="addItem()">Thêm sản phẩm</button>
+      </div>
+      <div class="card-body">
+        <div formArrayName="items">
+          <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i" class="row align-items-start mb-3 p-2 border rounded item-row">
+            
+            <!-- Product Selection Column -->
+            <div class="col-md-6">
+              <label class="form-label">Sản phẩm <span class="text-danger">*</span></label>
+              
+              <!-- Display selected variant info -->
+              <div *ngIf="item.value.variantDetails" class="selected-variant d-flex justify-content-between align-items-center">
+                <span>
+                  <strong>{{ item.value.variantDetails.productName }}</strong> - {{ item.value.variantDetails.colorName }} - Size {{ item.value.variantDetails.sizeName }}
+                  <br>
+                  <small class="text-muted">SKU: {{ item.value.variantDetails.sku }}</small>
+                </span>
+                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="item.get('variantDetails')?.setValue(null); item.get('variantId')?.setValue('')">Đổi</button>
+              </div>
+
+              <div *ngIf="!item.value.variantDetails" class="search-container position-relative">
+                <input type="text" class="form-control" placeholder="Tìm SKU hoặc Tên sản phẩm..." (keyup)="search($event, i)" (focus)="activeItemIndex = i">
+                <div *ngIf="activeItemIndex === i && (searchResults.length > 0 || searchLoading)" class="autocomplete-list">
+                  <div *ngIf="searchLoading" class="list-group-item">Đang tìm...</div>
+                  <button type="button" *ngFor="let variant of searchResults" class="list-group-item list-group-item-action" (click)="selectVariant(variant)">
+                    <br>
+                    <small class="text-muted">SKU: {{ variant.sku }}</small>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quantity Column -->
+            <div class="col-md-4">
+              <label class="form-label">Số lượng <span class="text-danger">*</span></label>
+              <input type="number" formControlName="quantity" class="form-control" placeholder="Số lượng">
+            </div>
+
+            <!-- Remove Button Column -->
+            <div class="col-md-2 d-flex align-items-end">
+              <button type="button" class="btn btn-danger w-100" (click)="removeItem(i)">Xóa</button>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="items.length === 0" class="text-center text-muted p-3">
+          Chưa có sản phẩm nào. Vui lòng "Thêm sản phẩm".
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <button type="submit" class="btn btn-primary" [disabled]="transactionForm.invalid || loading">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        {{ loading ? 'Đang lưu...' : 'Lưu Phiếu Kho' }}
+      </button>
+    </div>
+  </form>
+</div>
