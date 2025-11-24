@@ -31,7 +31,7 @@ export class ProductService {
 
 
   getAll(page: number, size: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}?page=${page}&size=${size}`);
+    return this.http.get<any>(`${this.baseUrl}?page=${page}&limit=${size}`);
   }
   createProduct(product: ProductCreateRequest): Observable<any> {
     const formData = new FormData();

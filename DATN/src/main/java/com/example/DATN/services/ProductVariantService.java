@@ -25,8 +25,7 @@ public class ProductVariantService {
     private final ProductVariantMapper productVariantMapper;
     private final ProductColorRepository productColorRepository;
     private final SizeRepository sizeRepository;
-    private final StockRepository stockRepository;
-    private final WareHouseRepository wareHouseRepository;
+    private final ProductRepository productRepository;
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -35,8 +34,6 @@ public class ProductVariantService {
              List<ProductVariantRequest> requests) {
         ProductColor productColor = productColorRepository.findById(productcolorId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
-
-
         List<ProductVariant> productVariants = new ArrayList<>();
         for (ProductVariantRequest request : requests) {
 

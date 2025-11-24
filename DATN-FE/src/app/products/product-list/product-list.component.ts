@@ -20,8 +20,8 @@ export class ProductListComponent implements OnInit {
   error = '';
   selectedProductIds = new Set<string>();
 
-  currentPage = 1;
-  pageSize = 15;
+  currentPage = 0; // Standardize to 0-indexed
+  pageSize = 12;    // A more reasonable page size
   totalPages = 0;
 
   searchTerm = '';
@@ -41,14 +41,18 @@ export class ProductListComponent implements OnInit {
   }
 
   loadProducts(page: number) {
+    if (page < 0) return; // Prevent going to negative pages
+
     this.loading = true;
     this.error = '';
-    this.isSearch = false; // Reset search state
-    this.searchTerm = ''; // Clear search term
-    this.currentPage = page;
-    this.productService.getAll(this.currentPage, this.pageSize).subscribe({
+    this.isSearch = false; 
+    this.searchTerm = '';
+    
+    // API expects 1-based page, so we add 1
+    this.productService.getAll(page + 1, this.pageSize).subscribe({
       next: (res: any) => {
         this.totalPages = res.data.totalPages;
+        this.currentPage = page; // Update current page only on success
         this.processProducts(res.data.content);
         this.loading = false;
       },
@@ -62,13 +66,13 @@ export class ProductListComponent implements OnInit {
 
   searchProducts(): void {
     if (!this.searchTerm.trim()) {
-      this.loadProducts(0);
+      this.loadProducts(0); // Load first page if search is cleared
       return;
     }
     this.loading = true;
     this.error = '';
     this.isSearch = true;
-    this.totalPages = 0;
+    this.totalPages = 0; // Reset pagination for search results
     this.productService.search(this.searchTerm).subscribe({
       next: (res: any) => {
         this.processProducts(res.data);
@@ -77,7 +81,7 @@ export class ProductListComponent implements OnInit {
       error: (err) => {
         this.error = 'Không tìm thấy sản phẩm.';
         console.error(err);
-        this.products = []; // Clear products if search fails
+        this.products = [];
         this.loading = false;
       }
     });
@@ -105,7 +109,7 @@ export class ProductListComponent implements OnInit {
   }
 
   goToPage(page: number): void {
-    if (page >= 1 && page < this.totalPages) {
+    if (page >= 0 && page < this.totalPages) {
       this.loadProducts(page);
     }
   }

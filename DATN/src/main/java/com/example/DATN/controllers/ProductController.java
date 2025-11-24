@@ -50,6 +50,8 @@ public class ProductController {
             @RequestParam(name = "name", required = false) String productName,
             @RequestParam(required = false) Long category_id,
             @RequestParam(required = false) Long brand_id,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) String color,
             @RequestParam(name = "sort_by", required = false) String sortBy,
             @RequestParam(name = "sort_order", defaultValue = "desc") String sortOrder,
             @RequestParam(name = "price_min", required = false) Double priceMin,
@@ -66,7 +68,7 @@ public class ProductController {
         Pageable pageable = PageRequest.of(page - 1, limit, sort);
 
         Page<ProductResponse> productPage = productService.getAllProducts(
-                productName, priceMin, priceMax, status, brand_id, category_id, pageable);
+                productName, priceMin, priceMax, status, brand_id, category_id,size,color, pageable);
 
         PageResponse<ProductResponse> pageResponse = PageResponse.<ProductResponse>builder()
                 .page(productPage.getNumber() + 1)
@@ -76,7 +78,6 @@ public class ProductController {
                 .totalPages(productPage.getTotalPages())
                 .content(productPage.getContent())
                 .build();
-
         return ApiResponse.<PageResponse<ProductResponse>>builder()
                 .data(pageResponse)
                 .build();
