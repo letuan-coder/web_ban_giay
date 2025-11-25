@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -16,7 +16,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Banner extends BaseEntity {
+public class Banner  {
     @Id
     @UuidGenerator
     UUID id;
@@ -32,8 +32,8 @@ public class Banner extends BaseEntity {
 
     private Boolean active = true;
 
-    private LocalDateTime startAt;
-    private LocalDateTime endAt;
+    private LocalDate startAt;
+    private LocalDate endAt;
 
     @Enumerated(EnumType.STRING)
     private BannerType type;

@@ -5,10 +5,6 @@ import com.example.DATN.dtos.request.product.ProductVariantRequest;
 import com.example.DATN.dtos.request.product.UpdateProductVariantRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.product.ProductVariantResponse;
-import com.example.DATN.mapper.ProductVariantMapper;
-import com.example.DATN.services.ColorService;
-import com.example.DATN.services.ImageProductService;
-import com.example.DATN.services.ProductService;
 import com.example.DATN.services.ProductVariantService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +20,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProductVariantController {
 
-    private final ProductService productService;
     private final ProductVariantService productVariantService;
-    private final ImageProductService imageProductService;
-    private final ColorService colorService;
-    private final ProductVariantMapper productVariantMapper;
+
 
     @PostMapping(value = "/list/{product_color_id}")
     @PreAuthorize("hasRole('ADMIN')")

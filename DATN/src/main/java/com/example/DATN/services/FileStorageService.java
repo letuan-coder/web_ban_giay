@@ -2,12 +2,12 @@
 package com.example.DATN.services;
 
 import com.example.DATN.constant.Util.FileUtil;
+import com.example.DATN.dtos.request.StoreFileRequest;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,32 +24,45 @@ public class FileStorageService {
     private final Path storageFolder = Paths.get("uploads");
     private final Path storageBannerFolder = Paths.get("uploads/banners");
     private final Path storageThumbnailFolder = Paths.get("uploads/thumbnails");
+    private final Path storeDefaultFolder =Paths.get("/uploads/default/");
 
     public FileStorageService() {
         try {
             Files.createDirectories(storageFolder);
             Files.createDirectories(storageBannerFolder);
             Files.createDirectories(storageThumbnailFolder);
+            Files.createDirectories(storeDefaultFolder);
         } catch (IOException e) {
             throw new RuntimeException("Cannot initialize storage folder", e);
         }
     }
 
     public String storeFile(
-            MultipartFile file,
-            String baseFileName) {
-        if (file.isEmpty()) {
+            StoreFileRequest request) {
+        if (request.getFile().isEmpty()) {
             throw new RuntimeException("Failed to store empty file.");
         }
-        if (file.getSize() >= FileUtil.MAX_FILE_SIZE_MB) {
+        if(request.getFile().getSize() >= FileUtil.MAX_FILE_SIZE_MB) {
             throw new ApplicationException(ErrorCode.FILE_SIZE_EXCEEDED);
         }
         String fileExtension = ".png";
-        String generatedFileName = baseFileName + "-"
+        String generatedFileName = request.getFileName() + "-"
                 + UUID.randomUUID().toString().substring(0, 8) + fileExtension;
-        Path destinationFilePath = this.storageFolder.
+        Path destinationFilePath  = this.storeDefaultFolder.
                 resolve(Paths.get(generatedFileName)).normalize().toAbsolutePath();
-        try (InputStream inputStream = file.getInputStream()) {
+        if(request.getBanner()!=null) {
+         destinationFilePath  = this.storeDefaultFolder.
+                    resolve(Paths.get(generatedFileName)).normalize().toAbsolutePath();
+        }
+        else if(request.getProduct()!=null){
+            destinationFilePath  = this.storageThumbnailFolder.
+                    resolve(Paths.get(generatedFileName)).normalize().toAbsolutePath();
+        }
+        else {
+            destinationFilePath  = this.storageBannerFolder.
+                    resolve(Paths.get(generatedFileName)).normalize().toAbsolutePath();
+        }
+        try (InputStream inputStream = request.getFile().getInputStream()) {
             Files.copy(inputStream, destinationFilePath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException("Failed to store file.", e);
@@ -57,63 +70,13 @@ public class FileStorageService {
         return generatedFileName;
     }
 
-    public String storeBannerFile(
-            MultipartFile file,
-            String baseFileName) {
-        if (file.isEmpty()) {
-            throw new RuntimeException("Failed to store empty file.");
-        }
-        if (file.getSize() >= FileUtil.MAX_FILE_SIZE_MB) {
-            throw new ApplicationException(ErrorCode.FILE_SIZE_EXCEEDED);
-        }
-        String fileExtension = ".png";
-        String generatedFileName = baseFileName + "-" +
-                UUID.randomUUID().toString()
-                        .substring(0, 8) + fileExtension;
-        Path destinationFilePath = this.storageBannerFolder
-                .resolve(Paths.get(generatedFileName)).normalize().toAbsolutePath();
-
-        try (InputStream inputStream = file.getInputStream()) {
-            Files.copy(inputStream, destinationFilePath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to store file.", e);
-        }
-        return generatedFileName;
-    }
-
-    public String storeThumbnailFile(
-            MultipartFile file,
-            String baseFileName) {
-        if (file.isEmpty()) {
-            throw new RuntimeException("Failed to store empty file.");
-        }
-        if (file.getSize() >= FileUtil.MAX_FILE_SIZE_MB) {
-            throw new ApplicationException(ErrorCode.FILE_SIZE_EXCEEDED);
-        }
-        String fileExtension = ".png";
-        String generatedFileName = baseFileName + "-" +
-                UUID.randomUUID().toString()
-                        .substring(0, 8) + fileExtension;
-        Path destinationFilePath = this.storageThumbnailFolder
-                .resolve(Paths.get(generatedFileName)).normalize().toAbsolutePath();
-        try (InputStream inputStream = file.getInputStream()) {
-            Files.copy(inputStream,
-                    destinationFilePath,
-                    StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to store file.", e);
-        }
-
-        return generatedFileName;
-    }
 
     public void deleteFile(String filename) {
         try {
             Path filePath = findFileInAllFolders(filename);
-            if(filePath==null){
-                throw new ApplicationException(ErrorCode.FILE_EMPTY);
+            if (filePath != null) {
+                Files.deleteIfExists(filePath);
             }
-            Files.deleteIfExists(filePath);
         } catch (IOException e) {
             throw new RuntimeException("Failed to delete file: " + filename, e);
         }
@@ -122,7 +85,8 @@ public class FileStorageService {
         Path[] folders = {
                 storageFolder,
                 storageBannerFolder,
-                storageThumbnailFolder
+                storageThumbnailFolder,
+                storeDefaultFolder
         };
 
         for (Path folder : folders) {
@@ -130,6 +94,7 @@ public class FileStorageService {
             if (Files.exists(filePath)) {
                 return filePath;
             }
+
         }
         return null;
     }

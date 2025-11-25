@@ -1,6 +1,7 @@
 package com.example.DATN.services;
 
 import com.example.DATN.constant.ProductStatus;
+import com.example.DATN.dtos.request.UploadImageRequest;
 import com.example.DATN.dtos.request.product.ProductRequest;
 import com.example.DATN.dtos.respone.product.ProductResponse;
 import com.example.DATN.exception.ApplicationException;
@@ -86,7 +87,15 @@ public class ProductService {
         product.setPrice(request.getPrice());
         product.setThumbnailUrl("");
         Product savedProduct = productRepository.save(product);
-        imageProductService.uploadThumbnailImages(savedProduct.getId(), request.getFile());
+        UploadImageRequest uploadImageRequest = UploadImageRequest.builder()
+                .product(savedProduct)
+                .banner(null)
+                .imageProduct(null)
+                .imageUrl(product.getThumbnailUrl())
+                .altText(product.getSlug())
+                .file(request.getFile())
+                .build();
+        imageProductService.uploadImage(uploadImageRequest);
         return productMapper.toProductResponse(savedProduct);
     }
     private String toSlug(String input) {
@@ -158,11 +167,16 @@ public class ProductService {
     public ProductResponse updateProductWithImage(UUID id, ProductRequest request, MultipartFile file) {
         ProductResponse updatedProductResponse = updateProduct(id, request);
 
-        imageProductService.uploadThumbnailImages(id, file);
-
         Product productWithImage = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
-
+        UploadImageRequest uploadImageRequest = UploadImageRequest.builder()
+                .file(file)
+                .product(productWithImage)
+                .imageProduct(null)
+                .banner(null)
+                .altText(updatedProductResponse.getSlug())
+                .build();
+        imageProductService.uploadImage(uploadImageRequest);
         return productMapper.toProductResponse(productWithImage);
     }
 
@@ -172,6 +186,7 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
         List<ProductColor> productColor = productColorRepository.findAllByProduct(product);
+        imageProductService.deleteImage(product.getId());
         for (ProductColor pc : productColor) {
             productColorService.deleteProductColor(pc.getId());
 

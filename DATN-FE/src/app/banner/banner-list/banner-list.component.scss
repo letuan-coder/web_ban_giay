@@ -141,3 +141,59 @@ td button {
 .cdk-drop-list-dragging .cdk-drag {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
+
+.banner-group {
+  margin-bottom: 40px;
+}
+
+.banner-group h2 {
+  color: #555;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.empty-state {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+  border: 2px dashed #ccc;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.empty-state-droppable {
+  min-height: 60px; /* Make sure it's a valid drop target */
+}
+
+.image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.delete-image-btn {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  cursor: pointer;
+  font-weight: bold;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.image-container:hover .delete-image-btn {
+  opacity: 1;
+}
+
+.image-preview-container {
+  margin-bottom: 20px;
+  text-align: center;
+}

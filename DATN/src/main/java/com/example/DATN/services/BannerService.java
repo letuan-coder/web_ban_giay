@@ -2,6 +2,7 @@ package com.example.DATN.services;
 
 import com.example.DATN.constant.BannerType;
 import com.example.DATN.dtos.request.BannerRequest;
+import com.example.DATN.dtos.request.UploadImageRequest;
 import com.example.DATN.dtos.request.banner.BannerSortRequest;
 import com.example.DATN.dtos.respone.BannerResponse;
 import com.example.DATN.exception.ApplicationException;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -25,20 +27,30 @@ public class BannerService {
     private final BannerMapper bannerMapper;
     private final ImageProductService imageProductService;
 
-
     public BannerResponse createBanner(BannerRequest request) {
+        LocalDate endAt = request.getEndAt();
+        if (endAt == null) {
+            endAt = LocalDate.of(9999, 12, 31);
+        }
         Banner banner = Banner.builder()
                 .bannerName(request.getBannerName())
                 .sortOrder(request.getSortOrder())
                 .startAt(request.getStartAt())
                 .redirectUrl(request.getRedirectUrl())
-                .endAt(request.getEndAt())
+                .endAt(endAt)
                 .active(request.getActive())
                 .type(request.getType())
                 .imageUrl("")
                 .build();
         Banner savedBanner = bannerRepository.save(banner);
-        imageProductService.uploadBannerImages(savedBanner.getId(), request.getFile());
+        UploadImageRequest uploadImageRequest = UploadImageRequest.builder()
+                .file(request.getFile())
+                .banner(savedBanner)
+                .imageProduct(null)
+                .product(null)
+                .altText(banner.getBannerName())
+                .build();
+        imageProductService.uploadImage(uploadImageRequest);
         return bannerMapper.toBannerResponse(savedBanner);
     }
 
@@ -53,7 +65,9 @@ public class BannerService {
         for (BannerSortRequest req : requests) {
             Banner banner = bannerRepository.findById(req.getId())
                     .orElseThrow(() -> new ApplicationException(ErrorCode.BANNER_NOT_FOUND));
-            bannerRepository.updateSortOrder(req.getId(), req.getSortOrder());
+            banner.setType(req.getType());
+            banner.setSortOrder(req.getSortOrder());
+            bannerRepository.save(banner);
         }
     }
 
@@ -66,11 +80,27 @@ public class BannerService {
     public BannerResponse updateBanner(UUID id, BannerRequest request) {
         Banner banner = bannerRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.BANNER_NOT_FOUND));
+       request.setImageUrl(banner.getImageUrl());
+        if(request.getEndAt()==null){
+             request.setEndAt(LocalDate.of(9999, 12, 31));
+        }
+        if(request.getFile()!=null){
+            UploadImageRequest uploadImageRequest =UploadImageRequest.builder()
+                    .file(request.getFile())
+                    .banner(banner)
+                    .imageProduct(null)
+                    .product(null)
+                    .altText(banner.getBannerName())
+                    .build();
+            imageProductService.uploadImage(uploadImageRequest);
+            request.setImageUrl(banner.getImageUrl());
+        }
         bannerMapper.updateBanner(banner, request);
         return bannerMapper.toBannerResponse(bannerRepository.save(banner));
     }
 
     public void deleteBanner(UUID id) {
+        imageProductService.deleteImage(id);
         if (!bannerRepository.existsById(id)) {
             throw new ApplicationException(ErrorCode.BANNER_NOT_FOUND);
         }

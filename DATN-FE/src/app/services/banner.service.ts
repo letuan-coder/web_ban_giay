@@ -10,6 +10,7 @@ import { Banner } from '../model/banner.model';
 })
 export class BannerService {
   private apiUrl = environment.apiBaseUrl + '/api/banners';
+  private imageApiUrl = environment.apiBaseUrl + '/api/images';
 
   constructor(private http: HttpClient) { }
 
@@ -31,5 +32,9 @@ export class BannerService {
 
   updateSortOrder(banners: { id: string; sortOrder: number }[]): Observable<ApiResponse<any>> {
     return this.http.patch<ApiResponse<any>>(`${this.apiUrl}/sort-order`, banners);
+  }
+
+  deleteImage(bannerId: string): Observable<any> {
+    return this.http.delete(`${this.imageApiUrl}/${bannerId}`);
   }
 }

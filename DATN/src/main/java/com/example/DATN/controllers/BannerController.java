@@ -52,7 +52,8 @@ public class BannerController {
     }
 
     @GetMapping("/type/{type}")
-    public ApiResponse<List<BannerResponse>> getBannersByType(@PathVariable("type") BannerType type) {
+    public ApiResponse<List<BannerResponse>> getBannersByType
+            (@PathVariable("type") BannerType type) {
         return ApiResponse.<List<BannerResponse>>builder()
                 .data(bannerService.getBannersByType(type))
                 .build();
@@ -61,7 +62,10 @@ public class BannerController {
     @PatchMapping("/{id}")
     public ApiResponse<BannerResponse> updateBanner(
             @PathVariable UUID id,
-            @RequestBody @Valid BannerRequest request) {
+            @RequestPart("data") @Valid BannerRequest request,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+
+        request.setFile(file);
         return ApiResponse.<BannerResponse>builder()
                 .data(bannerService.updateBanner(id, request))
                 .build();

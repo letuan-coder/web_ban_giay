@@ -1,21 +1,16 @@
-package com.example.DATN.dtos.request;
+package com.example.DATN.dtos.request.banner;
 
 import com.example.DATN.constant.BannerType;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
-public class BannerRequest {
-    private String imageUrl;
+@Data
+@Builder
+public class UpdateBannerRequest {
 
     private String bannerName;
 

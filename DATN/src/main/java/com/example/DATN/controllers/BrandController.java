@@ -6,7 +6,6 @@ import com.example.DATN.dtos.respone.brand.BrandResponse;
 import com.example.DATN.services.BrandService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,9 +18,6 @@ public class BrandController {
     private final BrandService brandService;
 
     @PostMapping
-
-    //xoa dòng này
-    @PreAuthorize("hasAuthority('CREATE_BRAND')")
     public ApiResponse<BrandResponse> createBrand(@RequestBody @Valid BrandRequest request) {
         return ApiResponse.<BrandResponse>builder()
                 .data(brandService.createBrand(request))
@@ -29,7 +25,6 @@ public class BrandController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('BRAND_VIEW')")
     public ApiResponse<List<BrandResponse>> getAllBrands() {
         return ApiResponse.<List<BrandResponse>>builder()
                 .data(brandService.getAllBrands())
@@ -52,7 +47,6 @@ public class BrandController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('BRAND_UPDATE')")
     public ApiResponse<BrandResponse> updateBrand(
             @PathVariable Long id, @RequestBody @Valid BrandRequest request) {
         return ApiResponse.<BrandResponse>builder()
@@ -61,7 +55,6 @@ public class BrandController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('BRAND_DELETE')")
     public ApiResponse<Void> deleteBrand(@PathVariable Long id) {
         brandService.deleteBrand(id);
         return ApiResponse.<Void>builder().build();

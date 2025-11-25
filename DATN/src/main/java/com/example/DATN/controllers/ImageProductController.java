@@ -25,7 +25,8 @@ public class ImageProductController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> deleteImage(@PathVariable UUID id) {
+    public ApiResponse<Void> deleteImage(
+            @PathVariable UUID id) {
         imageProductService.deleteImage(id);
         return ApiResponse.<Void>builder().build();
     }
