@@ -4,6 +4,7 @@ import com.example.DATN.constant.ProductStatus;
 import com.example.DATN.dtos.request.product.ProductRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.PageResponse;
+import com.example.DATN.dtos.respone.product.ProductDetailReponse;
 import com.example.DATN.dtos.respone.product.ProductResponse;
 import com.example.DATN.services.ImageProductService;
 import com.example.DATN.services.ProductService;
@@ -34,13 +35,6 @@ public class ProductController {
         return ApiResponse.<ProductResponse>builder()
                 .data(productService.createProduct(request))
                 .build();
-    }
-
-    @PostMapping("/upload")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> uploadProducts(@RequestParam("file") MultipartFile file) {
-        productService.addProductsFromExcel(file);
-        return ApiResponse.<Void>builder().build();
     }
 
     @GetMapping
@@ -106,8 +100,8 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<ProductResponse> getProductById(@PathVariable UUID id) {
-        return ApiResponse.<ProductResponse>builder()
+    public ApiResponse<ProductDetailReponse> getProductById(@PathVariable UUID id) {
+        return ApiResponse.<ProductDetailReponse>builder()
                 .data(productService.getProductById(id))
                 .build();
     }

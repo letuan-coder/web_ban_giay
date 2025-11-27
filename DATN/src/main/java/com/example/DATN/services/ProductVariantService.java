@@ -67,6 +67,7 @@ public class ProductVariantService {
                 productVariants.add(productVariant);
 
             }
+            productVariantRepository.saveAll(productVariants);
         }
 
         List<ProductVariant> savedProductVariants = productVariantRepository.saveAll(productVariants);

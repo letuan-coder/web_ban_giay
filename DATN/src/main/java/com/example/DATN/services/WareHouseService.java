@@ -4,7 +4,7 @@ import com.example.DATN.dtos.request.WareHouseRequest;
 import com.example.DATN.dtos.respone.WareHouseResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
-import com.example.DATN.mappers.WareHouseMapper;
+import com.example.DATN.mapper.WareHouseMapper;
 import com.example.DATN.models.WareHouse;
 import com.example.DATN.repositories.WareHouseRepository;
 import lombok.RequiredArgsConstructor;

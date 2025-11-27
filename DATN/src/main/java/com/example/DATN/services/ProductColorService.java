@@ -63,7 +63,8 @@ public class ProductColorService {
                 .color(color)
                 .build();
         ProductColor savedProductColor = productColorRepository.save(productColor);
-        List<ProductVariantResponse> productVariantResponses = productVariantService.createListProductVariant(savedProductColor.getId(),requests);
+        List<ProductVariantResponse> productVariantResponses = productVariantService
+                .createListProductVariant(savedProductColor.getId(),requests);
         List<UUID> variantIds = productVariantResponses.stream()
                 .map(ProductVariantResponse::getId)
                 .collect(Collectors.toList());

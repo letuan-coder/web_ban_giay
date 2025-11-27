@@ -1,4 +1,4 @@
-package com.example.DATN.mappers;
+package com.example.DATN.mapper;
 
 import com.example.DATN.dtos.respone.WareHouseResponse;
 import com.example.DATN.models.WareHouse;

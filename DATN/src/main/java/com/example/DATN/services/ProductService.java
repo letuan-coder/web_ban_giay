@@ -3,6 +3,7 @@ package com.example.DATN.services;
 import com.example.DATN.constant.ProductStatus;
 import com.example.DATN.dtos.request.UploadImageRequest;
 import com.example.DATN.dtos.request.product.ProductRequest;
+import com.example.DATN.dtos.respone.product.ProductDetailReponse;
 import com.example.DATN.dtos.respone.product.ProductResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
@@ -76,7 +77,6 @@ public class ProductService {
 
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.CATEGORY_NOT_FOUND));
-
         String formatProductName = formatInputString.formatInputString(request.getName().trim());
         String productCode = (generate(PREFIX, generateProductCode()));
         String formatDescription = formatInputString.formatInputString(request.getDescription().trim());
@@ -115,9 +115,6 @@ public class ProductService {
         // 3. Chuyển về chữ thường
         return slug.toLowerCase(Locale.ROOT);
     }
-    public void addProductsFromExcel(MultipartFile file) {
-        // Placeholder for excel import logic
-    }
 
     public Page<ProductResponse> getAllProducts(
             String productName, Double priceMin, Double priceMax,
@@ -139,10 +136,10 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    public ProductResponse getProductById(UUID id) {
+    public ProductDetailReponse getProductById(UUID id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
-        return productMapper.toProductResponse(product);
+        return productMapper.toDetail(product);
     }
 
     @Transactional

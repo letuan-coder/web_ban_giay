@@ -2,6 +2,7 @@
 package com.example.DATN.mapper;
 
 import com.example.DATN.dtos.request.product.ProductRequest;
+import com.example.DATN.dtos.respone.product.ProductDetailReponse;
 import com.example.DATN.dtos.respone.product.ProductResponse;
 import com.example.DATN.models.Product;
 import org.mapstruct.Mapper;
@@ -28,4 +29,14 @@ public interface ProductMapper {
     @Mapping(target = "brand.id",source = "brandId")
     @Mapping(target = "category.id",source = "categoryId")
     Product toProduct(ProductRequest productRequest);
+
+    @Mapping(source = "productColors",target = "colorResponses")
+    @Mapping(
+            source = "productColors",
+            target = "variantDetailResponses",
+            qualifiedByName = "productColorsToVariantDetails"
+    )
+    ProductDetailReponse toDetail (Product product);
+
+
 }
