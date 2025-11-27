@@ -5,5 +5,6 @@ public enum BannerType {
     HOMEPAGE_MIDDLE,
     HOMEPAGE_BOTTOM,
     MOBILE,
-    DESKTOP
+    DESKTOP,
+    INACTIVE
 }

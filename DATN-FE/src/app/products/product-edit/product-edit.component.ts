@@ -116,7 +116,6 @@ export class ProductEditComponent implements OnInit {
     }
     this.loading = true;
     this.message = '';
-
     if (this.selectedFile) {
       this.productService.updateProductWithImage(this.Updateproduct, this.product.id, this.selectedFile).subscribe({
         next: (res) => {

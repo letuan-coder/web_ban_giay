@@ -24,7 +24,7 @@ public class FileStorageService {
     private final Path storageFolder = Paths.get("uploads");
     private final Path storageBannerFolder = Paths.get("uploads/banners");
     private final Path storageThumbnailFolder = Paths.get("uploads/thumbnails");
-    private final Path storeDefaultFolder =Paths.get("/uploads/default/");
+    private final Path storeDefaultFolder = Paths.get("/uploads/default/");
 
     public FileStorageService() {
         try {
@@ -42,24 +42,22 @@ public class FileStorageService {
         if (request.getFile().isEmpty()) {
             throw new RuntimeException("Failed to store empty file.");
         }
-        if(request.getFile().getSize() >= FileUtil.MAX_FILE_SIZE_MB) {
+        if (request.getFile().getSize() >= FileUtil.MAX_FILE_SIZE_MB) {
             throw new ApplicationException(ErrorCode.FILE_SIZE_EXCEEDED);
         }
         String fileExtension = ".png";
         String generatedFileName = request.getFileName() + "-"
                 + UUID.randomUUID().toString().substring(0, 8) + fileExtension;
-        Path destinationFilePath  = this.storeDefaultFolder.
+        Path destinationFilePath = this.storeDefaultFolder.
                 resolve(Paths.get(generatedFileName)).normalize().toAbsolutePath();
-        if(request.getBanner()!=null) {
-         destinationFilePath  = this.storeDefaultFolder.
+        if (request.getBanner() != null) {
+            destinationFilePath = this.storeDefaultFolder.
                     resolve(Paths.get(generatedFileName)).normalize().toAbsolutePath();
-        }
-        else if(request.getProduct()!=null){
-            destinationFilePath  = this.storageThumbnailFolder.
+        } else if (request.getProduct() != null) {
+            destinationFilePath = this.storageThumbnailFolder.
                     resolve(Paths.get(generatedFileName)).normalize().toAbsolutePath();
-        }
-        else {
-            destinationFilePath  = this.storageBannerFolder.
+        } else {
+            destinationFilePath = this.storageBannerFolder.
                     resolve(Paths.get(generatedFileName)).normalize().toAbsolutePath();
         }
         try (InputStream inputStream = request.getFile().getInputStream()) {
@@ -81,6 +79,7 @@ public class FileStorageService {
             throw new RuntimeException("Failed to delete file: " + filename, e);
         }
     }
+
     private Path findFileInAllFolders(String filename) {
         Path[] folders = {
                 storageFolder,
@@ -98,11 +97,13 @@ public class FileStorageService {
         }
         return null;
     }
+
     public Resource loadFileAsResource(String filename) {
         try {
             Path filePath = findFileInAllFolders(filename);
             if (filePath == null) {
-                throw new ApplicationException(ErrorCode.FILE_EMPTY);
+                return loadDefaultImage();
+
             }
             Resource resource = new UrlResource(filePath.toUri());
             if (resource.exists() || resource.isReadable()) {
@@ -112,6 +113,22 @@ public class FileStorageService {
             }
         } catch (MalformedURLException e) {
             throw new RuntimeException("File not found: " + filename, e);
+        }
+    }
+
+    private Resource loadDefaultImage() {
+        try {
+            Path defaultPath = Paths.get("uploads/default/default.png").normalize();
+            Resource resource = new UrlResource(defaultPath.toUri());
+
+            if (resource.exists() && resource.isReadable()) {
+                return resource;
+            } else {
+                throw new RuntimeException("Default image not found");
+            }
+
+        } catch (Exception ex) {
+            throw new RuntimeException("Cannot load default image", ex);
         }
     }
 

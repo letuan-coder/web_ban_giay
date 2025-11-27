@@ -22,7 +22,6 @@ public class ImageProductController {
 
     private final ImageProductService imageProductService;
     private final FileStorageService fileStorageService;
-
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Void> deleteImage(
@@ -43,8 +42,15 @@ public class ImageProductController {
                             "inline; filename=\"" + resource.getFilename() + "\"")
                     .body(resource);
         } catch (ApplicationException e) {
-            return ResponseEntity.notFound().build();
+            Resource resource = fileStorageService.loadFileAsResource("default.png");
+            String contentType = fileStorageService.getMediaTypeForFileName(filename);
+            ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\"" + resource.getFilename() + "\"")
+                    .body(resource);
         }
+        return ResponseEntity.notFound().build();
     }
 
 }

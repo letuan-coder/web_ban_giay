@@ -38,8 +38,9 @@ public class StockController {
                 .build();
     }
 
-    @PutMapping("/{id}")
-    public ApiResponse<StockResponse> updateStock(@PathVariable Long id, @RequestBody StockRequest request) {
+    @PatchMapping("/{id}")
+    public ApiResponse<StockResponse> updateStock
+            (@PathVariable Long id, @RequestBody StockRequest request) {
         return ApiResponse.<StockResponse>builder()
                 .data(stockService.updateStock(id, request))
                 .build();

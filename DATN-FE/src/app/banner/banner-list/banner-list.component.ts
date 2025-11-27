@@ -28,11 +28,10 @@ export class BannerListComponent implements OnInit {
   selectedFile: File | null = null;
   bannerTypes = Object.values(BannerType);
 
-  // Properties for redirect dropdowns
   categories: any[] = [];
   brands: any[] = [];
   products: any[] = [];
-  selectedRedirectType: 'category' | 'brand' | 'product' | null = null; // Corrected type to singular
+  selectedRedirectType: 'category' | 'brand' | 'product' | null = null;
   selectedRedirectId: string | null = null;
   currentEditingBanner: Banner | null = null;
 

@@ -25,7 +25,7 @@ import java.util.UUID;
 public class ProductColor extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    UUID id; // ví dụ COL08
+    UUID id;
 
     @ManyToOne
     @JoinColumn(name = "color_code")

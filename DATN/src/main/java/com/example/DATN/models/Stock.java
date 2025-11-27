@@ -2,18 +2,16 @@ package com.example.DATN.models;
 
 import com.example.DATN.constant.StockType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "stock")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Stock {
+public class Stock extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,6 +31,7 @@ public class Stock {
     @JoinColumn(name = "store_id")
     private Store store;
 
+    private Integer minQuantity;
     private Integer quantity = 0;
 }
 

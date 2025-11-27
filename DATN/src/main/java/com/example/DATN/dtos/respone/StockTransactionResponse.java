@@ -1,5 +1,6 @@
 package com.example.DATN.dtos.respone;
 
+import com.example.DATN.constant.TransactionStatus;
 import com.example.DATN.constant.TransactionType;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,7 @@ import java.util.List;
 public class StockTransactionResponse {
     private Long id;
     private TransactionType type;
+    private TransactionStatus transactionStatus;
     private Long supplierId;
     private String supplierName;
     private Long fromWarehouseId;

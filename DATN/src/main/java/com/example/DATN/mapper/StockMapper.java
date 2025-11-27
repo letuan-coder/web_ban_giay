@@ -12,4 +12,5 @@ public interface StockMapper {
     @Mapping(source = "store.id", target = "storeId")
     @Mapping(source = "warehouse.id", target = "warehouseId")
     StockResponse toStockResponse(Stock stock);
+
 }

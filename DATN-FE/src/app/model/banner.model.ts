@@ -3,7 +3,8 @@ export enum BannerType {
   HOMEPAGE_MIDDLE = 'HOMEPAGE_MIDDLE',
   HOMEPAGE_BOTTOM = 'HOMEPAGE_BOTTOM',
   MOBILE = 'MOBILE',
-  DESKTOP = 'DESKTOP'
+  DESKTOP = 'DESKTOP',
+  INACTIVE='INACTIVE'
 }
 
 export interface Banner {

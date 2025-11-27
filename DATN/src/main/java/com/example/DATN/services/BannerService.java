@@ -32,6 +32,8 @@ public class BannerService {
         if (endAt == null) {
             endAt = LocalDate.of(9999, 12, 31);
         }
+        if(request.getStartAt()==null){
+            request.setStartAt(LocalDate.of(1, 1, 1));        }
         Banner banner = Banner.builder()
                 .bannerName(request.getBannerName())
                 .sortOrder(request.getSortOrder())
@@ -72,7 +74,16 @@ public class BannerService {
     }
 
     public List<BannerResponse> getAllBanners() {
-        return bannerRepository.findAll().stream()
+        List<Banner> banners =  bannerRepository.findAll();
+        banners.forEach(banner -> {
+            if (banner.getEndAt() != null
+                    && banner.getEndAt().isBefore(LocalDate.now().plusDays(1))) {
+                banner.setActive(false);
+                banner.setType(BannerType.INACTIVE);
+                bannerRepository.save(banner);
+            }
+        });
+        return banners.stream()
                 .map(bannerMapper::toBannerResponse)
                 .collect(Collectors.toList());
     }
@@ -84,6 +95,8 @@ public class BannerService {
         if(request.getEndAt()==null){
              request.setEndAt(LocalDate.of(9999, 12, 31));
         }
+        if(request.getStartAt()==null){
+            request.setStartAt(LocalDate.of(1, 1, 1));        }
         if(request.getFile()!=null){
             UploadImageRequest uploadImageRequest =UploadImageRequest.builder()
                     .file(request.getFile())

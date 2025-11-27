@@ -1,14 +1,18 @@
 package com.example.DATN.services;
 
+import cn.ipokerface.snowflake.SnowflakeIdGenerator;
 import com.example.DATN.constant.StockType;
+import com.example.DATN.constant.TransactionStatus;
 import com.example.DATN.constant.TransactionType;
+import com.example.DATN.dtos.request.CreateMissingItemsInvoiceRequest;
+import com.example.DATN.dtos.request.MissingItemDTO;
 import com.example.DATN.dtos.request.StockTransactionRequest;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
-import com.example.DATN.mapper.StockTransactionMapper;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class StockTransactionService {
 
@@ -25,15 +30,15 @@ public class StockTransactionService {
     private final StoreRepository storeRepository;
     private final WareHouseRepository wareHouseRepository;
     private final SupplierRepository supplierRepository;
-    private final StockTransactionMapper transactionMapper;
-
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
     @Transactional
     public void createTransaction(StockTransactionRequest request) {
         StockTransaction transaction = new StockTransaction();
+        Long newId = snowflakeIdGenerator.nextId();
+        transaction.setId(newId);
         transaction.setType(request.getType());
+        transaction.setStatus(TransactionStatus.PENDING);
         transaction.setItems(new ArrayList<>());
-
-        // Process based on transaction type
         switch (request.getType()) {
             case IMPORT:
                 handleImport(request, transaction);
@@ -42,46 +47,74 @@ public class StockTransactionService {
                 handleTransfer(request, transaction);
                 break;
             case EXPORT:
-                // Logic for export (e.g., sales) can be added here
-                throw new ApplicationException(ErrorCode.INVALID_VALIDATION, "Export functionality is not yet implemented.");
+                throw new ApplicationException(ErrorCode.INVALID_VALIDATION,"INVALID EXPORT");
             default:
-                throw new ApplicationException(ErrorCode.INVALID_VALIDATION, "Invalid transaction type.");
+                throw new ApplicationException(ErrorCode.INVALID_VALIDATION);
         }
 
-        // Process items and update stock
         for (var itemRequest : request.getItems()) {
             ProductVariant variant = variantRepository.findById(itemRequest.getVariantId())
                     .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
-
-            // Add item to transaction
             StockTransactionItem transactionItem = StockTransactionItem.builder()
                     .transaction(transaction)
                     .variant(variant)
                     .quantity(itemRequest.getQuantity())
                     .build();
             transaction.getItems().add(transactionItem);
+            log.info("Transaction id={}, type={}", transaction.getId(), transaction.getType());
 
-            // Update stock based on type
             if (request.getType() == TransactionType.IMPORT) {
-                updateStock(transaction.getToWareHouse(), transaction.getToStore(), variant, itemRequest.getQuantity(), true);
+                updateStock(transaction.getToWareHouse(), transaction.getToStore(),
+                        variant, itemRequest.getQuantity(), true);
             } else if (request.getType() == TransactionType.TRANSFER) {
-                // Decrease from source
                 updateStock(transaction.getFromWareHouse(), transaction.getFromStore(), variant, itemRequest.getQuantity(), false);
-                // Increase at destination
                 updateStock(transaction.getToWareHouse(), transaction.getToStore(), variant, itemRequest.getQuantity(), true);
             }
         }
-
         transactionRepository.save(transaction);
     }
 
     @Transactional
+    public void createMissingItemsInvoice(CreateMissingItemsInvoiceRequest request) {
+        StockTransaction originalTransaction = transactionRepository.findById(request.getOriginalTransactionId())
+                .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND, "Original transaction not found"));
+
+        if (originalTransaction.getType() != TransactionType.IMPORT) {
+            throw new ApplicationException(ErrorCode.INVALID_VALIDATION, "Can only create a missing items invoice for an IMPORT transaction.");
+        }
+
+        StockTransaction missingItemsInvoice = new StockTransaction();
+        missingItemsInvoice.setType(TransactionType.IMPORT);
+        missingItemsInvoice.setStatus(TransactionStatus.PENDING_COMPLETION);
+        missingItemsInvoice.setOriginalTransaction(originalTransaction);
+        missingItemsInvoice.setSupplier(originalTransaction.getSupplier());
+        missingItemsInvoice.setToWareHouse(originalTransaction.getToWareHouse());
+        missingItemsInvoice.setToStore(originalTransaction.getToStore());
+        missingItemsInvoice.setItems(new ArrayList<>());
+
+        for (MissingItemDTO itemDTO : request.getMissingItems()) {
+            ProductVariant variant = variantRepository.findById(itemDTO.getProductVariantId())
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
+
+            StockTransactionItem transactionItem = StockTransactionItem.builder()
+                    .transaction(missingItemsInvoice)
+                    .variant(variant)
+                    .quantity(itemDTO.getQuantity())
+                    .build();
+            missingItemsInvoice.getItems().add(transactionItem);
+        }
+
+        transactionRepository.save(missingItemsInvoice);
+    }
+
+    @Transactional
     private void handleImport(StockTransactionRequest request, StockTransaction transaction) {
-        if (request.getSupplierId() == null || (request.getToStoreId() == null && request.getToWarehouseId() == null)) {
-            throw new ApplicationException(ErrorCode.INVALID_VALIDATION, "Import requires a supplier and a destination (store or warehouse).");
+        if (request.getSupplierId() == null || (request.getToStoreId() == null
+                && request.getToWarehouseId() == null)) {
+            throw new ApplicationException(ErrorCode.INVALID_VALIDATION);
         }
         Supplier supplier = supplierRepository.findById(request.getSupplierId())
-                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED, "Supplier not found"));
+                .orElseThrow(() -> new ApplicationException(ErrorCode.SUPPLIER_NOT_FOUND));
         transaction.setSupplier(supplier);
 
         if (request.getToWarehouseId() != null) {
@@ -101,7 +134,6 @@ public class StockTransactionService {
             throw new ApplicationException(ErrorCode.INVALID_VALIDATION, "Transfer requires a source and a destination.");
         }
 
-        // Set source
         if (request.getFromWarehouseId() != null) {
             WareHouse fromWareHouse = wareHouseRepository.findById(request.getFromWarehouseId())
                     .orElseThrow(() -> new ApplicationException(ErrorCode.WAREHOUSE_NOT_FOUND));
@@ -125,7 +157,10 @@ public class StockTransactionService {
     }
 
     @Transactional
-    private void updateStock(WareHouse warehouse, Store store, ProductVariant variant, int quantity, boolean isIncrease) {
+    private void updateStock(
+            WareHouse warehouse, Store store,
+            ProductVariant variant,
+            Integer quantity, Boolean isIncrease) {
         Stock stock;
         if (warehouse != null) {
             stock = stockRepository.findByVariantAndWarehouse(variant, warehouse)

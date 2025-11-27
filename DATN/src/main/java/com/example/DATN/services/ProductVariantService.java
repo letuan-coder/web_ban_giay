@@ -9,7 +9,9 @@ import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.ProductVariantMapper;
 import com.example.DATN.models.*;
-import com.example.DATN.repositories.*;
+import com.example.DATN.repositories.ProductColorRepository;
+import com.example.DATN.repositories.ProductVariantRepository;
+import com.example.DATN.repositories.SizeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,10 +27,7 @@ public class ProductVariantService {
     private final ProductVariantMapper productVariantMapper;
     private final ProductColorRepository productColorRepository;
     private final SizeRepository sizeRepository;
-    private final StockRepository stockRepository;
-    private final WareHouseRepository wareHouseRepository;
-    private final ProductRepository productRepository;
-
+    private final StoreService storeService;
 
     @Transactional(rollbackFor = Exception.class)
     public List<ProductVariantResponse> createListProductVariant
@@ -36,6 +35,17 @@ public class ProductVariantService {
              List<ProductVariantRequest> requests) {
         ProductColor productColor = productColorRepository.findById(productcolorId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
+        Set<Store> stores = storeService.getAllStore();
+        Set<Stock> stock = new HashSet<>();
+        for (Store response:stores) {
+          Stock stockForStore = Stock.builder()
+                    .store(response)
+                    .quantity(0)
+                    .minQuantity(0)
+                    .build();
+          stock.add(stockForStore);
+        }
+
 
         List<ProductVariant> productVariants = new ArrayList<>();
         for (ProductVariantRequest request : requests) {
@@ -49,7 +59,7 @@ public class ProductVariantService {
                 ProductVariant productVariant = ProductVariant
                         .builder()
                         .productColor(productColor)
-                        .stocks(null)
+                        .stocks(stock)
                         .size(size)
                         .sku(skugenerate)
                         .price(productColor.getProduct().getPrice())
@@ -69,6 +79,7 @@ public class ProductVariantService {
     public ProductVariantResponse getProductVariantById(UUID id) {
         ProductVariant productVariant = productVariantRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
+
         return productVariantMapper.toProductVariantResponse(productVariant);
     }
     public ProductVariantResponse getProductVariantBySKU(String sku) {
@@ -79,7 +90,8 @@ public class ProductVariantService {
 
 
     public List<ProductVariantResponse> getallproductvariant() {
-        return productVariantRepository.findAll()
+        List<ProductVariant> responses = productVariantRepository.findAll();
+        return responses
                 .stream()
                 .map(productVariantMapper::toProductVariantResponse)
                 .toList();

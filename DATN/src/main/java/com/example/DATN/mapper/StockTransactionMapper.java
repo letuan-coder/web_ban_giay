@@ -7,39 +7,25 @@ import com.example.DATN.models.StockTransactionItem;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {})
 public interface StockTransactionMapper {
 
     @Mapping(target = "variantSku", source = "variant.sku")
+    @Mapping(target = "variantId",source = "variant.id")
     StockTransactionItemResponse toStockTransactionItemResponse(StockTransactionItem item);
 
-    default StockTransactionResponse toStockTransactionResponse(StockTransaction transaction) {
-        if (transaction == null) {
-            return null;
-        }
+    @Mapping(target = "supplierId", source = "supplier.id")
+    @Mapping(target = "supplierName", source = "supplier.name")
+    @Mapping(target = "fromStoreId", source = "fromStore.id")
+    @Mapping(target = "fromStoreName", source = "fromStore.name")
+    @Mapping(target = "toStoreId", source = "toStore.id")
+    @Mapping(target = "toStoreName", source = "toStore.name")
+    @Mapping(target = "transactionStatus", source = "status")
+    @Mapping(target = "fromWarehouseId", source = "fromWareHouse.id")
+    @Mapping(target = "fromWarehouseName", source = "fromWareHouse.name")
+    @Mapping(target = "toWarehouseId", source = "toWareHouse.id")
+    @Mapping(target = "toWarehouseName", source = "toWareHouse.name")
+    StockTransactionResponse toStockTransactionResponse(StockTransaction transaction);
 
-        List<StockTransactionItemResponse> itemResponses = transaction.getItems().stream()
-                .map(this::toStockTransactionItemResponse)
-                .collect(Collectors.toList());
 
-        return StockTransactionResponse.builder()
-                .id(transaction.getId())
-                .type(transaction.getType())
-                .supplierId(transaction.getSupplier() != null ? transaction.getSupplier().getId() : null)
-                .supplierName(transaction.getSupplier() != null ? transaction.getSupplier().getName() : null)
-                .fromWarehouseId(transaction.getFromWareHouse() != null ? transaction.getFromWareHouse().getId() : null)
-                .fromWarehouseName(transaction.getFromWareHouse() != null ? transaction.getFromWareHouse().getName() : null)
-                .fromStoreId(transaction.getFromStore() != null ? transaction.getFromStore().getId() : null)
-                .fromStoreName(transaction.getFromStore() != null ? transaction.getFromStore().getName() : null)
-                .toWarehouseId(transaction.getToWareHouse() != null ? transaction.getToWareHouse().getId() : null)
-                .toWarehouseName(transaction.getToWareHouse() != null ? transaction.getToWareHouse().getName() : null)
-                .toStoreId(transaction.getToStore() != null ? transaction.getToStore().getId() : null)
-                .toStoreName(transaction.getToStore() != null ? transaction.getToStore().getName() : null)
-                .createdDate(transaction.getCreatedAt())
-                .items(itemResponses)
-                .build();
-    }
 }
