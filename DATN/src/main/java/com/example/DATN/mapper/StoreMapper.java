@@ -10,5 +10,6 @@ import org.mapstruct.MappingTarget;
 public interface StoreMapper {
     Store toStore(StoreRequest request);
     StoreResponse toStoreResponse(Store store);
+    Store toEntity (StoreResponse responses);
     void updateStore(@MappingTarget Store store, StoreRequest request);
 }

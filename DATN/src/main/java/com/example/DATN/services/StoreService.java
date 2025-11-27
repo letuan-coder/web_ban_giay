@@ -10,7 +10,9 @@ import com.example.DATN.repositories.StoreRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +33,9 @@ public class StoreService {
                 .stream()
                 .map(storeMapper::toStoreResponse)
                 .collect(Collectors.toList());
+    }
+    public Set<Store> getAllStore() {
+        return new HashSet<>(storeRepository.findAll());
     }
 
     public StoreResponse getStoreById(Long id) {

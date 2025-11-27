@@ -81,6 +81,13 @@ public class ProductController {
                 .build();
     }
 
+    @GetMapping("/colorId/{product_color_id}")
+    public ApiResponse<List<String>> GetImageByProductColor(
+            @PathVariable UUID product_color_id) {
+        return ApiResponse.<List<String>>builder()
+                .data(productService.getImageByProductColorId(product_color_id))
+                .build();
+    }
 
     @GetMapping("/code/{productCode}")
     public ApiResponse<List<ProductResponse>> getProductByProductCode(

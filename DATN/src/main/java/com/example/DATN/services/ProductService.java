@@ -9,14 +9,8 @@ import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.FormatInputString;
 import com.example.DATN.mapper.ProductColorMapper;
 import com.example.DATN.mapper.ProductMapper;
-import com.example.DATN.models.Brand;
-import com.example.DATN.models.Category;
-import com.example.DATN.models.Product;
-import com.example.DATN.models.ProductColor;
-import com.example.DATN.repositories.BrandRepository;
-import com.example.DATN.repositories.CategoryRepository;
-import com.example.DATN.repositories.ProductColorRepository;
-import com.example.DATN.repositories.ProductRepository;
+import com.example.DATN.models.*;
+import com.example.DATN.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,7 +33,6 @@ import static com.example.DATN.specification.ProductSpecification.filterProducts
 public class ProductService {
 
     private final ProductRepository productRepository;
-
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
     private final ProductColorRepository productColorRepository;
@@ -49,13 +42,24 @@ public class ProductService {
     private final ImageProductService imageProductService;
     private final FormatInputString formatInputString;
     private final ProductColorMapper productColorMapper;
-//
+    private final ImageProductRepository imageProductRepository;
+
+    //
 //    public List<ProductResponse> getProductByProductCode(String productCode) {
 //        List<Product> ListOfProduct = productRepository.findAllByProductCode(productCode);
 //        return ListOfProduct.stream()
 //                .map(productMapper::toProductResponse)
 //                .collect(Collectors.toList());
 //    }
+    public List<String> getImageByProductColorId(UUID productColorId){
+            ProductColor productColor = productColorRepository.findById(productColorId)
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
+
+            return imageProductRepository.findAllByProductColor(productColor)
+                    .stream()
+                    .map(ImageProduct::getImageUrl)
+                    .toList();
+    }
 
     private String generateProductCode() {
         return UUID.randomUUID().toString().substring(0, 3).toUpperCase();

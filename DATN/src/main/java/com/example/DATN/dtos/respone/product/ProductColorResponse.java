@@ -21,7 +21,8 @@ public class ProductColorResponse {
     UUID id;
     ColorResponse color;
     Is_Available isAvailable;
-    List<ProductVariantResponse> variantResponses;
     List<ImageProductResponse> images;
+    List<ProductVariantResponse> variantResponses;
+
 
 }

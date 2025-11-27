@@ -112,11 +112,11 @@ public enum ErrorCode {
 
     //WareHouse
     WAREHOUSE_NOT_FOUND
-            (1091, "Return request status is invalid for this operation.", HttpStatus.BAD_REQUEST),
+            (1090, "Warehouse not found", HttpStatus.NOT_FOUND),
 
     //store
     STORE_NOT_FOUND
-            (1099, "Return request status is invalid for this operation.", HttpStatus.BAD_REQUEST),
+            (1091, "Store not found", HttpStatus.NOT_FOUND),
 
     STOCK_NOT_FOUND(1100, "Stock not found", HttpStatus.NOT_FOUND),
 
