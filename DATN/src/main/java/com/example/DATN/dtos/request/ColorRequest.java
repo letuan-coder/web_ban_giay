@@ -1,15 +1,13 @@
 package com.example.DATN.dtos.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ColorRequest {
     private String name;
     //@HexCodeConstraint(message = "INVALID_HEX_CODE")

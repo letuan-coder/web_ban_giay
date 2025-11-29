@@ -22,7 +22,7 @@ public class ProductVariantRequest {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<SizeRequest> sizes;
-
+    private List<String> sizeCodes;
     private String sku;
 
     @Min(value = 0, message = "PRICE_MUST_BE_POSITIVE")

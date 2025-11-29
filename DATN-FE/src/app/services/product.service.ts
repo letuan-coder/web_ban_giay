@@ -15,6 +15,7 @@ export interface ProductCreateRequest {
   colorCodes?: string[];
   sizeCodes?: string[];
 }
+
 export interface updateProductRequest {
   name: string;
   description: string;
@@ -27,9 +28,9 @@ export interface updateProductRequest {
   providedIn: 'root'
 })
 export class ProductService {
-  private baseUrl = environment.apiBaseUrl+'/api/products';
-  private deleteUrl = environment.apiBaseUrl+'/api/images'
-  private adminUrl = environment.apiBaseUrl+'/api/products/admim'
+  private baseUrl = environment.apiBaseUrl + '/api/products';
+  private deleteUrl = environment.apiBaseUrl + '/api/images'
+  private adminUrl = environment.apiBaseUrl + '/api/products/admim'
   constructor(private http: HttpClient) { }
 
 
@@ -39,8 +40,8 @@ export class ProductService {
   createProduct(product: ProductCreateRequest): Observable<any> {
     const formData = new FormData();
     formData.append('name', product.name);
-    formData.append('description', product.description);
-    formData.append('brandId', product.brandId.toString());
+    const encoded = product.description.replace(/\n/g, '\\n');
+    formData.append('description', encoded); formData.append('brandId', product.brandId.toString());
     formData.append('categoryId', product.categoryId.toString());
     formData.append('weight', product.weight.toString());
     if (product.price) {
@@ -61,11 +62,11 @@ export class ProductService {
   deleteProduct(id: string): Observable<any> {
     return this.http.delete(`${this.baseUrl}/${id}`);
   }
-  updateProduct(product:updateProductRequest,id:string): Observable<any> {
+  updateProduct(product: updateProductRequest, id: string): Observable<any> {
     return this.http.patch(`${this.baseUrl}/${id}`, product);
   }
 
-  updateProductWithImage(product: updateProductRequest, id: string,file:File): Observable<any> {
+  updateProductWithImage(product: updateProductRequest, id: string, file: File): Observable<any> {
     const formData = new FormData();
     const productBlob = new Blob([JSON.stringify(product)], { type: 'application/json' });
     formData.append('data', productBlob);
@@ -81,7 +82,7 @@ export class ProductService {
     return this.http.get<any>(`${this.baseUrl}/${id}`);
   }
 
-  getAdminById(id:string): Observable<any> {
+  getAdminById(id: string): Observable<any> {
     return this.http.get<any>(`${this.adminUrl}/${id}`);
   }
   search(name: string): Observable<any> {

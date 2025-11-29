@@ -1,6 +1,5 @@
 package com.example.DATN.dtos.request.product;
 
-import com.example.DATN.dtos.request.ColorRequest;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -23,8 +22,7 @@ public class ProductRequest {
     private String description;
     private MultipartFile file;
     private BigDecimal price;
-//    private List<String> colorRequests;
-    private List<ColorRequest> colorCodes;
+    private List<String> colorCodes;
     private List<String> sizeCodes;
     @NotNull(message = "BRAND_ID_REQUIRED")
     private Long brandId;

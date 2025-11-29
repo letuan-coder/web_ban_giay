@@ -4,7 +4,7 @@
     <div>
       <h2 class="mb-1">{{ product.name }}</h2>
       <p class="text-muted mb-0">Mã sản phẩm: {{product.productCode}}</p>
-      
+
     </div>
     <div class="btn-group">
       <button class="btn btn-primary" (click)="toggleAddVariantForm()">
@@ -15,7 +15,9 @@
       </button> -->
     </div>
   </div>
-  <p>{{ product.description}}</p>
+  <div style="white-space: pre-line;">
+    {{ product.description }}
+  </div>
 
 
   <div class="card mb-4" *ngIf="showAddVariantForm">
@@ -75,7 +77,7 @@
                   {{ size.name }}
                 </div>
               </div>
-            
+
             </div>
           </div>
         </div>
@@ -92,10 +94,12 @@
   </div>
 
   <div class="row g-4">
-    <div class="col-12" *ngFor="let colorVariant of product?.colorResponses">
+    <div class="col-12" *ngFor="let colorVariant of product.colorResponses">
       <div class="card">
         <div class="card-header">
-          <h4 class="mb-0">Màu: {{ colorVariant }}</h4>
+          <h4 class="mb-0">
+            <!-- Màu: {{  }} -->
+          </h4>
           <button class="btn btn-sm btn-info ms-2" [routerLink]="['/product-variants/update', colorVariant.id]">
             <i class="bi bi-pencil"></i> Cập nhật
           </button>
@@ -196,7 +200,8 @@
 
                     <div *ngIf="selectedProductIds.size > 0" class="action-bar">
                       <button class="btn btn-sm btn-secondary me-2" (click)="openBulkEdit()">✏️ Sửa hàng loạt</button>
-                      <button class="btn btn-sm btn-info me-2" (click)="openApplyPromotionDialog()">🎁 Áp dụng khuyến mãi</button>
+                      <button class="btn btn-sm btn-info me-2" (click)="openApplyPromotionDialog()">🎁 Áp dụng khuyến
+                        mãi</button>
                       <button class="btn btn-sm btn-danger" (click)="deleteVariant(variant.id)">
                         <i class="bi bi-trash"></i> Xóa
                       </button>

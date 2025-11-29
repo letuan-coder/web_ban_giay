@@ -12,7 +12,7 @@ import { NGX_CURRENCY_CONFIG, NgxCurrencyDirective } from 'ngx-currency';
 @Component({
   selector: 'app-product-create',
   standalone: true,
-  imports: [CommonModule, FormsModule,NgxCurrencyDirective],
+  imports: [CommonModule, FormsModule, NgxCurrencyDirective],
   templateUrl: './product-create.component.html',
   styleUrls: ['./product-create.component.scss']
 })
@@ -45,13 +45,14 @@ export class ProductCreateComponent implements OnInit {
     private categoryService: CategoryService,
     private colorService: ColorService,
     private sizeService: SizeService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.loadBrands();
     this.loadCategories();
     this.loadColors();
     this.loadSizes();
+   
   }
 
   loadBrands() {
@@ -67,7 +68,7 @@ export class ProductCreateComponent implements OnInit {
     this.categoryService.getAll().subscribe((response: any) => {
       this.categories = response.data;
       if (this.categories.length > 0) {
-        this.product.categoryId = this.categories[0].id; 
+        this.product.categoryId = this.categories[0].id;
       }
     });
   }
@@ -117,7 +118,7 @@ export class ProductCreateComponent implements OnInit {
 
   formatPrice(value: number | null): string {
     if (!value) return '';
-    return value.toLocaleString('vi-VN'); 
+    return value.toLocaleString('vi-VN');
   }
 
   createProduct() {
@@ -148,7 +149,7 @@ export class ProductCreateComponent implements OnInit {
         this.loading = false;
         console.error(err);
         this.message = 'Tạo sản phẩm thất bại!';
-        this.message= err.message;
+        this.message = err.message;
       }
     });
   }

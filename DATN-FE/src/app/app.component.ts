@@ -15,7 +15,7 @@ import { MatDialogModule } from '@angular/material/dialog'; // Added MatDialogMo
 export class AppComponent {
   title = 'DATN-FE';
   showSearchBar: boolean = false;
-  
+ 
   constructor(private authService: AuthService, public router: Router) { }
 
   get isAuthRoute(): boolean {

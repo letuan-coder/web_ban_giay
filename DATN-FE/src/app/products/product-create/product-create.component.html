@@ -26,6 +26,9 @@
                              name="description"
                                 class="form-control"></textarea>
                         </div>
+        
+
+
                         <div class="mb-3">
                             <label for="weight" class="form-label">Khối lượng sản phẩm</label>
                             <input type="text" id="weight" [(ngModel)]="product.weight" name="weight"
@@ -34,7 +37,7 @@
 
                         <div class="mb-3">
                             <label for="price" class="form-label">Giá mặc định</label>
-                            <input  [currencyMask]="{ prefix: '', thousands: '.', decimal: '.', align: 'left',
+                            <input [currencyMask]="{ prefix: '', thousands: '.', decimal: '.', align: 'left',
          precision: 0 }" type="text" inputmode="numeric" id="price" [(ngModel)]="product.price" name="price"
                                 class="form-control" />
                         </div>
@@ -62,7 +65,8 @@
 
                         <div class="mb-3">
                             <label for="colors" class="form-label">Màu sắc</label>
-                            <select id="colors" [(ngModel)]="product.colorCodes" name="colorCodes" class="form-select" multiple>
+                            <select id="colors" [(ngModel)]="product.colorCodes" name="colorCodes" class="form-select"
+                                multiple>
                                 <option *ngFor="let c of colors" [value]="c.code">{{ c.name }}</option>
                             </select>
                         </div>
@@ -71,7 +75,8 @@
                             <label class="form-label">Kích thước</label>
                             <div class="d-flex flex-wrap">
                                 <div *ngFor="let s of sizes" class="form-check me-3">
-                                    <input class="form-check-input" type="checkbox" [value]="s.code" [id]="'size-' + s.code" (change)="onSizeChange($event, s.code)">
+                                    <input class="form-check-input" type="checkbox" [value]="s.code"
+                                        [id]="'size-' + s.code" (change)="onSizeChange($event, s.code)">
                                     <label class="form-check-label" [for]="'size-' + s.code">
                                         {{ s.name }}
                                     </label>

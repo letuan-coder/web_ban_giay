@@ -1,7 +1,6 @@
 package com.example.DATN.services;
 
 
-import com.example.DATN.dtos.request.SizeRequest;
 import com.example.DATN.dtos.request.product.ProductVariantRequest;
 import com.example.DATN.dtos.request.product.UpdateProductVariantRequest;
 import com.example.DATN.dtos.respone.product.ProductVariantResponse;
@@ -38,32 +37,33 @@ public class ProductVariantService {
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
         Set<Store> stores = storeService.getAllStore();
         Set<Stock> stock = new HashSet<>();
-        for (Store response:stores) {
-          Stock stockForStore = Stock.builder()
-                    .store(response)
-                    .quantity(0)
-                    .minQuantity(0)
-                    .build();
-          stock.add(stockForStore);
-        }
+
         List<ProductVariant> productVariants = new ArrayList<>();
 //        for (ProductVariantRequest request : requests) {
-            for (SizeRequest sizeRequest : request.getSizes()) {
-                Size size = sizeRepository.findByName(sizeRequest.getName()).orElseThrow(() ->
+            for (String sizeRequest : request.getSizeCodes()) {
+                Size size = sizeRepository.findByCode(sizeRequest).orElseThrow(() ->
                         new ApplicationException(ErrorCode.SIZE_NOT_FOUND));
                 String skugenerate = productColor.getProduct().getProductCode() + "-" +
                         productColor.getColor().getCode() + "-" + size.getCode();
                 ProductVariant productVariant = ProductVariant
                         .builder()
                         .productColor(productColor)
-                        .stocks(stock)
+                        .stocks(null)
                         .size(size)
                         .sku(skugenerate)
                         .price(productColor.getProduct().getPrice())
                         .build();
                 productVariants.add(productVariant);
+                productVariantRepository.save(productVariant);
+//                for (Store response:stores) {
+//                    Stock stockForStore = Stock.builder()
+//                            .store(response)
+//                            .quantity(0)
+//                            .minQuantity(0)
+//                            .build();
+//                    stock.add(stockForStore);
+//                }
             }
-
             productVariantRepository.saveAll(productVariants);
         List<ProductVariant> savedProductVariants = productVariantRepository.saveAll(productVariants);
         return savedProductVariants.stream()

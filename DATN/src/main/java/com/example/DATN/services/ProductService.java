@@ -1,10 +1,10 @@
 package com.example.DATN.services;
 
 import com.example.DATN.constant.ProductStatus;
-import com.example.DATN.dtos.request.ColorRequest;
 import com.example.DATN.dtos.request.UploadImageRequest;
 import com.example.DATN.dtos.request.product.ProductColorRequest;
 import com.example.DATN.dtos.request.product.ProductRequest;
+import com.example.DATN.dtos.request.product.ProductVariantRequest;
 import com.example.DATN.dtos.respone.product.ProductDetailReponse;
 import com.example.DATN.dtos.respone.product.ProductResponse;
 import com.example.DATN.exception.ApplicationException;
@@ -49,6 +49,7 @@ public class ProductService {
     private final ImageProductRepository imageProductRepository;
     private final ProductVariantService productVariantService;
     private final ProductVariantMapper productVariantMapper;
+    private final ColorRepository colorRepository;
 
     //    public List<ProductResponse> getProductByProductCode(String productCode) {
 //        List<Product> ListOfProduct = productRepository.findAllByProductCode(productCode);
@@ -82,10 +83,12 @@ public class ProductService {
                 .orElseThrow(() -> new ApplicationException(ErrorCode.CATEGORY_NOT_FOUND));
         String formatProductName = formatInputString.formatInputString(request.getName().trim());
         String productCode = (generate(PREFIX, generateProductCode()));
-        String formatDescription = formatInputString.formatInputString(request.getDescription());
+//        String formatDescription = formatInputString.formatInputString(request.getDescription());
+        String rawDesc = request.getDescription();
+        String realDesc = rawDesc.replace("\\n", "\n");
         Product product = productMapper.toProduct(request);
         product.setName(formatProductName);
-        product.setDescription(formatDescription);
+        product.setDescription(realDesc);
         product.setProductCode(productCode);
         product.setBrand(brand);
         product.setCategory(category);
@@ -95,21 +98,22 @@ public class ProductService {
         product.setThumbnailUrl("");
         Product savedProduct = productRepository.save(product);
 
-        for(ColorRequest colorRequest :request.getColorCodes()) {
-
+        for(String colorCode :request.getColorCodes()) {
+            Color color = colorRepository.findByCode(colorCode)
+                    .orElseThrow(()->new ApplicationException(ErrorCode.COLOR_NOT_FOUND));
+            ProductVariantRequest productVariantRequest = ProductVariantRequest.builder()
+                    .sizeCodes(request.getSizeCodes())
+                    .price(request.getPrice())
+                    .stock(null)
+                    .build();
             ProductColorRequest productColorRequest = ProductColorRequest.builder()
-                    .color(colorRequest)
+                    .colorName(color.getName())
                     .productId(product.getId())
-                    .variantRequest(null)
+                    .variantRequest(productVariantRequest)
                     .build();
             ProductColor productColor = productColorMapper
                     .toEntity(productColorService.createProductColor(productColorRequest));
-//            ProductVariantRequest productVariantRequest = ProductVariantRequest.builder()
-//                    .sizes(request.())
-//                    .price(request.getPrice())
-//                    .stock(null)
-//                    .build();
-//            productVariantService.createListProductVariant(productColor.getId(),productVariantRequest);
+
         }
         UploadImageRequest uploadImageRequest = UploadImageRequest.builder()
                 .product(savedProduct)

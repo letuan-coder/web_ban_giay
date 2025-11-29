@@ -28,11 +28,9 @@ public class User extends BaseEntity {
             , unique = true)
     String username;
 
-    @Column(nullable = false, length = 255)
     @NotBlank(message = "FIRST_NAME_REQUIRED")
     String firstName;
 
-    @Column(nullable = false, length = 255)
     @NotBlank(message = "LAST_NAME_REQUIRED")
     String lastName;
 

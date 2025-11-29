@@ -13,6 +13,7 @@ import { ProductColorService } from '../../services/product-color.service';
 import { ProductVariantService } from '../../services/product-variant.service';
 import { ColorVariantResponse, VariantResponse } from '../../model/variant.response.model';
 import { forkJoin } from 'rxjs';
+import { Product } from '../../model/product.model';
 
 @Component({
   selector: 'app-product-detail',
@@ -24,7 +25,7 @@ import { forkJoin } from 'rxjs';
 
 export class ProductDetailComponent implements OnInit {
 
-  product: any | null = null;
+  product: Product | null = null;
   loading = false;
   error = '';
   selectedProductIds = new Set<string>();
@@ -124,7 +125,7 @@ export class ProductDetailComponent implements OnInit {
       this.sortColumn = column;
       this.sortDirection = 'asc';
     }
-    
+
     this.product.colorResponses.forEach((colorVariant: ColorVariantResponse) => {
       colorVariant.variantResponses.sort((a: VariantResponse, b: VariantResponse) => {
         let valA: any;
