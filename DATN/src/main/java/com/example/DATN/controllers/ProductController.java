@@ -36,6 +36,8 @@ public class ProductController {
                 .data(productService.createProduct(request))
                 .build();
     }
+    
+
 
     @GetMapping
     public ApiResponse<PageResponse<ProductResponse>> getAllProducts(
@@ -106,6 +108,13 @@ public class ProductController {
                 .build();
     }
 
+    @GetMapping("/admin/{id}")
+    public ApiResponse<ProductResponse> getProductAdminById
+            (@PathVariable UUID id) {
+        return ApiResponse.<ProductResponse>builder()
+                .data(productService.getProductAdminById(id))
+                .build();
+    }
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<ProductResponse> updateProduct(

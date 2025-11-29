@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { ProductService, ProductCreateRequest } from '../../services/product.service';
 import { Brand, BrandService } from '../../services/brand.service';
 import { Category, CategoryService } from '../../services/category.service';
+import { Color, ColorService } from '../../services/color.service';
+import { Size, SizeService } from '../../services/size.service';
 import { NGX_CURRENCY_CONFIG, NgxCurrencyDirective } from 'ngx-currency';
 
 @Component({
@@ -17,6 +19,8 @@ import { NGX_CURRENCY_CONFIG, NgxCurrencyDirective } from 'ngx-currency';
 export class ProductCreateComponent implements OnInit {
   brands: Brand[] = [];
   categories: Category[] = [];
+  colors: Color[] = [];
+  sizes: Size[] = [];
   productsExisting: string[] = [];
   filteredProducts: string[] = [];
 
@@ -27,7 +31,9 @@ export class ProductCreateComponent implements OnInit {
     brandId: 0,
     categoryId: 0,
     price: 0,
-    file: undefined
+    file: undefined,
+    colorCodes: [],
+    sizeCodes: []
   };
 
   loading = false;
@@ -36,12 +42,16 @@ export class ProductCreateComponent implements OnInit {
   constructor(
     private productService: ProductService,
     private brandService: BrandService,
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
+    private colorService: ColorService,
+    private sizeService: SizeService
   ) { }
 
   ngOnInit(): void {
     this.loadBrands();
     this.loadCategories();
+    this.loadColors();
+    this.loadSizes();
   }
 
   loadBrands() {
@@ -62,6 +72,18 @@ export class ProductCreateComponent implements OnInit {
     });
   }
 
+  loadColors() {
+    this.colorService.getAll().subscribe((response: any) => {
+      this.colors = response.data;
+    });
+  }
+
+  loadSizes() {
+    this.sizeService.getAll().subscribe((response: any) => {
+      this.sizes = response.data;
+    });
+  }
+
   onFileSelected(event: any) {
     if (event.target.files.length > 0) {
       this.product.file = event.target.files[0];
@@ -77,6 +99,20 @@ export class ProductCreateComponent implements OnInit {
   selectSuggestion(name: string) {
     this.product.name = name;
     this.filteredProducts = [];
+  }
+
+  onSizeChange(event: any, sizeCode: string) {
+    if (!this.product.sizeCodes) {
+      this.product.sizeCodes = [];
+    }
+    if (event.target.checked) {
+      this.product.sizeCodes.push(sizeCode);
+    } else {
+      const index = this.product.sizeCodes.indexOf(sizeCode);
+      if (index > -1) {
+        this.product.sizeCodes.splice(index, 1);
+      }
+    }
   }
 
   formatPrice(value: number | null): string {
@@ -102,7 +138,9 @@ export class ProductCreateComponent implements OnInit {
           brandId: this.brands.length > 0 ? this.brands[0].id : 0,
           categoryId: this.categories.length > 0 ? this.categories[0].id : 0,
           price: 0,
-          file: undefined
+          file: undefined,
+          colorCodes: [],
+          sizeCodes: []
         };
         this.filteredProducts = [];
       },

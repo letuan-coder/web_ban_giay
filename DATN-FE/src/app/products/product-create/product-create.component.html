@@ -21,7 +21,9 @@
 
                         <div class="mb-3">
                             <label for="description" class="form-label">Mô tả</label>
-                            <textarea id="description" [(ngModel)]="product.description" name="description"
+                            <textarea id="description" 
+                            [(ngModel)]="product.description"
+                             name="description"
                                 class="form-control"></textarea>
                         </div>
                         <div class="mb-3">
@@ -56,6 +58,25 @@
                                 required>
                                 <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
                             </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="colors" class="form-label">Màu sắc</label>
+                            <select id="colors" [(ngModel)]="product.colorCodes" name="colorCodes" class="form-select" multiple>
+                                <option *ngFor="let c of colors" [value]="c.code">{{ c.name }}</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Kích thước</label>
+                            <div class="d-flex flex-wrap">
+                                <div *ngFor="let s of sizes" class="form-check me-3">
+                                    <input class="form-check-input" type="checkbox" [value]="s.code" [id]="'size-' + s.code" (change)="onSizeChange($event, s.code)">
+                                    <label class="form-check-label" [for]="'size-' + s.code">
+                                        {{ s.name }}
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                         <button class="btn btn-primary" type="submit">Thêm sản phẩm</button>
                     </form>

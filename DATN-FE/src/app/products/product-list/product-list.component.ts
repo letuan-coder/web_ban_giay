@@ -43,8 +43,8 @@ export class ProductListComponent implements OnInit {
   loadProducts(page: number) {
     this.loading = true;
     this.error = '';
-    this.isSearch = false; // Reset search state
-    this.searchTerm = ''; // Clear search term
+    this.isSearch = false; 
+    this.searchTerm = ''; 
     this.currentPage = page;
     this.productService.getAll(this.currentPage, this.pageSize).subscribe({
       next: (res: any) => {
@@ -77,7 +77,7 @@ export class ProductListComponent implements OnInit {
       error: (err) => {
         this.error = 'Không tìm thấy sản phẩm.';
         console.error(err);
-        this.products = []; // Clear products if search fails
+        this.products = []; 
         this.loading = false;
       }
     });
@@ -93,9 +93,7 @@ export class ProductListComponent implements OnInit {
 
       if (allVariants.length > 0) {
         price = Math.min(...allVariants.map((v: any) => Number(v.price)));
-
       }
-
       return { ...product,ThumbnailUrl, price };
 
     });

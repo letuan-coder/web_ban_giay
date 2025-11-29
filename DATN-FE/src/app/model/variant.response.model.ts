@@ -38,6 +38,7 @@ export interface ProductDetail {
   id: string;
   name: string;
   slug: string;
+  size:SizeResponse;
   productCode: string;
   description: string;
   available: string;

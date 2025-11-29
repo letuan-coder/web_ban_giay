@@ -57,14 +57,13 @@ public class ProductColorService {
         if (productColorRepository.existsByProductAndColor(product, color)) {
             throw new ApplicationException(ErrorCode.PRODUCT_COLOR_EXISTED);
         }
-        List<ProductVariantRequest> requests = request.getVariantRequests();
         ProductColor productColor = ProductColor.builder()
                 .product(product)
                 .color(color)
                 .build();
         ProductColor savedProductColor = productColorRepository.save(productColor);
         List<ProductVariantResponse> productVariantResponses = productVariantService
-                .createListProductVariant(savedProductColor.getId(),requests);
+                .createListProductVariant(savedProductColor.getId(),request.getVariantRequest());
         List<UUID> variantIds = productVariantResponses.stream()
                 .map(ProductVariantResponse::getId)
                 .collect(Collectors.toList());
@@ -130,28 +129,19 @@ public class ProductColorService {
         List<ProductVariantRequest> variantsToCreate = new ArrayList<>();
         List<UpdateProductVariantRequest> variantsToUpdate = new ArrayList<>();
 
-        if (request.getVariantRequests() != null && !request.getVariantRequests().isEmpty()) {
-            request.getVariantRequests().forEach(variantRequest -> {
-                if (variantRequest.getId() != null) {
-                    UpdateProductVariantRequest updateRequest = UpdateProductVariantRequest.builder()
-                            .id(variantRequest.getId())
-                            .price(variantRequest.getPrice())
-                            .stock(variantRequest.getStock())
-                            .build();
-                    variantsToUpdate.add(updateRequest);
-                } else {
-                    variantsToCreate.add(variantRequest);
-                }
-            });
+        if (request.getVariantRequest() != null) {
+            if (!variantsToUpdate.isEmpty()) {
+                productVariantService.updateProductVariant(id, variantsToUpdate);
+            }
+
+            if (!variantsToCreate.isEmpty()) {
+
+                productVariantService.createListProductVariant(id,request.getVariantRequest());
+            }
+
         }
 
-        if (!variantsToUpdate.isEmpty()) {
-            productVariantService.updateProductVariant(id, variantsToUpdate);
-        }
 
-        if (!variantsToCreate.isEmpty()) {
-            productVariantService.createListProductVariant(id, variantsToCreate);
-        }
 
         if (request.getFiles() != null && !request.getFiles().isEmpty()) {
             imageProductService.uploadImages(existingProductColor.getId(), request.getFiles(), request.getAltText());

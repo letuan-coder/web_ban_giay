@@ -4,7 +4,7 @@
     <div>
       <h2 class="mb-1">{{ product.name }}</h2>
       <p class="text-muted mb-0">Mã sản phẩm: {{product.productCode}}</p>
-      <p class="text-muted mb-0">Ngày tạo: {{product.createdAt| date:'short'}}</p>
+      
     </div>
     <div class="btn-group">
       <button class="btn btn-primary" (click)="toggleAddVariantForm()">
@@ -95,7 +95,7 @@
     <div class="col-12" *ngFor="let colorVariant of product?.colorResponses">
       <div class="card">
         <div class="card-header">
-          <h4 class="mb-0">Màu: {{ colorVariant.color.name }}</h4>
+          <h4 class="mb-0">Màu: {{ colorVariant }}</h4>
           <button class="btn btn-sm btn-info ms-2" [routerLink]="['/product-variants/update', colorVariant.id]">
             <i class="bi bi-pencil"></i> Cập nhật
           </button>

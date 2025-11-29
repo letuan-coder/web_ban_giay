@@ -12,6 +12,8 @@ export interface ProductCreateRequest {
   weight: number;
   price?: number;
   file?: File;
+  colorCodes?: string[];
+  sizeCodes?: string[];
 }
 export interface updateProductRequest {
   name: string;
@@ -27,6 +29,7 @@ export interface updateProductRequest {
 export class ProductService {
   private baseUrl = environment.apiBaseUrl+'/api/products';
   private deleteUrl = environment.apiBaseUrl+'/api/images'
+  private adminUrl = environment.apiBaseUrl+'/api/products/admim'
   constructor(private http: HttpClient) { }
 
 
@@ -45,6 +48,12 @@ export class ProductService {
     }
     if (product.file) {
       formData.append('file', product.file);
+    }
+    if (product.colorCodes) {
+      product.colorCodes.forEach(code => formData.append('colorCodes', code));
+    }
+    if (product.sizeCodes) {
+      product.sizeCodes.forEach(code => formData.append('sizeCodes', code));
     }
     return this.http.post(this.baseUrl, formData);
   }
@@ -72,6 +81,9 @@ export class ProductService {
     return this.http.get<any>(`${this.baseUrl}/${id}`);
   }
 
+  getAdminById(id:string): Observable<any> {
+    return this.http.get<any>(`${this.adminUrl}/${id}`);
+  }
   search(name: string): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/search?name=${name}`);
   }

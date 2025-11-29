@@ -14,7 +14,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class ProductDetailReponse {
-
     private UUID id;
     private String name;
     private String slug;

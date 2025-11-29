@@ -27,7 +27,7 @@ public class ProductVariantController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<ProductVariantResponse>>> createListProductVariant(
             @PathVariable UUID product_color_id,
-            @Valid @RequestBody List<ProductVariantRequest> variantRequest) {
+            @Valid @RequestBody ProductVariantRequest variantRequest) {
         ApiResponse response = ApiResponse.<List<ProductVariantResponse>>builder()
                 .data(productVariantService.createListProductVariant(product_color_id, variantRequest))
                 .build();

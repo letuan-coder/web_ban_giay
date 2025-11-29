@@ -8,7 +8,7 @@ import com.example.DATN.dtos.respone.jwt.AuthenticationResponse;
 import com.example.DATN.dtos.respone.jwt.IntrospectResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
-import com.example.DATN.helper.GetJwtIdForGuest;
+import com.example.DATN.helper.GetUserByJwtHelper;
 import com.example.DATN.models.ForgotToken;
 import com.example.DATN.models.InvalidateToken;
 import com.example.DATN.models.Role;
@@ -29,7 +29,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -40,10 +39,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.text.ParseException;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.Date;
-import java.util.StringJoiner;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -70,9 +66,8 @@ public class AuthenticationService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
-    private final CartService cartService;
-    private final GetJwtIdForGuest getJwtIdForGuest;
-    private RedisTemplate redisTemplate;
+    private final GetUserByJwtHelper getUserByJwtHelper;
+
     final InvalidateTokenRepository invalidateTokenRepository;
     private final MailService mailService;
 
@@ -113,24 +108,6 @@ public class AuthenticationService {
         mailService.sendMail(mailStructure);
 
     }
-//
-//    public void sendOTP(ForgotPasswordRequest request)  {
-//        ForgotToken forgotToken = forgotTokenRepository.findByEmail(request.getEmail())
-//                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
-//        String otp = String.valueOf((int) ((Math.random() * 9 + 1) * 100000));
-//        // Lưu OTP vào Redis với thời gian hết hạn là 5 phút
-//        redisTemplate.opsForValue().set(forgotToken.getEmail(), otp, 5, java.util.concurrent.TimeUnit.MINUTES);
-//        String htmlContent =
-//                "Mã OTP của bạn là: " + otp + "\n Mã có hiệu lực trong 5 phút.";
-//        MailStructure mailStructure =
-//                MailStructure.builder()
-//                        .to(forgotToken.getEmail())
-//                        .subject("Mã OTP khôi phục mật khẩu")
-//                        .content(htmlContent)
-//                        .build();
-//        mailService.sendMail(mailStructure);
-//    }
-
 
     public void resetPassword(ResetPasswordRequest request) throws ParseException, JOSEException {
         ForgotToken forgotToken = forgotTokenRepository.findByToken(request.getToken())
@@ -200,16 +177,15 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        //kiểm tra username có tồn tại không
-        User user = userRepository.findByUsername(request.getUsername()).
-                orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
-        boolean isPasswordMatch = passwordEncoder.matches(request.getPassword(), user.getPassword());
-        //kiểm tra password có đúng không
+
+        Optional<User> user = userRepository.findByUsername(request.getUsername());
+
+        boolean isPasswordMatch = passwordEncoder.matches(request.getPassword(), user.get().getPassword());
         if (!isPasswordMatch) {
             throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
         }
         //generate jwt
-        String jwt = GenerateJWT(user);
+        String jwt = GenerateJWT(user.get());
         //trả lại jwt cho client
         return AuthenticationResponse.builder()
                 .token(jwt)
@@ -383,7 +359,9 @@ public class AuthenticationService {
         try {
             verifiedToken(token, false);
         } catch (ApplicationException e) {
+
             isValid = false;
+
         }
         return IntrospectResponse.builder()
                 .active(isValid)

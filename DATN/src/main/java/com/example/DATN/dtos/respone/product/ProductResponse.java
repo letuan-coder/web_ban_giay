@@ -21,7 +21,6 @@ public class ProductResponse {
     private String name;
     private String slug;
     private String productCode;
-    private String description;
     private Is_Available available;
     private List<ProductColorResponse> colorResponses;
     private String ThumbnailUrl;

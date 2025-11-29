@@ -20,9 +20,6 @@ import java.util.UUID;
 public class ProductVariantRequest {
     private UUID id;
 
-//    @JsonInclude(JsonInclude.Include.NON_NULL)
-//    private SizeRequest size;
-
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<SizeRequest> sizes;
 

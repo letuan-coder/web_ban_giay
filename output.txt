@@ -1,0 +1,7 @@
+Tôi không thể trực tiếp mở và chỉnh sửa các file Excel (.xlsx, .xls) giống như phần mềm Excel. Tuy nhiên, tôi có thể làm việc với dữ liệu theo các cách sau:
+
+1.  **Đọc và phân tích dữ liệu:** Nếu bạn cung cấp cho tôi nội dung của file Excel dưới dạng văn bản (ví dụ: copy-paste các ô, hoặc cung cấp dưới dạng CSV), tôi có thể đọc, phân tích và trích xuất thông tin từ đó.
+2.  **Tạo dữ liệu:** Tôi có thể tạo dữ liệu ở định dạng bảng (ví dụ: CSV, Markdown table) mà bạn có thể copy và dán vào Excel, hoặc lưu thành file CSV để mở bằng Excel.
+3.  **Hỗ trợ code xử lý Excel:** Nếu bạn có code (ví dụ: Python với thư viện pandas, Java với Apache POI, Node.js với exceljs) để xử lý file Excel, tôi có thể giúp bạn viết, sửa đổi hoặc gỡ lỗi code đó.
+
+Bạn muốn tôi giúp bạn với tác vụ nào liên quan đến file Excel?

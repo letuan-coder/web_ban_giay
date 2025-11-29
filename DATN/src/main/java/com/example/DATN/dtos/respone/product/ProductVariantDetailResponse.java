@@ -15,7 +15,10 @@ import java.util.UUID;
 @Builder
 public class ProductVariantDetailResponse {
     private UUID id;
-    private Integer size;
+    private String sku;
+    private String size;
+    private String colorName;
+    private String colorHex;
     private Is_Available isAvailable;
     private BigDecimal price;
     private Integer stock;

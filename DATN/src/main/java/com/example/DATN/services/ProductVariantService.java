@@ -32,7 +32,8 @@ public class ProductVariantService {
     @Transactional(rollbackFor = Exception.class)
     public List<ProductVariantResponse> createListProductVariant
             (UUID productcolorId,
-             List<ProductVariantRequest> requests) {
+             ProductVariantRequest request)
+    {
         ProductColor productColor = productColorRepository.findById(productcolorId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
         Set<Store> stores = storeService.getAllStore();
@@ -45,13 +46,9 @@ public class ProductVariantService {
                     .build();
           stock.add(stockForStore);
         }
-
-
         List<ProductVariant> productVariants = new ArrayList<>();
-        for (ProductVariantRequest request : requests) {
-
+//        for (ProductVariantRequest request : requests) {
             for (SizeRequest sizeRequest : request.getSizes()) {
-
                 Size size = sizeRepository.findByName(sizeRequest.getName()).orElseThrow(() ->
                         new ApplicationException(ErrorCode.SIZE_NOT_FOUND));
                 String skugenerate = productColor.getProduct().getProductCode() + "-" +
@@ -65,11 +62,9 @@ public class ProductVariantService {
                         .price(productColor.getProduct().getPrice())
                         .build();
                 productVariants.add(productVariant);
-
             }
-            productVariantRepository.saveAll(productVariants);
-        }
 
+            productVariantRepository.saveAll(productVariants);
         List<ProductVariant> savedProductVariants = productVariantRepository.saveAll(productVariants);
         return savedProductVariants.stream()
                 .map(productVariantMapper::toProductVariantResponse)

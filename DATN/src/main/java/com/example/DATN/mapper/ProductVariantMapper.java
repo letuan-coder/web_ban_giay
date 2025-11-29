@@ -29,6 +29,8 @@ public interface ProductVariantMapper {
 
 
     @Mapping(source = "size.name", target = "size")
+    @Mapping(source = "productColor.color.name",target = "colorName")
+    @Mapping(source = "productColor.color.hexCode",target = "colorHex")
     @Named("toVariantDetail")
     ProductVariantDetailResponse toDetail(ProductVariant variant);
 

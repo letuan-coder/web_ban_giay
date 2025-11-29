@@ -20,7 +20,7 @@ public class ProductColorRequest {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String colorName;
     ColorRequest color;
-    List<ProductVariantRequest> variantRequests;
+    ProductVariantRequest variantRequest;
     List<MultipartFile> files;
     List<String> altText;
 }

@@ -3,9 +3,7 @@ import { BulkEditComponent } from './BulkEditDialogComponent'; // Import BulkEdi
 import { ApplyPromotionDialogComponent } from './apply-promotion-dialog/apply-promotion-dialog.component'; // Import the new dialog
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgxCurrencyDirective } from 'ngx-currency';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Product } from '../../model/product.model';
 import { Component, OnInit } from '@angular/core';
 import { ProductService } from '../../services/product.service';
 import { ImageProductService } from '../../services/image-product.service';
@@ -15,6 +13,7 @@ import { ProductColorService } from '../../services/product-color.service';
 import { ProductVariantService } from '../../services/product-variant.service';
 import { ColorVariantResponse, VariantResponse } from '../../model/variant.response.model';
 import { forkJoin } from 'rxjs';
+
 @Component({
   selector: 'app-product-detail',
   standalone: true,
@@ -25,7 +24,7 @@ import { forkJoin } from 'rxjs';
 
 export class ProductDetailComponent implements OnInit {
 
-  product: Product | null = null;
+  product: any | null = null;
   loading = false;
   error = '';
   selectedProductIds = new Set<string>();
@@ -53,7 +52,7 @@ export class ProductDetailComponent implements OnInit {
     private sizeService: SizeService,
     private productColorService: ProductColorService,
     private router: Router,
-    private productVariantService: ProductVariantService, 
+    private productVariantService: ProductVariantService,
     private dialog: MatDialog
   ) { }
 
@@ -84,7 +83,26 @@ export class ProductDetailComponent implements OnInit {
     this.error = '';
     this.productService.getById(id).subscribe({
       next: (res: any) => {
-        this.product = res.data;
+        const productData = res.data;
+        // Restructure data: Group variants under their respective colors
+        if (productData && productData.colorResponses && productData.variantDetailResponses) {
+          const variantsByColorId = new Map<string, any[]>();
+
+          // I'm assuming the variant object has a `productColorId` that links to the colorResponse `id`
+          for (const variant of productData.variantDetailResponses) {
+            const productColorId = variant.productColorId;
+            if (!variantsByColorId.has(productColorId)) {
+              variantsByColorId.set(productColorId, []);
+            }
+            variantsByColorId.get(productColorId)!.push(variant);
+          }
+
+          for (const colorResponse of productData.colorResponses) {
+            colorResponse.variantResponses = variantsByColorId.get(colorResponse.id) || [];
+          }
+        }
+
+        this.product = productData;
         this.loading = false;
       },
       error: (err) => {
@@ -106,7 +124,7 @@ export class ProductDetailComponent implements OnInit {
       this.sortColumn = column;
       this.sortDirection = 'asc';
     }
-
+    
     this.product.colorResponses.forEach((colorVariant: ColorVariantResponse) => {
       colorVariant.variantResponses.sort((a: VariantResponse, b: VariantResponse) => {
         let valA: any;

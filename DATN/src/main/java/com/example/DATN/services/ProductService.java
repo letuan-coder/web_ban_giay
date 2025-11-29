@@ -1,7 +1,9 @@
 package com.example.DATN.services;
 
 import com.example.DATN.constant.ProductStatus;
+import com.example.DATN.dtos.request.ColorRequest;
 import com.example.DATN.dtos.request.UploadImageRequest;
+import com.example.DATN.dtos.request.product.ProductColorRequest;
 import com.example.DATN.dtos.request.product.ProductRequest;
 import com.example.DATN.dtos.respone.product.ProductDetailReponse;
 import com.example.DATN.dtos.respone.product.ProductResponse;
@@ -10,6 +12,7 @@ import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.FormatInputString;
 import com.example.DATN.mapper.ProductColorMapper;
 import com.example.DATN.mapper.ProductMapper;
+import com.example.DATN.mapper.ProductVariantMapper;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
 import lombok.RequiredArgsConstructor;
@@ -44,9 +47,10 @@ public class ProductService {
     private final FormatInputString formatInputString;
     private final ProductColorMapper productColorMapper;
     private final ImageProductRepository imageProductRepository;
+    private final ProductVariantService productVariantService;
+    private final ProductVariantMapper productVariantMapper;
 
-    //
-//    public List<ProductResponse> getProductByProductCode(String productCode) {
+    //    public List<ProductResponse> getProductByProductCode(String productCode) {
 //        List<Product> ListOfProduct = productRepository.findAllByProductCode(productCode);
 //        return ListOfProduct.stream()
 //                .map(productMapper::toProductResponse)
@@ -74,12 +78,11 @@ public class ProductService {
     public ProductResponse createProduct(ProductRequest request) {
         Brand brand = brandRepository.findById(request.getBrandId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.BRAND_NOT_FOUND));
-
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.CATEGORY_NOT_FOUND));
         String formatProductName = formatInputString.formatInputString(request.getName().trim());
         String productCode = (generate(PREFIX, generateProductCode()));
-        String formatDescription = formatInputString.formatInputString(request.getDescription().trim());
+        String formatDescription = formatInputString.formatInputString(request.getDescription());
         Product product = productMapper.toProduct(request);
         product.setName(formatProductName);
         product.setDescription(formatDescription);
@@ -91,6 +94,23 @@ public class ProductService {
         product.setPrice(request.getPrice());
         product.setThumbnailUrl("");
         Product savedProduct = productRepository.save(product);
+
+        for(ColorRequest colorRequest :request.getColorCodes()) {
+
+            ProductColorRequest productColorRequest = ProductColorRequest.builder()
+                    .color(colorRequest)
+                    .productId(product.getId())
+                    .variantRequest(null)
+                    .build();
+            ProductColor productColor = productColorMapper
+                    .toEntity(productColorService.createProductColor(productColorRequest));
+//            ProductVariantRequest productVariantRequest = ProductVariantRequest.builder()
+//                    .sizes(request.())
+//                    .price(request.getPrice())
+//                    .stock(null)
+//                    .build();
+//            productVariantService.createListProductVariant(productColor.getId(),productVariantRequest);
+        }
         UploadImageRequest uploadImageRequest = UploadImageRequest.builder()
                 .product(savedProduct)
                 .banner(null)
@@ -140,6 +160,12 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
         return productMapper.toDetail(product);
+    }
+
+    public ProductResponse getProductAdminById(UUID id){
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
+        return productMapper.toProductResponse(product);
     }
 
     @Transactional
@@ -200,7 +226,6 @@ public class ProductService {
                 .id(product.getId())
                 .name(product.getName())
                 .slug(product.getSlug())
-                .description(product.getDescription())
                 .productCode(product.getProductCode())
                 .available(product.getAvailable())
                 .brandName(product.getBrand() != null ? product.getBrand().getName() : null)

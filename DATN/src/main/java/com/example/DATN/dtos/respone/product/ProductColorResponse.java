@@ -2,7 +2,6 @@ package com.example.DATN.dtos.respone.product;
 
 
 import com.example.DATN.constant.Is_Available;
-import com.example.DATN.dtos.respone.ColorResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,10 +18,10 @@ import java.util.UUID;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class ProductColorResponse {
     UUID id;
-    ColorResponse color;
+    String colorCode;
+    String colorName;
+    String colorHexCode;
     Is_Available isAvailable;
     List<ImageProductResponse> images;
     List<ProductVariantResponse> variantResponses;
-
-
 }
