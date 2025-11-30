@@ -1,7 +1,19 @@
 trả lời mọi câu hỏi bằng tiếng việt 
+--API LINK
+province
+https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province
+
+ward:
+https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward?district_id
+
+districts
+https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district
+
+
 --backend
 sài cấu trúc Builder Pattern 
 --frontEnd
+luôn cập nhật logic vào file typescript khi cập nhật file HTML
 luôn sài generate từ angular CLI và theo cấu trúc thư mục định sẵn 
 tạo tưởng đường routing vào 'C:\Luu tru\DACN2\DATN\DATN-API\DATN-FE\src\app\app-routing.module.ts'
 và tạo đường dẫn cho người dùng vào bằng 'C:\Luu tru\DACN2\DATN\DATN-API\DATN-FE\src\app\app.component.html'

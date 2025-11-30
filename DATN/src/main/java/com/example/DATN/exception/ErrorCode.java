@@ -98,7 +98,7 @@ public enum ErrorCode {
     PROVINCE_NOT_FOUND(1056, "Province not found", HttpStatus.NOT_FOUND),
     DISTRICT_NOT_FOUND(1057, "District not found", HttpStatus.NOT_FOUND),
     COMMUNE_NOT_FOUND(1058, "Commune not found", HttpStatus.NOT_FOUND),
-    ADDRESS_NOT_FOUND(1059, "Address not found", HttpStatus.NOT_FOUND),
+    ADDRESS_NOT_FOUND(1059, "User don't have detail to create order", HttpStatus.NOT_FOUND),
 
     // Order Return
     RETURN_PERIOD_EXPIRED(1060, "Return period has expired for this order.", HttpStatus.BAD_REQUEST),

@@ -22,6 +22,8 @@ public class OrderItem extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
+    String name;
+    String code;
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "order_id", nullable = false)
@@ -35,6 +37,11 @@ public class OrderItem extends BaseEntity {
 
     @Column(nullable = false)
     Integer quantity;
+
+    private Integer weight;
+    private Integer height;
+    private Integer width;
+    private Integer length;
 
     @Column(nullable = false)
     private BigDecimal price;

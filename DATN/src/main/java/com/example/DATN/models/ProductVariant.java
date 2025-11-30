@@ -47,6 +47,11 @@ public class ProductVariant extends BaseEntity {
     @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL)
     private Set<Stock> stocks = new HashSet<>();
 
+    //for shipping
+    Integer weight;
+    Integer height;
+    Integer width;
+    Integer length;
 
     @Column(nullable = false, unique = true)
     String sku;

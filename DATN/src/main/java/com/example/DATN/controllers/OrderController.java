@@ -27,6 +27,25 @@ public class OrderController {
                 .build();
     }
 
+    @PatchMapping("/{orderId}")
+    public ApiResponse<OrderResponse> updateOrderId(
+            @PathVariable Long orderId,
+            @RequestBody String newStatus
+    ) {
+        orderService.updateOrderStatus(orderId, newStatus);
+        return ApiResponse.<OrderResponse>builder()
+                .data(null)
+                .message("update status for order")
+                .build();
+    }
+
+    @GetMapping("/all")
+    public ApiResponse<List<OrderResponse>> getOrdersForAdmin() {
+        List<OrderResponse> response = orderService.getOrdersByUser();
+        return ApiResponse.<List<OrderResponse>>builder()
+                .data(response)
+                .build();
+    }
 
     @GetMapping
     public ApiResponse<List<OrderResponse>> getOrdersByUser() {

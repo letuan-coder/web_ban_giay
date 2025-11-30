@@ -12,8 +12,9 @@ import java.util.List;
 
 @Mapper(componentModel = "spring",uses = {ProductVariantMapper.class})
 public interface OrderItemMapper {
-    OrderItem toEntity(OrderItemResponse respone);
+    OrderItem toEntity(OrderItemResponse response);
 
+    @Mapping(target = "productVariant.id",source = "productVariantId")
     OrderItem toOrderItem(OrderItemRequest request);
 
     @Mapping(target = "productName",source = "productVariant.productColor.product.name")
@@ -21,7 +22,7 @@ public interface OrderItemMapper {
     @Mapping(target = "colorName",source = "productVariant.productColor.color.name")
     @Mapping(target = "sizeName",source = "productVariant.size.name")
     @Mapping(target = "price", source = "price")
-    @Mapping(target = "image", source = "productVariant.productColor.images", qualifiedByName = "getFirstImageUrl")
+    @Mapping(target = "sku",source = "productVariant.sku")
     OrderItemResponse toOrderItemResponse(OrderItem orderItem);
 
     @Named("getFirstImageUrl")

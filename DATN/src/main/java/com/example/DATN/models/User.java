@@ -60,9 +60,9 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     List<Order> orders;
 
-    @OneToOne(mappedBy = "user"
+    @OneToMany(mappedBy = "user"
             , fetch = FetchType.LAZY)
     @JsonManagedReference
-    UserAddress userAddress;
+    List<UserAddress> userAddress;
 
 }

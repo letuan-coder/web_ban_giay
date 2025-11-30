@@ -2,7 +2,6 @@ package com.example.DATN.dtos.respone.order;
 
 import com.example.DATN.constant.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -12,11 +11,15 @@ import java.util.List;
 @Data
 public class OrderResponse {
     private Long id;
-    private List<OrderItemResponse> items;
+    private String userName;
+    private String userAddress;
+    private String phoneNumber;
+    private String receiverName;
     private String paymentMethodName;
     private OrderStatus orderStatus;
     private BigDecimal totalPrice;
-    @JsonProperty("ngày đặt")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDateTime created_At;
+    private List<OrderItemResponse> items;
+
 }

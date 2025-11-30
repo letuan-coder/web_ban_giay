@@ -6,6 +6,7 @@ import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.SizeMapper;
 import com.example.DATN.models.Size;
+import com.example.DATN.repositories.ColorRepository;
 import com.example.DATN.repositories.SizeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,8 @@ public class SizeService {
     private final SizeRepository sizeRepository;
     private final SizeMapper sizeMapper;
     private final String PREFIX = "SZ_";
+    private final ColorRepository colorRepository;
+
     private String generateProductCode() {
         return UUID.randomUUID().toString().substring(0, 5).toUpperCase();
     }
@@ -48,6 +51,7 @@ public class SizeService {
     }
 
     public List<SizeResponse> getSizes() {
+
         return sizeRepository.findAll().stream()
                 .map(sizeMapper::toSizeResponse)
                 .toList();

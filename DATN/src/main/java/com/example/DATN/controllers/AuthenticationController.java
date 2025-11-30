@@ -6,15 +6,15 @@ import com.example.DATN.dtos.respone.jwt.AuthenticationResponse;
 import com.example.DATN.dtos.respone.jwt.IntrospectResponse;
 import com.example.DATN.services.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
 
@@ -26,24 +26,12 @@ import java.text.ParseException;
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
-    @Value("${cookie.duration.days}")
-    private Integer COOKIE_DURATION;
 
     @PostMapping("/login")
     ApiResponse <AuthenticationResponse> login(
-            @RequestBody AuthenticationRequest request,
-            @RequestParam(value="remember-me", required = false, defaultValue = "false")
-            Boolean remember,
-            HttpServletResponse response) {
+            @RequestBody AuthenticationRequest request ){
         AuthenticationResponse authResponse = authenticationService.authenticate(request);
-        if (remember) {
-            Cookie cookie = new Cookie("remember-me", authResponse.getToken());
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-            cookie.setPath("/");
-            cookie.setMaxAge(COOKIE_DURATION);
-            response.addCookie(cookie);
-        }
+
         return ApiResponse.<AuthenticationResponse>builder()
                 .data(authResponse)
                 .build();
@@ -79,7 +67,8 @@ public class AuthenticationController {
     }
     @PostMapping("/guest")
     ApiResponse<AuthenticationResponse> createGuest() {
-        AuthenticationResponse authResponse = authenticationService.createGuestAndAuthenticate();
+        AuthenticationResponse authResponse = authenticationService
+                .createGuestAndAuthenticate();
         return ApiResponse.<AuthenticationResponse>builder()
                 .data(authResponse)
                 .build();

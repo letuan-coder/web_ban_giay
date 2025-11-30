@@ -50,6 +50,8 @@ public class SupplierService {
                 .collect(Collectors.toList());
     }
 
+
+
     public SupplierResponse getSupplierById(Long id) {
         Supplier supplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.SUPPLIER_NOT_FOUND));

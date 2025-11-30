@@ -1,12 +1,20 @@
 package com.example.DATN.dtos.request.order;
 
+import com.example.DATN.constant.PaymentMethodEnum;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.UUID;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class OrderRequest {
-    private List<UUID> productColorId;
-    private Long paymentMethodId;
+    private String Note;
+    private Integer serviceId;
+    private List<OrderItemRequest> orderItemRequests;
+    private PaymentMethodEnum type;
 }

@@ -9,6 +9,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GHTKRequest {
-    private List<GhtkProduct> products;
-    private GhtkOrderInfo order;
+    private List<GhnProduct> products;
+    private GhnOrderInfo order;
 }

@@ -27,7 +27,8 @@ public class OrderItemService {
     private final ProductVariantRepository productVariantRepository;
 
     @Transactional
-    public OrderItemResponse addOrderItemToOrder(Long orderId, OrderItemRequest itemRequest) {
+    public OrderItemResponse addOrderItemToOrder
+            (Long orderId, OrderItemRequest itemRequest) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
         ProductVariant variant= productVariantRepository.findById(itemRequest.getProductVariantId())

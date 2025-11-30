@@ -1,5 +1,6 @@
 package com.example.DATN.repositories;
 
+import com.example.DATN.models.Order;
 import com.example.DATN.models.OrderItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -11,6 +12,6 @@ import java.util.List;
  */
 @Repository
 public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
-    List<OrderItem> findAllByOrder(OrderItem item);
+    List<OrderItem> findAllByOrder(Order order);
 }
 

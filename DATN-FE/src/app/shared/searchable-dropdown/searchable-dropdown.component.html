@@ -1,0 +1,24 @@
+<div class="searchable-dropdown" (clickOutside)="isDropdownOpen = false">
+  <input 
+    type="text" 
+    class="form-control"
+    [placeholder]="placeholder"
+    [(ngModel)]="searchTerm" 
+    (ngModelChange)="filterData()"
+    (focus)="openDropdown()"
+  >
+  <div *ngIf="isDropdownOpen" class="dropdown-list-container">
+    <ul class="dropdown-list">
+      <li *ngIf="filteredData.length === 0 && searchTerm.length > 0" class="dropdown-item disabled">
+        Không tìm thấy kết quả
+      </li>
+      <li 
+        *ngFor="let item of filteredData" 
+        class="dropdown-item" 
+        (click)="selectItem(item)"
+      >
+        {{ item[displayField] }}
+      </li>
+    </ul>
+  </div>
+</div>

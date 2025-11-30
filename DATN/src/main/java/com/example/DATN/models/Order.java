@@ -1,6 +1,9 @@
 package com.example.DATN.models;
 
 import com.example.DATN.constant.OrderStatus;
+import com.example.DATN.constant.PaymentMethodEnum;
+import com.example.DATN.constant.PaymentStatus;
+import com.example.DATN.constant.ShippingStatus;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -22,6 +25,37 @@ public class Order extends BaseEntity {
     @Id
     private Long id;
 
+    // Mã đơn hàng GHN
+    private String ghnOrderCode;
+
+    // Mã phân loại nội bộ của GHN
+    private String sortCode;
+
+
+    // Loại vận chuyển (truck, motor…)
+    private String transType;
+
+    // Mã phường/xã
+    private String wardEncode;
+
+    // Mã quận/huyện
+    private String districtEncode;
+
+    // Tổng phí GHN (total_fee)
+    private Integer totalFee;
+
+    // Phí dịch vụ chính (main_service)
+    private Integer mainServiceFee;
+
+    // Thời gian dự kiến giao hàng
+    private LocalDateTime expectedDeliveryTime;
+
+    // Đối tác vận hành (operation_partner)
+    private String operationPartner;
+
+    // Thời gian cập nhật trạng thái lần cuối
+    private LocalDateTime ghnLastUpdated;
+
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "user_id", nullable = false)
@@ -32,10 +66,9 @@ public class Order extends BaseEntity {
     @JsonManagedReference
     private List<OrderItem> items;
 
-    @JoinColumn(name = "payment_method_id")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private PaymentMethod paymentMethod;
+    private Integer serviceId;
+
+    private PaymentMethodEnum paymentMethod;
 
     private BigDecimal shippingFee;
 
@@ -44,8 +77,20 @@ public class Order extends BaseEntity {
     @NotNull
     private BigDecimal total_price;
 
+    private String Note;
+
+    @Enumerated(EnumType.STRING)
+    PaymentStatus paymentStatus;
+
     @ManyToOne
     UserAddress userAddress;
+
+    Integer total_weight;
+    Integer total_height;
+    Integer total_width;
+    Integer total_length;
+    @Enumerated(EnumType.STRING)
+    ShippingStatus ghnStatus;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;

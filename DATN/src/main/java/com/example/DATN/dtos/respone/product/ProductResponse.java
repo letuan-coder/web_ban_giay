@@ -32,5 +32,5 @@ public class ProductResponse {
     private Long categoryId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private double weight;
+    private Double weight;
 }

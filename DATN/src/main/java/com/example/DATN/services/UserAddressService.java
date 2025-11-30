@@ -15,9 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -72,12 +70,11 @@ public class UserAddressService {
         return response;
     }
 
-    public List<UserAddressResponse> getUserAddresses() {
+    public UserAddressResponse getUserAddresses() {
         User user = getUserByJwtHelper.getCurrentUser();
-        List<UserAddress> addresses = userAddressRepository.findByUser(user);
-        return addresses.stream()
-            .map(userAddressMapper::toResponse)
-            .collect(Collectors.toList());
+        UserAddress userAddress =  userAddressRepository.findByUser(user)
+                .orElseThrow(()->new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND));
+        return userAddressMapper.toResponse(userAddress);
     }
 
     @Transactional
