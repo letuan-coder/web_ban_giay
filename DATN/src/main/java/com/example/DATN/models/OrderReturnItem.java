@@ -6,6 +6,9 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.util.UUID;
 
 @Setter
 @Getter
@@ -17,8 +20,9 @@ import org.hibernate.annotations.OnDeleteAction;
 @Table(name = "order_return_items")
 public class OrderReturnItem {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @UuidGenerator
+    UUID id;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_return_id", nullable = false)

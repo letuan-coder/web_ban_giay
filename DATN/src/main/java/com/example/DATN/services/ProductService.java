@@ -1,5 +1,6 @@
 package com.example.DATN.services;
 
+import cn.ipokerface.snowflake.SnowflakeIdGenerator;
 import com.example.DATN.constant.ProductStatus;
 import com.example.DATN.dtos.request.UploadImageRequest;
 import com.example.DATN.dtos.request.product.ProductColorRequest;
@@ -7,12 +8,13 @@ import com.example.DATN.dtos.request.product.ProductRequest;
 import com.example.DATN.dtos.request.product.ProductVariantRequest;
 import com.example.DATN.dtos.respone.product.ProductDetailReponse;
 import com.example.DATN.dtos.respone.product.ProductResponse;
+import com.example.DATN.dtos.respone.product.ProductSupplierResponse;
+import com.example.DATN.dtos.respone.product.SearchProductResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.FormatInputString;
 import com.example.DATN.mapper.ProductColorMapper;
 import com.example.DATN.mapper.ProductMapper;
-import com.example.DATN.mapper.ProductVariantMapper;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
 import lombok.RequiredArgsConstructor;
@@ -42,14 +44,14 @@ public class ProductService {
     private final ProductColorRepository productColorRepository;
     private final ProductMapper productMapper;
     private final ProductColorService productColorService;
-    private final String PREFIX = "SHOES_";
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
+    private final String PREFIX = "SHOES";
     private final ImageProductService imageProductService;
     private final FormatInputString formatInputString;
     private final ProductColorMapper productColorMapper;
     private final ImageProductRepository imageProductRepository;
-    private final ProductVariantService productVariantService;
-    private final ProductVariantMapper productVariantMapper;
     private final ColorRepository colorRepository;
+    private final SupplierRepository supplierRepository;
 
     //    public List<ProductResponse> getProductByProductCode(String productCode) {
 //        List<Product> ListOfProduct = productRepository.findAllByProductCode(productCode);
@@ -67,11 +69,8 @@ public class ProductService {
                     .toList();
     }
 
-    private String generateProductCode() {
-        return UUID.randomUUID().toString().substring(0, 3).toUpperCase();
-    }
 
-    public static String generate(String prefix, String index) {
+    public static String generate(String prefix, Long index) {
         return prefix + index;
     }
 
@@ -81,8 +80,17 @@ public class ProductService {
                 .orElseThrow(() -> new ApplicationException(ErrorCode.BRAND_NOT_FOUND));
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.CATEGORY_NOT_FOUND));
+        Supplier supplier =null;
+        if(request.getSupplierId()!=null) {
+            supplier = supplierRepository.findById(request.getSupplierId())
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.SUPPLIER_NOT_FOUND));
+        }
+        if (request.getImportPrice().compareTo(request.getPrice()) > 0) {
+            throw new ApplicationException(ErrorCode.INVALID_PRICE);
+        }
         String formatProductName = formatInputString.formatInputString(request.getName().trim());
-        String productCode = (generate(PREFIX, generateProductCode()));
+        Long snowCode= snowflakeIdGenerator.nextId();;
+        String productCode = (generate(PREFIX, snowCode));
 //        String formatDescription = formatInputString.formatInputString(request.getDescription());
         String rawDesc = request.getDescription();
         String realDesc = rawDesc.replace("\\n", "\n");
@@ -93,9 +101,10 @@ public class ProductService {
         product.setBrand(brand);
         product.setCategory(category);
         product.setSlug(toSlug(formatProductName));
-        product.setWeight(request.getWeight());
+        product.setImportPrice(request.getImportPrice());
         product.setPrice(request.getPrice());
         product.setThumbnailUrl("");
+        product.setSupplier(supplier);
         Product savedProduct = productRepository.save(product);
 
         for(String colorCode :request.getColorCodes()) {
@@ -115,6 +124,7 @@ public class ProductService {
                     .toEntity(productColorService.createProductColor(productColorRequest));
 
         }
+
         UploadImageRequest uploadImageRequest = UploadImageRequest.builder()
                 .product(savedProduct)
                 .banner(null)
@@ -148,9 +158,16 @@ public class ProductService {
         return productsPage.map(this::mapProductToProductResponse);
     }
 
-    public List<ProductResponse> getProductByProductCode(String productCode) {
-        return productRepository.findByProductCode(productCode).stream()
-                .map(this::mapProductToProductResponse)
+    public List<SearchProductResponse> getProductByProductCode(String productCode) {
+        return productRepository.findByProductCode(productCode)
+                .stream().map(productMapper::toSearchDetail)
+                .collect(Collectors.toList());
+    }
+    public List<ProductSupplierResponse> getProductBySupplierId(UUID supplierId) {
+        Supplier supplier = supplierRepository.findById(supplierId)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.SUPPLIER_NOT_FOUND));
+        return productRepository.findBySupplier(supplier)
+                .stream().map(productMapper::toSupplierDetail)
                 .collect(Collectors.toList());
     }
 
@@ -161,8 +178,10 @@ public class ProductService {
     }
 
     public ProductDetailReponse getProductById(UUID id) {
+
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
+
         return productMapper.toDetail(product);
     }
 
@@ -188,7 +207,7 @@ public class ProductService {
         existingProduct.setCategory(category);
         existingProduct.setSlug(toSlug(request.getName()));
         existingProduct.setUpdatedAt(LocalDateTime.now());
-        existingProduct.setWeight(request.getWeight());
+
         existingProduct.setPrice(request.getPrice());
         Product updatedProduct = productRepository.save(existingProduct);
         return productMapper.toProductResponse(updatedProduct);
@@ -234,7 +253,6 @@ public class ProductService {
                 .available(product.getAvailable())
                 .brandName(product.getBrand() != null ? product.getBrand().getName() : null)
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
-                .weight(product.getWeight())
                 .ThumbnailUrl(product.getThumbnailUrl())
                 .brandId(product.getBrand().getId())
                 .categoryId(product.getCategory().getId())

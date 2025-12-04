@@ -101,9 +101,6 @@ public class ProductVariantService {
             productVariant.setPrice(request.getPrice());
         }
 
-        if (request.getDiscountPrice() != null) {
-            productVariant.setDiscountPrice(request.getDiscountPrice());
-        }
         if (request.getSku() != null && !request.getSku().isEmpty()) {
             productVariant.setSku(request.getSku());
         }
@@ -139,9 +136,7 @@ public class ProductVariantService {
                     skuNeedsUpdate = true;
                 }
             }
-            if (match.getDiscountPrice() != null) {
-                existingProductVariant.setDiscountPrice(match.getDiscountPrice());
-            }
+
             if (match.getSku() != null && !match.getSku().isEmpty()) {
                 existingProductVariant.setSku(match.getSku());
             }

@@ -62,6 +62,16 @@ public class GlobalExceptionHandler {
         apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
         return ResponseEntity.internalServerError().body(apiResponse);
     }
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
+
+        return ResponseEntity.badRequest().body(
+                ApiResponse.builder()
+                        .code(ErrorCode.INVALID_INPUT.getCode()) // Tạo enum INVALID_INPUT trong ErrorCode
+                        .message(ex.getMessage())
+                        .build()
+        );
+    }
 
 }
 

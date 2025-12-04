@@ -22,5 +22,5 @@ public class PromotionRequest {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private Boolean active;
-    private List<UUID> productVariantIds;
+    private List<UUID> productId;
 }

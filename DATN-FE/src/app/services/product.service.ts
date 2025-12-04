@@ -9,8 +9,9 @@ export interface ProductCreateRequest {
   description: string;
   brandId: number;
   categoryId: number;
-  weight: number;
+  supplierId: number;
   price?: number;
+  importPrice?: number;
   file?: File;
   colorCodes?: string[];
   sizeCodes?: string[];
@@ -18,8 +19,7 @@ export interface ProductCreateRequest {
 
 export interface updateProductRequest {
   name: string;
-  description: string;
-  weight: number;
+  description:string;
   brandId: number;
   categoryId: number;
   price?: number;
@@ -37,13 +37,18 @@ export class ProductService {
   getAll(page: number, size: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}?page=${page}&limit=${size}`);
   }
+
+  createProductWithVariants(formData: FormData): Observable<any> {
+    return this.http.post(this.baseUrl, formData);
+  }
+
   createProduct(product: ProductCreateRequest): Observable<any> {
     const formData = new FormData();
     formData.append('name', product.name);
     const encoded = product.description.replace(/\n/g, '\\n');
     formData.append('description', encoded); formData.append('brandId', product.brandId.toString());
     formData.append('categoryId', product.categoryId.toString());
-    formData.append('weight', product.weight.toString());
+    formData.append('supplierId', product.supplierId.toString());
     if (product.price) {
       formData.append('price', product.price.toString());
     }
@@ -55,6 +60,10 @@ export class ProductService {
     }
     if (product.sizeCodes) {
       product.sizeCodes.forEach(code => formData.append('sizeCodes', code));
+    }
+    if (product.importPrice) {
+      formData.append('importPrice', product.importPrice.toString());
+
     }
     return this.http.post(this.baseUrl, formData);
   }
@@ -87,5 +96,12 @@ export class ProductService {
   }
   search(name: string): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/search?name=${name}`);
+  }
+  getProductsBySupplier(id: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/supplier/${id}`);
+  }
+
+  getProductByCode(code: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/code/${code}`);
   }
 }

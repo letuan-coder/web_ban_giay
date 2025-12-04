@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Getter
 @Setter
@@ -13,13 +15,17 @@ import lombok.*;
 @Table(name ="stock_transaction_items")
 public class StockTransactionItem extends BaseEntity{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "transaction_id")
     @JsonBackReference
     private StockTransaction transaction;
+
+    @ManyToOne
+    @JoinColumn(name = "original_item_id")
+
+    private StockTransactionItem originalTransactionItem;
 
     @ManyToOne
     @JoinColumn(name = "variant_id")

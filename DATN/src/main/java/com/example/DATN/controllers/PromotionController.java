@@ -39,7 +39,8 @@ public class PromotionController {
     }
 
     @PostMapping
-    public ApiResponse<PromotionResponse> createPromotion(@RequestBody PromotionRequest promotionRequest) {
+    public ApiResponse<PromotionResponse> createPromotion(
+            @RequestBody PromotionRequest promotionRequest) {
         return ApiResponse.<PromotionResponse>builder()
                 .data(promotionService.createPromotion(promotionRequest))
                 .message("Promotion created successfully")

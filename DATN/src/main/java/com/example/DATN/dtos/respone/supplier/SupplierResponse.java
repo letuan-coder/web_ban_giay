@@ -6,12 +6,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class SupplierResponse {
-    private Long id;
+    private UUID id;
     private String name;
     private String taxCode;
     private String email;

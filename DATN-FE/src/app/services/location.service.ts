@@ -10,6 +10,9 @@ import { environment } from '../../enviroment/enviroment';
 })
 export class LocationService {
   private apiUrl = environment.apiBaseUrl+"/api";
+  private provinceUrl ="https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province";
+  private districtsUrl ="https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district";
+  private wardUrl= "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward?district_id";
 
   constructor(private http: HttpClient) { }
 

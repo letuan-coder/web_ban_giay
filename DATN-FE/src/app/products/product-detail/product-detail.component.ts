@@ -41,7 +41,7 @@ export class ProductDetailComponent implements OnInit {
     newColorName: '',
     newColorCode: '',
     isAvailable: 'AVAILABLE',
-    variantRequests: [{ sizes: [] as string[], price: 0, stock: 1 }],
+    variantRequests: [{ sizes: [] as string[], price: 0, stock: 1, weight: 0, height: 0, width: 0, length: 0 }],
     files: [] as File[]
   };
 
@@ -87,20 +87,40 @@ export class ProductDetailComponent implements OnInit {
         const productData = res.data;
         // Restructure data: Group variants under their respective colors
         if (productData && productData.colorResponses && productData.variantDetailResponses) {
-          const variantsByColorId = new Map<string, any[]>();
+          const variantsByColorName = new Map<string, VariantResponse[]>();
 
-          // I'm assuming the variant object has a `productColorId` that links to the colorResponse `id`
+          // Group variantDetailResponses by colorName
           for (const variant of productData.variantDetailResponses) {
-            const productColorId = variant.productColorId;
-            if (!variantsByColorId.has(productColorId)) {
-              variantsByColorId.set(productColorId, []);
+            // Transform size from string to SizeResponse object
+            if (typeof variant.size === 'string') {
+              variant.size = { name: variant.size, code: variant.size };
             }
-            variantsByColorId.get(productColorId)!.push(variant);
+            
+            const colorName = variant.colorName; // Using colorName for grouping
+            if (!variantsByColorName.has(colorName)) {
+              variantsByColorName.set(colorName, []);
+            }
+            variantsByColorName.get(colorName)!.push(variant);
           }
 
-          for (const colorResponse of productData.colorResponses) {
-            colorResponse.variantResponses = variantsByColorId.get(colorResponse.id) || [];
-          }
+          // Map backend colorResponses to frontend ColorVariantResponse structure
+          const mappedColorResponses: ColorVariantResponse[] = productData.colorResponses.map((colorRes: any) => {
+            const colorVariant: ColorVariantResponse = {
+              id: colorRes.productColorId, // Map productColorId to id
+              color: {
+                code: colorRes.hexCode, // Using hexCode as color code
+                name: colorRes.colorName,
+                hexCode: colorRes.hexCode
+              },
+              isAvailable: productData.available, // Assuming product available status for color initially
+              variantResponses: variantsByColorName.get(colorRes.colorName) || [], // Assign grouped variants
+              images: [] // Assuming images are loaded separately or are part of another structure
+            };
+            return colorVariant;
+          });
+
+          // Update productData with the new structure
+          productData.colorResponses = mappedColorResponses;
         }
 
         this.product = productData;
@@ -135,7 +155,7 @@ export class ProductDetailComponent implements OnInit {
           case 'sku': valA = a.sku; valB = b.sku; break;
           case 'size': valA = a.size?.name ?? 0; valB = b.size?.name ?? 0; break;
           case 'price': valA = a.price; valB = b.price; break;
-          case 'stock': valA = a.stock; valB = b.stock; break;
+          case 'stock': valA = a.total_stock; valB = b.total_stock; break;
           default: return 0;
         }
 
@@ -253,7 +273,7 @@ export class ProductDetailComponent implements OnInit {
   }
 
   addVariantGroup(): void {
-    this.newVariantRequest.variantRequests.push({ sizes: [], price: 0, stock: 1 });
+    this.newVariantRequest.variantRequests.push({ sizes: [], price: 0, stock: 1, weight: 0, height: 0, width: 0, length: 0 });
   }
 
   removeVariantGroup(index: number): void {
@@ -310,6 +330,10 @@ export class ProductDetailComponent implements OnInit {
       // Append price and stock for the current variant group
       formData.append(`variantRequests[${i}].price`, variantGroup.price.toString());
       formData.append(`variantRequests[${i}].stock`, variantGroup.stock.toString());
+      formData.append(`variantRequests[${i}].weight`, variantGroup.weight.toString());
+      formData.append(`variantRequests[${i}].height`, variantGroup.height.toString());
+      formData.append(`variantRequests[${i}].width`, variantGroup.width.toString());
+      formData.append(`variantRequests[${i}].length`, variantGroup.length.toString());
       variantGroup.sizes
         .sort((a, b) => {
           const nameA = this.availableSizes.find(s => s.code === a)?.name ?? '';
@@ -411,7 +435,7 @@ export class ProductDetailComponent implements OnInit {
       newColorName: '',
       newColorCode: '',
       isAvailable: 'AVAILABLE',
-      variantRequests: [{ sizes: [], price: 0, stock: 1 }],
+      variantRequests: [{ sizes: [], price: 0, stock: 1, weight: 0, height: 0, width: 0, length: 0 }],
       files: []
     };
     this.selectedSizesGlobal.clear();

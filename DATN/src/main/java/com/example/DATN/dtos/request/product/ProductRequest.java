@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -22,8 +23,10 @@ public class ProductRequest {
     private String description;
     private MultipartFile file;
     private BigDecimal price;
+    private BigDecimal importPrice;
     private List<String> colorCodes;
     private List<String> sizeCodes;
+    private UUID supplierId;
     @NotNull(message = "BRAND_ID_REQUIRED")
     private Long brandId;
     private Double weight;

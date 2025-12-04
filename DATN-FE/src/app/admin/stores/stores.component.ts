@@ -5,8 +5,6 @@ import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http'
 import { Store } from '../../model/store.model';
 import { StoreService } from '../../services/store.service';
 import { ApiResponse } from '../../services/sale.service';
-import { LocationService } from '../../services/location.service';
-import { Province, District, Commune } from '../../model/location.model';
 import { SearchableDropdownComponent } from '../../shared/searchable-dropdown/searchable-dropdown.component';
 
 @Component({
@@ -20,15 +18,8 @@ export class StoresComponent implements OnInit {
   stores: Store[] = [];
   selectedStore: Partial<Store> = {};
   showForm = false;
-  provinces: Province[] = [];
-  districts: District[] = [];
-  communes: Commune[] = [];
 
-  selectedProvinceCode: string | null = null;
-  selectedDistrictCode: string | null = null;
-  selectedCommuneCode: string | null = null;
-
-  // Properties for GHN Integration
+  // Properties for GHN Integration (used by both forms now)
   showGhnForm = false;
   ghnProvinces: any[] = [];
   ghnDistricts: any[] = [];
@@ -37,6 +28,12 @@ export class StoresComponent implements OnInit {
   ghnSelectedProvinceId: number | null = null;
   ghnSelectedDistrictId: number | null = null;
   ghnSelectedWardCode: string | null = null;
+  
+  // Store selected names for building location string in manual form
+  selectedGhnProvinceName: string | null = null;
+  selectedGhnDistrictName: string | null = null;
+  selectedGhnWardName: string | null = null;
+
   searchedGhn = false;
   provinceSearchFields = ['ProvinceName', 'NameExtension'];
   districtSearchFields = ['DistrictName', 'NameExtension'];
@@ -47,43 +44,11 @@ export class StoresComponent implements OnInit {
 
   constructor(
     private storeService: StoreService,
-    private locationService: LocationService,
     private http: HttpClient
   ) { }
 
   ngOnInit(): void {
     this.loadStores();
-    this.loadInitialLocations();
-  }
-
-  loadInitialLocations(): void {
-    this.locationService.getProvinces().subscribe(res => this.provinces = res.data);
-  }
-
-  onProvinceChange(): void {
-    this.selectedDistrictCode = null;
-    this.selectedCommuneCode = null;
-    this.districts = [];
-    this.communes = [];
-
-    if (this.selectedProvinceCode) {
-      this.locationService.getDistricts(this.selectedProvinceCode)
-        .subscribe(res => {
-          this.districts = res.data;
-        });
-    }
-  }
-
-  onDistrictChange(): void {
-    this.selectedCommuneCode = null;
-    this.communes = [];
-
-    if (this.selectedDistrictCode) {
-      this.locationService.getCommunes(this.selectedDistrictCode)
-        .subscribe(res => {
-          this.communes = res.data;
-        });
-    }
   }
 
   loadStores(): void {
@@ -95,71 +60,82 @@ export class StoresComponent implements OnInit {
   showAddForm(): void {
     this.resetForm();
     this.showForm = true;
+    this.loadGhnProvinces(); // Load provinces for the manual form as well
   }
 
   selectStore(store: Store): void {
     this.resetForm();
     this.selectedStore = { ...store };
     this.showForm = true;
+    this.loadGhnProvinces();
     // Note: Pre-filling location dropdowns for editing requires more complex logic
     // to map the stored location string back to province/district/commune codes.
     // This is not implemented here for brevity.
   }
 
   resetForm(): void {
-    // Reset manual form state
     this.selectedStore = { active: true };
     this.showForm = false;
-    this.selectedProvinceCode = null;
-    this.selectedDistrictCode = null;
-    this.selectedCommuneCode = null;
-    this.districts = [];
-    this.communes = [];
-
-    // Reset GHN form state
     this.showGhnForm = false;
+
+    // Reset GHN-related state for both forms
+    this.ghnProvinces = [];
+    this.ghnDistricts = [];
+    this.ghnWards = [];
     this.ghnSelectedProvinceId = null;
     this.ghnSelectedDistrictId = null;
     this.ghnSelectedWardCode = null;
-    this.ghnDistricts = [];
-    this.ghnWards = [];
+    this.selectedGhnProvinceName = null;
+    this.selectedGhnDistrictName = null;
+    this.selectedGhnWardName = null;
+    
+    // Reset GHN search specific state
     this.ghnStoresResult = [];
     this.searchedGhn = false;
   }
 
   saveStore(): void {
     // Check for required location fields first
-    if (!this.selectedProvinceCode || !this.selectedDistrictCode || !this.selectedCommuneCode) {
-      alert('Vui lòng chọn đầy đủ Tỉnh/Thành phố, Quận/Huyện và Phường/Xã.');
+    if (!this.selectedStore.name || !this.ghnSelectedProvinceId || !this.ghnSelectedDistrictId || !this.ghnSelectedWardCode) {
+      alert('Vui lòng điền đầy đủ Tên cửa hàng, Tỉnh/Thành phố, Quận/Huyện và Phường/Xã.');
       return; // Stop the save process
     }
 
-    // Construct location string
-    const province = this.provinces.find(p => p.code === this.selectedProvinceCode);
-    const district = this.districts.find(d => d.code === this.selectedDistrictCode);
-    const commune = this.communes.find(c => c.code === this.selectedCommuneCode);
-
+    // Construct location string from selected GHN names
     const locationParts = [];
     if (this.selectedStore.addressDetail) {
       locationParts.push(this.selectedStore.addressDetail);
     }
-    if (commune) {
-      locationParts.push(commune.nameWithType);
+    if (this.selectedGhnWardName) {
+      locationParts.push(this.selectedGhnWardName);
     }
-    if (district) {
-      locationParts.push(district.nameWithType);
+    if (this.selectedGhnDistrictName) {
+      locationParts.push(this.selectedGhnDistrictName);
     }
-    if (province) {
-      locationParts.push(province.nameWithType);
+    if (this.selectedGhnProvinceName) {
+      locationParts.push(this.selectedGhnProvinceName);
+    }
+    const locationString = locationParts.join(', ');
+
+    const wardCodeInt = parseInt(this.ghnSelectedWardCode, 10);
+    if (isNaN(wardCodeInt)) {
+        alert('Mã Phường/Xã không hợp lệ.');
+        return;
     }
 
-    this.selectedStore.location = locationParts.join(', ');
+    const storeDataToSend = {
+        name: this.selectedStore.name,
+        phoneNumber: this.selectedStore.phoneNumber,
+        active: this.selectedStore.active,
+        location: locationString,
+        provinceCode: this.ghnSelectedProvinceId,
+        districtCode: this.ghnSelectedDistrictId,
+        wardCode: wardCodeInt,
+    };
 
-    if (this.selectedStore.name && this.selectedStore.location) {
-      const { addressDetail, ...storeDataToSend } = this.selectedStore;
 
-      if (storeDataToSend.id) {
-        this.storeService.update(storeDataToSend.id, storeDataToSend)
+    if (this.selectedStore.id) {
+        this.storeService.update(this.selectedStore.id, storeDataToSend)
           .subscribe({
             next: () => {
               this.loadStores();
@@ -177,9 +153,6 @@ export class StoresComponent implements OnInit {
             error: (err) => console.error('Lỗi khi tạo cửa hàng:', err)
           });
       }
-    } else {
-      alert('Vui lòng điền đầy đủ thông tin Tên cửa hàng và Địa chỉ.');
-    }
   }
 
   deleteStore(id: number): void {
@@ -190,7 +163,7 @@ export class StoresComponent implements OnInit {
     }
   }
 
-  // --- GHN Integration Methods ---
+  // --- GHN Integration Methods (now used by both forms) ---
 
   showGhnAddForm(): void {
     this.resetForm();
@@ -215,16 +188,21 @@ export class StoresComponent implements OnInit {
   }
   
   onGhnProvinceSelect(province: any): void {
-    this.ghnSelectedDistrictId = null;
-    this.ghnSelectedWardCode = null;
+    // Clear downstream selections
     this.ghnDistricts = [];
     this.ghnWards = [];
+    this.ghnSelectedDistrictId = null;
+    this.ghnSelectedWardCode = null;
+    this.selectedGhnDistrictName = null;
+    this.selectedGhnWardName = null;
     
     if (province) {
       this.ghnSelectedProvinceId = province.ProvinceID;
+      this.selectedGhnProvinceName = province.ProvinceName;
       this.loadGhnDistricts();
     } else {
       this.ghnSelectedProvinceId = null;
+      this.selectedGhnProvinceName = null;
     }
   }
 
@@ -243,14 +221,18 @@ export class StoresComponent implements OnInit {
   }
 
   onGhnDistrictSelect(district: any): void {
-    this.ghnSelectedWardCode = null;
+    // Clear downstream selections
     this.ghnWards = [];
+    this.ghnSelectedWardCode = null;
+    this.selectedGhnWardName = null;
 
     if (district) {
       this.ghnSelectedDistrictId = district.DistrictID;
+      this.selectedGhnDistrictName = district.DistrictName;
       this.loadGhnWards();
     } else {
       this.ghnSelectedDistrictId = null;
+      this.selectedGhnDistrictName = null;
     }
   }
 
@@ -271,8 +253,10 @@ export class StoresComponent implements OnInit {
   onGhnWardSelect(ward: any): void {
     if (ward) {
       this.ghnSelectedWardCode = ward.WardCode;
+      this.selectedGhnWardName = ward.WardName;
     } else {
       this.ghnSelectedWardCode = null;
+      this.selectedGhnWardName = null;
     }
   }
 

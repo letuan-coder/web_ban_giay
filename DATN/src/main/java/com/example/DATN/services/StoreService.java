@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,9 +22,12 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final StoreMapper storeMapper;
-
+    private final String storeCode="CN";
     public StoreResponse createStore(StoreRequest request) {
+        Long totalStore=storeRepository.count();
+        String code = storeCode + (totalStore + 1);
         Store store = storeMapper.toStore(request);
+        store.setCode(code);
         store = storeRepository.save(store);
         return storeMapper.toStoreResponse(store);
     }
@@ -38,13 +42,13 @@ public class StoreService {
         return new HashSet<>(storeRepository.findAll());
     }
 
-    public StoreResponse getStoreById(Long id) {
+    public StoreResponse getStoreById(UUID id) {
         Store store = storeRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
         return storeMapper.toStoreResponse(store);
     }
 
-    public StoreResponse updateStore(Long id, StoreRequest request) {
+    public StoreResponse updateStore(UUID id, StoreRequest request) {
         Store store = storeRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
         storeMapper.updateStore(store, request);
@@ -52,7 +56,7 @@ public class StoreService {
         return storeMapper.toStoreResponse(store);
     }
 
-    public void deleteStore(Long id) {
+    public void deleteStore(UUID id) {
         Store store = storeRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
         storeRepository.delete(store);

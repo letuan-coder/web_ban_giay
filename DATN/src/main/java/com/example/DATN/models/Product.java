@@ -8,7 +8,9 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -49,13 +51,17 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "category_id")
     Category category;
 
-    Double weight;
     @NotNull
     @Column(name = "thumbnail_url")
     String ThumbnailUrl;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id", nullable = true)
+    Supplier supplier;
+
     String altText;
 
+    BigDecimal importPrice;
     BigDecimal price;
     @ManyToOne
     @JoinColumn(name = "warehouse_id")
@@ -67,4 +73,19 @@ public class Product extends BaseEntity {
             , orphanRemoval = true)
     @JsonManagedReference
     private List<ProductColor> productColors;
+    @ManyToMany(
+            fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            }
+    )
+    @JoinTable(
+            name = "product_promotion",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "promotion_id")
+    )
+    private Set<Promotion> promotions = new HashSet<>();
+
+
 }

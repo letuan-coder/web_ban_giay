@@ -23,6 +23,7 @@ import java.util.List;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
     private final String[] PUBLIC_API =
             {"/api/users/register",
                     "/api/auth/**"
@@ -48,13 +49,20 @@ public class SecurityConfig {
     private String clientSecret;
 
     @Autowired
+    private RateLimitFilter rateLimitFilter;
+
+    @Autowired
     private CustomeJwtDecoder customeJwtDecoder;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.cors(cors -> cors.configurationSource(corsConfigurationSource()));
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
-
+        //rateLimit không dùng trong thời gian dev
+//        httpSecurity.addFilterBefore(
+//                rateLimitFilter,
+//                org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class
+//        );
         httpSecurity.authorizeHttpRequests(request -> request
 
                         .requestMatchers(HttpMethod.GET, "/api/vnpay/return").permitAll()
@@ -70,6 +78,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/provinces/**", "/api/districts/**", "/api/communes/**").permitAll()
                         .anyRequest().authenticated()
         );
+
         httpSecurity.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwtConfigurer -> jwtConfigurer
                                 .decoder(customeJwtDecoder)

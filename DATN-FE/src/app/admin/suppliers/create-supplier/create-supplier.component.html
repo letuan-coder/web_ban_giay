@@ -1,0 +1,119 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title text-center mb-4">Thêm Nhà Cung Cấp Mới</h3>
+          
+          <div *ngIf="message" class="alert mb-3"
+           [ngClass]="{'alert-success': isSuccess, 'alert-danger': !isSuccess}">
+            {{ message }}
+          </div>
+
+          <form [formGroup]="supplierForm" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label for="name" class="form-label">Tên Nhà Cung Cấp</label>
+              <input type="text" id="name" formControlName="name" class="form-control"
+                     [ngClass]="{'is-invalid': f['name'].invalid && f['name'].touched}">
+              <div *ngIf="f['name'].invalid && f['name'].touched" class="invalid-feedback">
+                <div *ngIf="f['name'].errors?.['required']">Tên nhà cung cấp không được để trống.</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="taxCode" class="form-label">Mã Số Thuế</label>
+              <input type="text" id="taxCode" formControlName="taxCode" class="form-control"
+                     [ngClass]="{'is-invalid': f['taxCode'].invalid && f['taxCode'].touched}">
+              <div *ngIf="f['taxCode'].invalid && f['taxCode'].touched" class="invalid-feedback">
+                <div *ngIf="f['taxCode'].errors?.['required']">Mã số thuế không được để trống.</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" id="email" formControlName="email" class="form-control"
+                     [ngClass]="{'is-invalid': f['email'].invalid && f['email'].touched}">
+              <div *ngIf="f['email'].invalid && f['email'].touched" class="invalid-feedback">
+                <div *ngIf="f['email'].errors?.['required']">Email không được để trống.</div>
+                <div *ngIf="f['email'].errors?.['email']">Email không hợp lệ.</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="phoneNumber" class="form-label">Số Điện Thoại</label>
+              <input type="text" id="phoneNumber" formControlName="phoneNumber" class="form-control"
+                     [ngClass]="{'is-invalid': f['phoneNumber'].invalid && f['phoneNumber'].touched}">
+              <div *ngIf="f['phoneNumber'].invalid && f['phoneNumber'].touched" class="invalid-feedback">
+                <div *ngIf="f['phoneNumber'].errors?.['required']">Số điện thoại không được để trống.</div>
+                <div *ngIf="f['phoneNumber'].errors?.['pattern']">Số điện thoại không hợp lệ.</div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-8 mb-3">
+                <label for="province" class="form-label">Tỉnh/Thành phố</label>
+                <app-searchable-dropdown
+                  [data]="ghnProvinces"
+                  displayField="ProvinceName"
+                  [searchFields]="provinceSearchFields"
+                  placeholder="Tìm tỉnh/thành phố..."
+                  (selectionChange)="onGhnProvinceSelect($event)">
+                </app-searchable-dropdown>
+                <div *ngIf="submitted && !selectedProvince" class="invalid-feedback d-block">
+                    Tỉnh/Thành phố không được để trống.
+                </div>
+              </div>
+              <div class="col-md-8 mb-3">
+                <label for="district" class="form-label">Quận/Huyện</label>
+                <app-searchable-dropdown
+                  [data]="ghnDistricts"
+                  displayField="DistrictName"
+                  [searchFields]="districtSearchFields"
+                  placeholder="Tìm quận/huyện..."
+                  (selectionChange)="onGhnDistrictSelect($event)">
+                </app-searchable-dropdown>
+                <div *ngIf="submitted && !selectedDistrict" class="invalid-feedback d-block">
+                    Quận/Huyện không được để trống.
+                </div>
+              </div>
+              <div class="col-md-8 mb-3">
+                <label for="commune" class="form-label">Phường/Xã</label>
+                <app-searchable-dropdown
+                  [data]="ghnCommunes"
+                  displayField="WardName"
+                  [searchFields]="communeSearchFields"
+                  placeholder="Tìm phường/xã..."
+                  (selectionChange)="onGhnCommuneSelect($event)">
+                </app-searchable-dropdown>
+                <div *ngIf="submitted && !selectedCommune" class="invalid-feedback d-block">
+                    Phường/Xã không được để trống.
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="streetAddress" class="form-label">Địa chỉ chi tiết (Số nhà, tên đường)</label>
+              <input type="text" id="streetAddress" formControlName="streetAddress" class="form-control"
+                     [ngClass]="{'is-invalid': f['streetAddress'].invalid && f['streetAddress'].touched}">
+              <div *ngIf="f['streetAddress'].invalid && f['streetAddress'].touched" class="invalid-feedback">
+                <div *ngIf="f['streetAddress'].errors?.['required']">Địa chỉ chi tiết không được để trống.</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="status" class="form-label">Trạng Thái</label>
+              <select id="status" formControlName="status" class="form-select">
+                <option *ngFor="let status of supplierStatuses" [value]="status">{{ status }}</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100" [disabled]="loading">
+              <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              {{ loading ? 'Đang tạo...' : 'Thêm Nhà Cung Cấp' }}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

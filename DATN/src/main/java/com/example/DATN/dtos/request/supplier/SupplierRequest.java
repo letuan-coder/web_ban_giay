@@ -17,6 +17,8 @@ public class SupplierRequest {
     @NotBlank(message = "Tên nhà cung cấp không được để trống")
     private String name;
 
+    private String supplierCode;
+
     @NotBlank(message = "Mã số thuế không được để trống")
     private String taxCode;
 
@@ -31,5 +33,5 @@ public class SupplierRequest {
     @NotBlank(message = "Địa chỉ nhà cung cấp không được để trống")
     private String supplierAddress;
 
-    private SupplierStatus status; // Optional, can be defaulted
+    private SupplierStatus status;
 }

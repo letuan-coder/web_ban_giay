@@ -40,16 +40,16 @@ public class OrderService {
     private final ProductVariantRepository productVariantRepository;
     private final UserAddressRepository userAddressRepository;
     private final OrderItemRepository orderItemRepository;
-
+    private final String OrderCodePrefix = "OD";
 
     @Transactional
-    public void confirmOrder(Long orderId,OrderStatus status) {
-        if(status==OrderStatus.CONFIRMED) {
+    public void confirmOrder(Long orderId, OrderStatus status) {
+        if (status == OrderStatus.CONFIRMED) {
             List<Integer> pickingShift = List.of(1, 2, 3);
 
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
-            long codAmountLong = 0L; // biến long
+            long codAmountLong = 0L;
             List<OrderItem> orderItem = orderItemRepository.findAllByOrder(order);
             if (order.getPaymentStatus() == PaymentStatus.UNPAID) {
                 codAmountLong = order.getTotal_price().longValue(); // ép BigDecimal sang long
@@ -108,7 +108,7 @@ public class OrderService {
                     .items(listProduct)
                     .build();
             GhnService.createOrder(ghnOrderInfo);
-        }else{
+        } else {
             throw new ApplicationException(ErrorCode.ORDER_STATUS_INVALID);
         }
 
@@ -130,9 +130,10 @@ public class OrderService {
         List<ProductVariant> listProductVariant =
                 productVariantRepository.findAllById(uuidList);
         Order order = new Order();
-        Long orderId = snowflakeIdGenerator.nextId();
-        order.setId(orderId);
         order.setUser(user);
+        Long code= snowflakeIdGenerator.nextId();
+        String orderCode = OrderCodePrefix+code;
+        order.setOrderCode(orderCode);
         order.setUserAddress(userAddress);
         order.setCreatedAt(LocalDateTime.now());
         order.setOrderStatus(OrderStatus.PENDING);

@@ -5,9 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Data
@@ -17,14 +19,19 @@ import java.util.Set;
 @Table(name = "store")
 public class Store extends BaseEntity {
     @Id
-    @GeneratedValue
-    private Long id;
+    @UuidGenerator
+    private UUID id;
+    private String code;
 
     @Column(nullable = false, unique = true)
     private String name;
 
     @Column(nullable = false, unique = true)
     private String location;
+
+    private Integer provinceCode;
+    private Integer districtCode;
+    private Integer wardCode;
 
     @Column(nullable = false, unique = true)
     private String phoneNumber;

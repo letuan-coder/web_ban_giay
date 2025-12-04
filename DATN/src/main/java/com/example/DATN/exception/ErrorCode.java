@@ -35,7 +35,7 @@ public enum ErrorCode {
     PROMOTION_NOT_FOUND(1088, "Promotion not found", HttpStatus.NOT_FOUND),
 
     // Product
-
+    INVALID_PRICE(1209,"price must be higher import price",HttpStatus.BAD_REQUEST),
     PRODUCT_NOT_AVAILABLE(1099, "product is not available", HttpStatus.BAD_REQUEST),
     INVALID_HEX_CODE(1038, "Invalid hex color code", HttpStatus.BAD_REQUEST),
     HEXCODE_ALREADY_EXISTS(1037, "Hex code already exists", HttpStatus.BAD_REQUEST),
@@ -131,7 +131,7 @@ public enum ErrorCode {
     REFUND_NOT_ALLOWDED(1128, "refund is not allowded", HttpStatus.BAD_REQUEST),
 
     // Generic
-
+    INVALID_INPUT(9998,"INVALID_INPUT",HttpStatus.BAD_REQUEST),
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final int code;

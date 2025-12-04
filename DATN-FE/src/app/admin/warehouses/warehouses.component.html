@@ -1,0 +1,86 @@
+<div class="container mt-4">
+  <h2>Quản lý Kho</h2>
+
+  <!-- Add/Edit Form -->
+  <div *ngIf="showForm" class="card my-4">
+    <div class="card-body">
+      <h5 class="card-title">{{ selectedWarehouse.warehouseCode }}</h5>
+      <form (ngSubmit)="saveWarehouse()">
+        <div class="mb-3">
+          <label for="warehouseName" class="form-label">Tên kho</label>
+          <input type="text" class="form-control" id="warehouseName" [(ngModel)]="selectedWarehouse.name" name="name"
+            required>
+        </div>
+
+        <!-- Location Dropdowns -->
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Tỉnh/Thành phố</label>
+            <app-searchable-dropdown [data]="ghnProvinces" displayField="ProvinceName"
+              [searchFields]="provinceSearchFields" placeholder="Tìm tỉnh/thành phố..."
+              (selectionChange)="onGhnProvinceSelect($event)">
+            </app-searchable-dropdown>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Quận/Huyện</label>
+            <app-searchable-dropdown [data]="ghnDistricts" displayField="DistrictName"
+              [searchFields]="districtSearchFields" placeholder="Tìm quận/huyện..."
+              (selectionChange)="onGhnDistrictSelect($event)">
+            </app-searchable-dropdown>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Phường/Xã</label>
+            <app-searchable-dropdown [data]="ghnWards" displayField="WardName" [searchFields]="wardSearchFields"
+              placeholder="Tìm phường/xã..." (selectionChange)="onGhnWardSelect($event)">
+            </app-searchable-dropdown>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="warehouseAddressDetail" class="form-label">Địa chỉ chi tiết (Số nhà, tên đường)</label>
+          <input type="text" class="form-control" id="warehouseAddressDetail"
+            [(ngModel)]="selectedWarehouse.addressDetail" name="addressDetail">
+        </div>
+
+        <div class="mb-3">
+          <label for="warehouseCapacity" class="form-label">Sức chứa</label>
+          <input [currencyMask]="{ prefix: '', thousands: '.', align: 'left', precision: 0 }" type="text"
+            class="form-control" [(ngModel)]="warehouseCapacityRaw" (ngModelChange)="onCapacityChange($event)"
+            name="capacity" />
+
+        </div>
+
+        <button type="submit" class="btn btn-primary me-2">Lưu</button>
+        <button type="button" class="btn btn-secondary" (click)="resetForm()">Hủy</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Button -->
+  <button *ngIf="!showForm" class="btn btn-success mb-3" (click)="showAddForm()">Thêm Kho</button>
+
+  <!-- Warehouses Table -->
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">Mã Kho</th>
+        <th scope="col">Tên</th>
+        <th scope="col">Vị trí</th>
+        <th scope="col">Sức chứa</th>
+        <th scope="col">Hành động</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let warehouse of warehouses">
+        <th scope="row">{{ warehouse.warehouseCode }}</th>
+        <td>{{ warehouse.name }}</td>
+        <td>{{ warehouse.location }}</td>
+        <td>{{ warehouse.capacity | number:'1.0-0' }}</td>
+        <td>
+          <button class="btn btn-sm btn-warning me-2" (click)="selectWarehouse(warehouse)">Sửa</button>
+          <button class="btn btn-sm btn-danger" (click)="deleteWarehouse(warehouse.warehouseCode)">Xóa</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

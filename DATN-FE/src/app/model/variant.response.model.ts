@@ -5,15 +5,18 @@ export interface SizeResponse {
 
 export interface VariantResponse {
   id: string;
-  size?: SizeResponse; 
+  size?: SizeResponse;
   isAvailable: string;
   price: number;
   discountPrice: number | null;
-  stock: number;
+  total_stock: number;
   sku: string;
-  createdAt: string; 
+  weight: number;
+  height: number;
+  width: number;
+  length: number;
+  createdAt: string;
 }
-
 export interface ImageResponse {
   id: number;
   imageUrl: string;

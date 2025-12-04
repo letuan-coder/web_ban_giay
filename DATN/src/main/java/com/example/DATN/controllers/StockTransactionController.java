@@ -1,6 +1,5 @@
 package com.example.DATN.controllers;
 
-import com.example.DATN.dtos.request.CreateMissingItemsInvoiceRequest;
 import com.example.DATN.dtos.request.StockTransactionRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.StockTransactionResponse;
@@ -29,14 +28,14 @@ public class StockTransactionController {
                 .build();
     }
 
-    @PostMapping("/create-missing-items-invoice")
-    public ApiResponse<String> createMissingItemsInvoice(
-            @RequestBody CreateMissingItemsInvoiceRequest request) {
-        transactionService.createMissingItemsInvoice(request);
-        return ApiResponse.<String>builder()
-                .data("Missing items invoice created successfully.")
-                .build();
-    }
+//    @PostMapping("/create-missing-items-invoice")
+//    public ApiResponse<String> createMissingItemsInvoice(
+//            @RequestBody CreateMissingItemsInvoiceRequest request) {
+//        transactionService.createMissingItemsInvoice(request);
+//        return ApiResponse.<String>builder()
+//                .data("Missing items invoice created successfully.")
+//                .build();
+//    }
 
     @GetMapping
     public ApiResponse<List<StockTransactionResponse>> getAllTransactions() {

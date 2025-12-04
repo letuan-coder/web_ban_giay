@@ -9,7 +9,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface PromotionMapper {
 
-    @Mapping(target = "productVariants", ignore = true)
     Promotion toPromotion(PromotionRequest request);
 
     PromotionResponse toPromotionResponse(Promotion promotion);

@@ -18,7 +18,6 @@ public interface OrderItemMapper {
     OrderItem toOrderItem(OrderItemRequest request);
 
     @Mapping(target = "productName",source = "productVariant.productColor.product.name")
-    @Mapping(target = "discountPrice",source = "productVariant.discountPrice")
     @Mapping(target = "colorName",source = "productVariant.productColor.color.name")
     @Mapping(target = "sizeName",source = "productVariant.size.name")
     @Mapping(target = "price", source = "price")

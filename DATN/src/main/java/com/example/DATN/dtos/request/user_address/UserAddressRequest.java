@@ -3,9 +3,15 @@ package com.example.DATN.dtos.request.user_address;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class UserAddressRequest {
 
     @NotBlank(message = "Receiver name is required")
@@ -17,12 +23,15 @@ public class UserAddressRequest {
 
     @NotBlank(message = "Province ID is required")
     private String provinceId;
+    private String provinceName;
 
     @NotBlank(message = "District ID is required")
-    private String districtId;
+    private Integer districtId;
+    private String districtName;
 
-    @NotBlank(message = "Commune ID is required")
-    private String communeId;
+    @NotBlank(message = "Ward ID is required")
+    private String wardId;
+    private String wardName;
 
     @NotBlank(message = "Street detail is required")
     private String streetDetail;

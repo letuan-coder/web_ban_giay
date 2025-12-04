@@ -6,7 +6,7 @@ import java.util.UUID;
 
 @Data
 public class StockTransactionItemResponse {
-    private Long id;
+    private UUID id;
     private UUID variantId;
     private String variantSku; // For convenience
     private Integer quantity;

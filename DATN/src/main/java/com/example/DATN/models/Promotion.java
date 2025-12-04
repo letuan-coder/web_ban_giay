@@ -6,10 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,7 +31,7 @@ public class Promotion extends BaseEntity {
     private String description;
 
     @Column(nullable = false)
-    private Double discountValue;
+    private BigDecimal discountValue;
 
     @Column(nullable = false)
     private LocalDateTime startDate;
@@ -39,21 +39,20 @@ public class Promotion extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime endDate;
 
+    @Column(name = "daily_start_time")
+    private LocalTime dailyStartTime;
+
+    @Column(name = "daily_end_time")
+    private LocalTime dailyEndTime;
+
     @Enumerated(EnumType.STRING)
     private PromotionType promotionType;
 
     @Column(nullable = false)
     private Boolean active = true;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-            name = "promotion_product_variant",
-            joinColumns = @JoinColumn(name = "promotion_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_variant_id")
-    )
-    @OnDelete(action = OnDeleteAction.CASCADE)
-
-    private Set<ProductVariant> productVariants = new HashSet<>();
+    @ManyToMany(mappedBy = "promotions")
+    private Set<Product> products = new HashSet<>();
 
 
 }

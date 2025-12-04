@@ -42,7 +42,6 @@ public class ProductVariant extends BaseEntity {
 
     BigDecimal price;
 
-    BigDecimal discountPrice;
 
     @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL)
     private Set<Stock> stocks = new HashSet<>();
@@ -60,8 +59,5 @@ public class ProductVariant extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     Is_Available isAvailable = Is_Available.AVAILABLE;
-
-    @ManyToMany(mappedBy = "productVariants")
-    private Set<Promotion> promotions = new HashSet<>();
 
 }

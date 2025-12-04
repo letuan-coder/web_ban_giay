@@ -15,7 +15,10 @@ import { BannerListComponent } from './banner/banner-list/banner-list.component'
 import { StoresComponent } from './admin/stores/stores.component';
 import { StocksComponent } from './admin/stocks/stocks.component';
 import { StockTransactionComponent } from './admin/stock-transaction/stock-transaction.component';
-import { OrdersComponent } from './admin/orders/orders.component';
+import { CreateSupplierComponent } from './admin/suppliers/create-supplier/create-supplier.component'; // Import the new component
+import { WarehousesComponent } from './admin/warehouses/warehouses.component';
+import { SupplierListComponent } from './admin/suppliers/supplier-list/supplier-list.component'; // Import the new component
+// import { OrdersComponent } from './admin/orders/orders.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -32,8 +35,11 @@ export const routes: Routes = [
   { path: 'admin/brands', component: BrandsComponent },
   { path: 'admin/banners', component: BannerListComponent },
   { path: 'admin/stores', component: StoresComponent },
+  { path: 'admin/warehouses', component: WarehousesComponent },
   { path: 'admin/stocks', component: StocksComponent },
   { path: 'admin/stock-transaction', component: StockTransactionComponent },
-  { path: 'admin/orders', component: OrdersComponent },
+  { path: 'admin/suppliers', component: SupplierListComponent }, // New route for SupplierListComponent
+  { path: 'admin/suppliers/create', component: CreateSupplierComponent }, // New route for CreateSupplierComponent
+  // { path: 'admin/orders', component: OrdersComponent },
   { path: 'promotions', component: PromotionsComponent }
 ];

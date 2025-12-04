@@ -1,5 +1,6 @@
 package com.example.DATN.services;
 
+import cn.ipokerface.snowflake.SnowflakeIdGenerator;
 import com.example.DATN.constant.SupplierStatus;
 import com.example.DATN.dtos.request.supplier.SupplierRequest;
 import com.example.DATN.dtos.respone.supplier.SupplierResponse;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,9 +23,11 @@ public class SupplierService {
 
     private final SupplierRepository supplierRepository;
     private final SupplierMapper supplierMapper;
-
+    private final String SupplierCodePrefix= "NCC";
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
     @Transactional
     public SupplierResponse createSupplier(SupplierRequest request) {
+
         if (supplierRepository.findByName(request.getName()).isPresent()) {
             throw new ApplicationException(ErrorCode.SUPPLIER_NAME_EXISTED);
         }
@@ -40,10 +44,17 @@ public class SupplierService {
         Supplier supplier = supplierMapper.toSupplier(request);
         if (request.getStatus() == null) {
             supplier.setStatus(SupplierStatus.ACTIVE);
+
         }
+        long code = snowflakeIdGenerator.nextId();;
+        String supplierCode = generator(SupplierCodePrefix,code);
+        supplier.setSupplierCode(supplierCode);
         return supplierMapper.toSupplierResponse(supplierRepository.save(supplier));
     }
 
+    public String generator(String prefix, long index) {
+        return String.format("%s-%d", prefix, index);
+    }
     public List<SupplierResponse> getAllSuppliers() {
         return supplierRepository.findAll().stream()
                 .map(supplierMapper::toSupplierResponse)
@@ -52,14 +63,14 @@ public class SupplierService {
 
 
 
-    public SupplierResponse getSupplierById(Long id) {
+    public SupplierResponse getSupplierById(UUID id) {
         Supplier supplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.SUPPLIER_NOT_FOUND));
         return supplierMapper.toSupplierResponse(supplier);
     }
 
     @Transactional
-    public SupplierResponse updateSupplier(Long id, SupplierRequest request) {
+    public SupplierResponse updateSupplier(UUID id, SupplierRequest request) {
         Supplier existingSupplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.SUPPLIER_NOT_FOUND));
 
@@ -82,7 +93,7 @@ public class SupplierService {
     }
 
     @Transactional
-    public void deleteSupplier(Long id) {
+    public void deleteSupplier(UUID id) {
         if (!supplierRepository.existsById(id)) {
             throw new ApplicationException(ErrorCode.SUPPLIER_NOT_FOUND);
         }

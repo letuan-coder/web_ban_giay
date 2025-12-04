@@ -30,20 +30,11 @@ public class UserAddress extends BaseEntity{
 
     @Column(nullable = false, length = 20)
     private String phoneNumber;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "province_id", nullable = false)
-    private Province province;
+    
     private String provinceCode;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "district_id", nullable = false)
-    private District district;
     private Integer districtCode;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "commune_id", nullable = false)
-    private Commune commune;
     private String wardCode;
 
     @Column(nullable = false, length = 500)

@@ -2,27 +2,31 @@ package com.example.DATN.dtos.respone;
 
 import com.example.DATN.constant.TransactionStatus;
 import com.example.DATN.constant.TransactionType;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
 public class StockTransactionResponse {
-    private Long id;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private UUID id;
     private TransactionType type;
     private TransactionStatus transactionStatus;
-    private Long supplierId;
+    private UUID supplierId;
     private String supplierName;
-    private Long fromWarehouseId;
+    private UUID fromWarehouseId;
     private String fromWarehouseName;
-    private Long fromStoreId;
+    private UUID fromStoreId;
     private String fromStoreName;
-    private Long toWarehouseId;
+    private UUID toWarehouseId;
     private String toWarehouseName;
-    private Long toStoreId;
+    private UUID toStoreId;
     private String toStoreName;
     private LocalDateTime createdDate;
     private List<StockTransactionItemResponse> items;

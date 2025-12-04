@@ -51,17 +51,12 @@ public class CartItemGuestService {
             }
             response.setCartItems(listItem);
             response.setGuest_key(guest_key);
-            if (variant.getDiscountPrice() == null) {
-                BigDecimal newTotalPrice = response.getCartItems().stream()
-                        .map(itemCart -> itemCart.getProductVariant().getPrice().multiply(new BigDecimal(itemCart.getQuantity())))
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-                response.setTotal_price(newTotalPrice);
-            } else {
+
                 BigDecimal newTotalPrice = response.getCartItems().stream()
                         .map(Itemcart -> Itemcart.getProductVariant().getDiscountPrice().multiply(new BigDecimal(Itemcart.getQuantity())))
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
                 response.setTotal_price(newTotalPrice);
-            }
+
             redisTemplate.opsForValue().set(guest_key, response, 7, TimeUnit.DAYS);
             return response;
         }

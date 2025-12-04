@@ -33,21 +33,25 @@ public class WareHouseController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<WareHouseResponse> getWareHouseById(@PathVariable Long id) {
+    public ApiResponse<WareHouseResponse> getWareHouseById
+            (@PathVariable String id) {
         return ApiResponse.<WareHouseResponse>builder()
                 .data(wareHouseService.getWareHouseById(id))
                 .build();
     }
 
-    @PutMapping("/{id}")
-    public ApiResponse<WareHouseResponse> updateWareHouse(@PathVariable Long id, @RequestBody @Valid WareHouseRequest request) {
+    @PatchMapping("/{id}")
+    public ApiResponse<WareHouseResponse> updateWareHouse
+            (@PathVariable String id, @RequestBody @Valid WareHouseRequest request) {
         return ApiResponse.<WareHouseResponse>builder()
                 .data(wareHouseService.updateWareHouse(id, request))
                 .build();
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> deleteWareHouse(@PathVariable Long id) {
+    public ApiResponse<Void> deleteWareHouse(
+            @PathVariable String id
+    ) {
         wareHouseService.deleteWareHouse(id);
         return ApiResponse.<Void>builder().build();
     }

@@ -10,7 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WareHouseResponse {
-    private Long id;
+    private String warehouseCode;
+    private Integer provinceCode;
+    private Integer districtCode;
+    private Integer wardCode;
     private String name;
     private String location;
     private Integer capacity;

@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class StoreResponse {
-    private Long id;
+    private String code;
     private String name;
     private String location;
     private String phoneNumber;

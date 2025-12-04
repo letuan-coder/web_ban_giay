@@ -1,48 +1,74 @@
 <div class="container mt-4">
-  <h2>Quản lý Hàng tồn kho</h2>
+  <h2>Xác nhận Nhập kho</h2>
 
-  <!-- Add/Edit Form -->
-  <div *ngIf="showForm" class="card my-4">
+  <!-- Search Form -->
+  <div class="card my-4">
     <div class="card-body">
-      <h5 class="card-title">{{ selectedStock.id ? 'Chỉnh sửa Hàng tồn kho' : 'Thêm Hàng tồn kho mới' }}</h5>
-      <form (ngSubmit)="saveStock()">
-        <div class="mb-3">
-          <label for="stockName" class="form-label">Tên sản phẩm</label>
-          <input type="text" class="form-control" id="stockName" [(ngModel)]="selectedStock.name" name="name" required>
-        </div>
-        <div class="mb-3">
-          <label for="stockQuantity" class="form-label">Số lượng</label>
-          <input type="number" class="form-control" id="stockQuantity" [(ngModel)]="selectedStock.quantity" name="quantity" required>
-        </div>
-        <button type="submit" class="btn btn-primary me-2">Lưu</button>
-        <button type="button" class="btn btn-secondary" (click)="resetForm()">Hủy</button>
-      </form>
+      <h5 class="card-title">Tìm Phiếu Giao Dịch Kho</h5>
+      <div class="input-group">
+        <input type="text" class="form-control" placeholder="Nhập ID Phiếu kho..."
+         [(ngModel)]="transactionIdToSearch" (keyup.enter)="findTransaction()">
+        <button class="btn btn-primary" type="button" (click)="findTransaction()" 
+        [disabled]="!transactionIdToSearch || loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          {{ loading ? 'Đang tìm...' : 'Tìm kiếm' }}
+        </button>
+      </div>
+      <div *ngIf="message" class="alert mt-3" [ngClass]="isError ? 'alert-danger' : 'alert-success'">
+        {{ message }}
+      </div>
     </div>
   </div>
 
-  <!-- Add Button -->
-  <button *ngIf="!showForm" class="btn btn-success mb-3" (click)="showAddForm()">Thêm Hàng tồn kho</button>
+  <!-- Transaction Details & Items Form -->
+  <form *ngIf="transaction" [formGroup]="receiptForm" (ngSubmit)="confirmReceipt()">
+    <div class="card my-4">
+      <div class="card-header">
+        <h5 class="mb-0">Chi tiết Phiếu Giao Dịch #{{ transaction.id }}</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4"><strong>Loại:</strong> {{ transaction.type }}</div>
+          <div class="col-md-4"><strong>Trạng thái:</strong> {{ transaction.transactionStatus }}</div>
+          <div class="col-md-4"><strong>Ngày tạo:</strong> {{ transaction.createdDate | date:'short' }}</div>
+          <div class="col-md-4 mt-2"><strong>Từ:</strong> {{ transaction.fromWarehouseName || transaction.fromStoreName || transaction.supplierName || 'N/A' }}</div>
+          <div class="col-md-4 mt-2"><strong>Tới:</strong> {{ transaction.toWarehouseName || transaction.toStoreName || 'N/A' }}</div>
+        </div>
+      </div>
+      <div class="card-body border-top">
+        <h6 class="card-subtitle mb-2 text-muted">Sản phẩm trong phiếu</h6>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Sản phẩm</th>
+                <th scope="col">SKU</th>
+                <th scope="col" class="text-center">Số lượng dự kiến</th>
+                <th scope="col" style="min-width: 150px;">Số lượng thực nhận</th>
+              </tr>
+            </thead>
+            <tbody formArrayName="items">
+              <tr *ngFor="let item of receiptItems.controls; let i = index" [formGroupName]="i">
+                <td>
+                  {{ item.value.variant.product.name }}
+                  <small class="d-block text-muted">{{ item.value.variant.color.name }} - {{ item.value.variant.size.name }}</small>
+                </td>
+                <td>{{ item.value.variant.sku }}</td>
+                <td class="text-center">{{ item.value.expectedQuantity }}</td>
+                <td>
+                  <input type="number" class="form-control" formControlName="actualQuantity" min="0">
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-  <!-- Stocks Table -->
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th scope="col">ID</th>
-        <th scope="col">Tên sản phẩm</th>
-        <th scope="col">Số lượng</th>
-        <th scope="col">Hành động</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let stock of stocks">
-        <th scope="row">{{ stock.id }}</th>
-        <td>{{ stock.name }}</td>
-        <td>{{ stock.quantity }}</td>
-        <td>
-          <button class="btn btn-sm btn-warning me-2" (click)="selectStock(stock)">Sửa</button>
-          <button class="btn btn-sm btn-danger" (click)="deleteStock(stock.id)">Xóa</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+    <button type="submit" class="btn btn-success" [disabled]="receiptForm.invalid || submitting">
+      <span *ngIf="submitting" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      {{ submitting ? 'Đang xử lý...' : 'Xác nhận Nhập kho' }}
+    </button>
+  </form>
+
 </div>

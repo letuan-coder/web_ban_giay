@@ -6,6 +6,8 @@ import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.PageResponse;
 import com.example.DATN.dtos.respone.product.ProductDetailReponse;
 import com.example.DATN.dtos.respone.product.ProductResponse;
+import com.example.DATN.dtos.respone.product.ProductSupplierResponse;
+import com.example.DATN.dtos.respone.product.SearchProductResponse;
 import com.example.DATN.services.ImageProductService;
 import com.example.DATN.services.ProductService;
 import jakarta.validation.Valid;
@@ -86,10 +88,17 @@ public class ProductController {
     }
 
     @GetMapping("/code/{productCode}")
-    public ApiResponse<List<ProductResponse>> getProductByProductCode(
+    public ApiResponse<List<SearchProductResponse>> getProductByProductCode(
             @PathVariable String productCode) {
-        return ApiResponse.<List<ProductResponse>>builder()
+        return ApiResponse.<List<SearchProductResponse>>builder()
                 .data(productService.getProductByProductCode(productCode))
+                .build();
+    }
+    @GetMapping("/supplier/{supplierId}")
+    public ApiResponse<List<ProductSupplierResponse>> getProductByProductCode(
+            @PathVariable UUID supplierId) {
+        return ApiResponse.<List<ProductSupplierResponse>>builder()
+                .data(productService.getProductBySupplierId(supplierId))
                 .build();
     }
 
@@ -102,7 +111,8 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<ProductDetailReponse> getProductById(@PathVariable UUID id) {
+    public ApiResponse<ProductDetailReponse> getProductById
+            (@PathVariable UUID id) {
         return ApiResponse.<ProductDetailReponse>builder()
                 .data(productService.getProductById(id))
                 .build();

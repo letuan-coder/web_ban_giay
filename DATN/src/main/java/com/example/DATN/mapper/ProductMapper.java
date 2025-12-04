@@ -4,6 +4,8 @@ package com.example.DATN.mapper;
 import com.example.DATN.dtos.request.product.ProductRequest;
 import com.example.DATN.dtos.respone.product.ProductDetailReponse;
 import com.example.DATN.dtos.respone.product.ProductResponse;
+import com.example.DATN.dtos.respone.product.ProductSupplierResponse;
+import com.example.DATN.dtos.respone.product.SearchProductResponse;
 import com.example.DATN.models.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -11,7 +13,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring", uses = {
         ImageProductMapper.class,
         ProductColorMapper.class,
-        ProductVariantMapper.class})
+        ProductVariantMapper.class,
+        SupplierMapper.class})
 public interface ProductMapper {
     @Mapping(source = "available",target = "available")
     @Mapping(source = "productColors", target = "colorResponses")
@@ -30,6 +33,11 @@ public interface ProductMapper {
     @Mapping(target = "category.id",source = "categoryId")
     Product toProduct(ProductRequest productRequest);
 
+    @Mapping(target = "supplierId",source = "supplier.id")
+    @Mapping(target = "productCode",source = "productCode")
+    @Mapping(target = "id",source = "id")
+    ProductSupplierResponse toSupplierDetail(Product product);
+
     @Mapping(source = "productColors",target = "colorResponses")
     @Mapping(
             source = "productColors",
@@ -38,5 +46,8 @@ public interface ProductMapper {
     )
     ProductDetailReponse toDetail (Product product);
 
-
+    @Mapping( source = "productColors",
+            target = "variantDetailResponses",
+            qualifiedByName = "productColorsToVariantDetails")
+    SearchProductResponse toSearchDetail(Product product);
 }

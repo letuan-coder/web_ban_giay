@@ -10,7 +10,7 @@ import java.util.List;
 
 @Data
 public class OrderResponse {
-    private Long id;
+    private String orderCode;
     private String userName;
     private String userAddress;
     private String phoneNumber;

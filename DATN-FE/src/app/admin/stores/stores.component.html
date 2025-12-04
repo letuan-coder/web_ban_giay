@@ -14,25 +14,34 @@
         <!-- Location Dropdowns -->
         <div class="row">
           <div class="col-md-4 mb-3">
-            <label for="province" class="form-label">Tỉnh/Thành phố</label>
-            <select id="province" class="form-select" [(ngModel)]="selectedProvinceCode" name="province" (change)="onProvinceChange()">
-              <option [ngValue]="01" disabled>Chọn Tỉnh/Thành phố</option>
-              <option *ngFor="let province of provinces" [value]="province.code">{{ province.nameWithType }}</option>
-            </select>
+            <label class="form-label">Tỉnh/Thành phố</label>
+            <app-searchable-dropdown
+              [data]="ghnProvinces"
+              displayField="ProvinceName"
+              [searchFields]="provinceSearchFields"
+              placeholder="Tìm tỉnh/thành phố..."
+              (selectionChange)="onGhnProvinceSelect($event)">
+            </app-searchable-dropdown>
           </div>
           <div class="col-md-4 mb-3">
-            <label for="district" class="form-label">Quận/Huyện</label>
-            <select id="district" class="form-select" [(ngModel)]="selectedDistrictCode" name="district" (change)="onDistrictChange()" [disabled]="!selectedProvinceCode">
-              <option [ngValue]="null" disabled>Chọn Quận/Huyện</option>
-              <option *ngFor="let district of districts" [value]="district.code">{{ district.nameWithType }}</option>
-            </select>
+            <label class="form-label">Quận/Huyện</label>
+            <app-searchable-dropdown
+              [data]="ghnDistricts"
+              displayField="DistrictName"
+              [searchFields]="districtSearchFields"
+              placeholder="Tìm quận/huyện..."
+              (selectionChange)="onGhnDistrictSelect($event)">
+            </app-searchable-dropdown>
           </div>
           <div class="col-md-4 mb-3">
-            <label for="commune" class="form-label">Phường/Xã</label>
-            <select id="commune" class="form-select" [(ngModel)]="selectedCommuneCode" name="commune" [disabled]="!selectedDistrictCode">
-              <option [ngValue]="null" disabled>Chọn Phường/Xã</option>
-              <option *ngFor="let commune of communes" [value]="commune.code">{{ commune.nameWithType }}</option>
-            </select>
+            <label class="form-label">Phường/Xã</label>
+            <app-searchable-dropdown
+              [data]="ghnWards"
+              displayField="WardName"
+              [searchFields]="wardSearchFields"
+              placeholder="Tìm phường/xã..."
+              (selectionChange)="onGhnWardSelect($event)">
+            </app-searchable-dropdown>
           </div>
         </div>
 

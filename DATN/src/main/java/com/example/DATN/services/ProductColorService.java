@@ -46,7 +46,6 @@ public class ProductColorService {
             String colorName = request.getColorName();
             color = colorRepository.findByName(colorName)
                     .orElseThrow(() -> new ApplicationException(ErrorCode.COLOR_NOT_FOUND));
-
         }
         if (request.getColor() != null) {
             ColorResponse response = colorService.createColor(request.getColor());
@@ -165,17 +164,17 @@ public class ProductColorService {
                 }
             }
         }
-
-        for (ProductVariant variant : productColor.getVariants()) {
-            List<Promotion> promotion = promotionRepository.findAllByProductVariants(variant);
-            promotion.stream().map(p -> {
-                p.getProductVariants().remove(variant);
-                promotionRepository.save(p);
-                return p;
-            }).collect(Collectors.toList());
-            productVariantRepository.delete(variant);
-
-        }
+//
+//        for (ProductVariant variant : productColor.getVariants()) {
+//            List<Promotion> promotion = promotionRepository.findAllByProductVariants(variant);
+//            promotion.stream().map(p -> {
+//                p.getProductVariants().remove(variant);
+//                promotionRepository.save(p);
+//                return p;
+//            }).collect(Collectors.toList());
+//            productVariantRepository.delete(variant);
+//
+//        }
 
         productColorRepository.delete(productColor);
     }

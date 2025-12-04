@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/stores")
@@ -32,21 +33,23 @@ public class StoreController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<StoreResponse> getStoreById(@PathVariable Long id) {
+    public ApiResponse<StoreResponse> getStoreById
+            (@PathVariable UUID id) {
         return ApiResponse.<StoreResponse>builder()
                 .data(storeService.getStoreById(id))
                 .build();
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<StoreResponse> updateStore(@PathVariable Long id, @RequestBody StoreRequest request) {
+    public ApiResponse<StoreResponse> updateStore
+            (@PathVariable UUID id, @RequestBody StoreRequest request) {
         return ApiResponse.<StoreResponse>builder()
                 .data(storeService.updateStore(id, request))
                 .build();
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<String> deleteStore(@PathVariable Long id) {
+    public ApiResponse<String> deleteStore(@PathVariable UUID id) {
         storeService.deleteStore(id);
         return ApiResponse.<String>builder()
                 .data("Store deleted successfully")

@@ -10,11 +10,12 @@ export interface StockTransactionItemRequest {
 
 export interface StockTransactionRequest {
   type: string;
-  supplierId?: number;
-  fromStoreId?: number;
-  fromWareHouseId?: number;
-  toStoreId?: number;
-  toWareHouseId?: number;
+  supplierId?: string;
+  fromStoreId?: string;
+  fromWarehouseId?: string;
+  toStoreId?: string;
+  toWarehouseId?: string;
+  expectedReceivedDate?: string;
   items: StockTransactionItemRequest[];
 }
 
@@ -75,9 +76,10 @@ export class StockTransactionService {
     return this.http.post(this.apiUrl, request);
   }
 
-  getTransactionById(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id}`);
-  }
+getTransactionById(id: string): Observable<any> {
+  // id là string, không convert sang Number
+  return this.http.get(`${this.apiUrl}/${id}`);
+}
 
   createMissingItemsInvoice(request: CreateMissingItemsInvoiceRequest): Observable<any> {
     return this.http.post(`${this.apiUrl}/create-missing-items-invoice`, request);

@@ -1,6 +1,7 @@
 package com.example.DATN.dtos.request;
 
 import com.example.DATN.constant.TransactionType;
+import com.google.api.client.util.DateTime;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -14,11 +15,12 @@ public class StockTransactionRequest {
     @NotNull(message = "Transaction type is required")
     private TransactionType type;
 
-    private Long supplierId;
-    private Long fromWarehouseId;
-    private Long fromStoreId;
-    private Long toWarehouseId;
-    private Long toStoreId;
+    private String supplierId;
+    private String fromWarehouseId;
+    private String fromStoreId;
+    private String toWarehouseId;
+    private String toStoreId;
+    private DateTime expectedReceivedDate;
 
     @NotNull(message = "Items list cannot be null")
     @Size(min = 1, message = "Transaction must have at least one item")

@@ -5,9 +5,11 @@ import com.example.DATN.constant.TransactionType;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -18,7 +20,9 @@ import java.util.List;
 @NoArgsConstructor
 public class StockTransaction extends BaseEntity{
     @Id
-    private Long id;
+    @UuidGenerator
+    private UUID id;
+    private String code; // mã OUT, IN, DEBT...
 
     @Enumerated(EnumType.STRING)
     private TransactionType type;
@@ -46,9 +50,6 @@ public class StockTransaction extends BaseEntity{
     @JoinColumn(name = "to_store_id")
     private Store toStore;
 
-    @ManyToOne
-    @JoinColumn(name = "original_transaction_id")
-    private StockTransaction originalTransaction;
 
     @OneToMany(mappedBy = "transaction",
             cascade = CascadeType.ALL,

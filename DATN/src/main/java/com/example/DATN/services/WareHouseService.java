@@ -1,5 +1,6 @@
 package com.example.DATN.services;
 
+import cn.ipokerface.snowflake.SnowflakeIdGenerator;
 import com.example.DATN.dtos.request.WareHouseRequest;
 import com.example.DATN.dtos.respone.WareHouseResponse;
 import com.example.DATN.exception.ApplicationException;
@@ -20,36 +21,45 @@ public class WareHouseService {
 
     private final WareHouseRepository wareHouseRepository;
     private final WareHouseMapper wareHouseMapper;
-
+    private final String wareHousePrefix = "WH";
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
     public WareHouseResponse createWareHouse(WareHouseRequest request) {
+        Long snowflake = snowflakeIdGenerator.nextId();
+        String code =wareHousePrefix+(snowflake);
         WareHouse wareHouse = WareHouse.builder()
+                .warehouseCode(code)
+                .addressDetail(request.getAddressDetail())
+                .provinceCode(request.getProvinceCode())
+                .districtCode(request.getDistrictCode())
+                .wardCode(request.getWardCode())
                 .name(request.getName())
                 .location(request.getLocation())
                 .capacity(request.getCapacity())
-                .createdAt(LocalDateTime.now())
+                .stocks(null)
                 .deleted(false)
                 .build();
-        
         wareHouse = wareHouseRepository.save(wareHouse);
         return wareHouseMapper.toWareHouseResponse(wareHouse);
     }
 
     public List<WareHouseResponse> getAllWareHouses() {
-        return wareHouseRepository.findAll().stream()
+        return wareHouseRepository.findAllByDeletedFalse().stream()
                 .map(wareHouseMapper::toWareHouseResponse)
                 .collect(Collectors.toList());
     }
 
-    public WareHouseResponse getWareHouseById(Long id) {
-        WareHouse wareHouse = wareHouseRepository.findById(id)
+    public WareHouseResponse getWareHouseById(String warehouseCode) {
+        WareHouse wareHouse = wareHouseRepository.findBywarehouseCode(warehouseCode)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.WAREHOUSE_NOT_FOUND));
         return wareHouseMapper.toWareHouseResponse(wareHouse);
     }
 
-    public WareHouseResponse updateWareHouse(Long id, WareHouseRequest request) {
-        WareHouse wareHouse = wareHouseRepository.findById(id)
+    public WareHouseResponse updateWareHouse(String id, WareHouseRequest request) {
+        WareHouse wareHouse = wareHouseRepository.findBywarehouseCode(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.WAREHOUSE_NOT_FOUND));
-        
+        wareHouse.setDistrictCode(request.getDistrictCode());
+        wareHouse.setProvinceCode(request.getProvinceCode());
+        wareHouse.setWardCode(request.getWardCode());
         wareHouse.setName(request.getName());
         wareHouse.setLocation(request.getLocation());
         wareHouse.setCapacity(request.getCapacity());
@@ -59,8 +69,8 @@ public class WareHouseService {
         return wareHouseMapper.toWareHouseResponse(wareHouse);
     }
 
-    public void deleteWareHouse(Long id) {
-        WareHouse wareHouse = wareHouseRepository.findById(id)
+    public void deleteWareHouse(String code) {
+        WareHouse wareHouse = wareHouseRepository.findBywarehouseCode(code)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.WAREHOUSE_NOT_FOUND));
         wareHouse.setDeleted(true);
         wareHouseRepository.save(wareHouse);

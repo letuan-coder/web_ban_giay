@@ -5,10 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UuidGenerator;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 
 @Entity
@@ -19,19 +20,24 @@ import java.util.Set;
 @NoArgsConstructor
 public class WareHouse extends BaseEntity{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @UuidGenerator
+    private UUID id;
+
+    private String warehouseCode;
 
     @Column(nullable = false)
     private String name;
 
     private String location;
 
-    private Integer capacity;
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private String addressDetail;
+    private Integer provinceCode;
+    private Integer districtCode;
+    private Integer wardCode;
 
-    private LocalDateTime updatedAt;
+
+
+    private Integer capacity;
 
     private Boolean deleted = false;
 

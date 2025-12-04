@@ -3,14 +3,15 @@
   <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
     <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">ĐÔNG TUẤN STORE CMS</a>
     <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse"
-     data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+      data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="d-flex align-items-center ms-auto">
       <button class="btn btn-link text-white me-2" (click)="toggleSearchBar()">
         <span data-feather="search"></span>
       </button>
-      <input *ngIf="showSearchBar" class="form-control form-control-dark" type="text" placeholder="Search" aria-label="Search">
+      <input *ngIf="showSearchBar" class="form-control form-control-dark" type="text" placeholder="Search"
+        aria-label="Search">
     </div>
     <div class="navbar-nav">
       <div class="nav-item text-nowrap">
@@ -48,37 +49,47 @@
                 Thương hiệu
               </a>
             </li>
-              <li class="nav-item">
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/admin/suppliers" routerLinkActive="active">
+                <span data-feather="truck"></span> <!-- Using a truck icon for supplier -->
+                Thêm Nhà cung cấp
+              </a>
+            </li>
+            <li class="nav-item">
               <a class="nav-link" routerLink="promotions" routerLinkActive="active">
                 <span data-feather="briefcase"></span>
                 Khuyến mãi
-              </a> 
-              <li class="nav-item">
+              </a>
+            <li class="nav-item">
               <a class="nav-link" routerLink="admin/banners" routerLinkActive="active">
                 <span data-feather="briefcase"></span>
                 Banner
               </a>
-               <li class="nav-item">
+            <li class="nav-item">
               <a class="nav-link" routerLink="admin/stocks" routerLinkActive="active">
                 <span data-feather="briefcase"></span>
                 Tồn Kho
               </a>
-               <li class="nav-item">
+            <li class="nav-item">
               <a class="nav-link" routerLink="admin/stores" routerLinkActive="active">
                 <span data-feather="briefcase"></span>
                 Chi Nhánh
               </a>
-                <li class="nav-item">
+            <li class="nav-item">
               <a class="nav-link" routerLink="admin/stock-transaction" routerLinkActive="active">
                 <span data-feather="briefcase"></span>
                 Phiếu Nhập/Xuất
               </a>
-                <li class="nav-item">
+            <li class="nav-item">
               <a class="nav-link" routerLink="admin/orders" routerLinkActive="active">
                 <span data-feather="file-text"></span>
                 Quản lý Đơn hàng
               </a>
-              
+            <li class="nav-item">
+              <a class="nav-link" routerLink="admin/warehouses" routerLinkActive="active">
+                <span data-feather="archive"></span>
+                Quản lý Kho
+              </a>
             </li>
           </ul>
         </div>

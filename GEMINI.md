@@ -1,18 +1,12 @@
 trả lời mọi câu hỏi bằng tiếng việt 
---API LINK
-province
-https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province
-
-ward:
-https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward?district_id
-
-districts
-https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district
-
+tuyệt đối khi yêu cầu sửa giao diện không được sửa hay thay đổi BackEnd hay bất cứ thứ gì trong controller, request hay response chỉ khi nào người dùng yêu cầu thì mối được sửa BackEnd
 
 --backend
 sài cấu trúc Builder Pattern 
+luôn import các thư viện khi sài và khởi tạo giá trị nếu có 
 --frontEnd
+luôn kiểm tra lỗi ở file TypeScript, HTML, Service và model 
+khi thêm bất cứ function luôn kiểm tra bên TypeScript có function đó chưa 
 luôn cập nhật logic vào file typescript khi cập nhật file HTML
 luôn sài generate từ angular CLI và theo cấu trúc thư mục định sẵn 
 tạo tưởng đường routing vào 'C:\Luu tru\DACN2\DATN\DATN-API\DATN-FE\src\app\app-routing.module.ts'

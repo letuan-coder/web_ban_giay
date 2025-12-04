@@ -71,6 +71,11 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
+            "options": {
+              "host": "0.0.0.0",
+              "disableHostCheck": true,
+              "port": 4200
+            },
             "production": {
               "buildTarget": "DATN-FE:build:production"
             },

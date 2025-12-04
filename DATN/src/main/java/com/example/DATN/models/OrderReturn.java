@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.List;
+import java.util.UUID;
 
 @Setter
 @Getter
@@ -18,8 +20,8 @@ import java.util.List;
 @Table(name = "order_returns")
 public class OrderReturn {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @UuidGenerator
+    UUID id;
 
     String reasonReturn;
 

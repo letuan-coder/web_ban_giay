@@ -24,6 +24,7 @@ public class StockController {
                 .build();
     }
 
+
     @GetMapping
     public ApiResponse<List<StockResponse>> getAllStocks() {
         return ApiResponse.<List<StockResponse>>builder()
@@ -38,14 +39,15 @@ public class StockController {
                 .build();
     }
 
-    @PatchMapping("/{id}")
-    public ApiResponse<StockResponse> updateStock
-            (@PathVariable Long id, @RequestBody StockRequest request) {
-        return ApiResponse.<StockResponse>builder()
-                .data(stockService.updateStock(id, request))
-                .build();
-    }
 
+//    @PatchMapping("/{id}")
+//    public ApiResponse<StockResponse> updateStock
+//            (@PathVariable Long id, @RequestBody StockRequest request) {
+//        return ApiResponse.<StockResponse>builder()
+//                .data(stockService.updateStock(id, request))
+//                .build();
+//    }
+//
     @DeleteMapping("/{id}")
     public ApiResponse<String> deleteStock(@PathVariable Long id) {
         stockService.deleteStock(id);

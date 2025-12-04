@@ -6,16 +6,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class ReturnItemResponse {
-    private int id;
-    private int orderItemId;
+    private UUID id;
+    private UUID orderItemId;
     private String productName;
     private String productVariantName;
-    private int quantity;
+    private Integer quantity;
     private BigDecimal price;
 }

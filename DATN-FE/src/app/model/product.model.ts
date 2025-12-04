@@ -9,11 +9,13 @@ export interface Product {
   categoryName:String;
   productCode:String;
   categoryId:number;
+  supplierId?: number;
+  supplierName?: string;
   price?: number;
-  weight?: number;
   thumbnailUrl?:string;
   altText?:string;
   slug:string
+  available:string;
   createdAt:string;
   colorResponses: ColorVariantResponse[];
 }

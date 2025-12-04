@@ -32,7 +32,6 @@ export class ProductEditComponent implements OnInit {
     private router: Router
   ) { }
   Updateproduct: updateProductRequest = {
-    weight: 0,
     name: '',
     description: '',
     brandId: 0,
@@ -51,7 +50,6 @@ export class ProductEditComponent implements OnInit {
             this.product = response.data;
             if (this.product) {
               this.Updateproduct = {
-                weight: this.product.weight || 0,
                 name: this.product?.name,
                 description: this.product.description|| '',
                 brandId: this.product.brandId ||1,

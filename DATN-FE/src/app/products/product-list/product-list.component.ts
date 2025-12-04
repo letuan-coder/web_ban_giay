@@ -62,7 +62,7 @@ export class ProductListComponent implements OnInit {
 
   searchProducts(): void {
     if (!this.searchTerm.trim()) {
-      this.loadProducts(0);
+      this.loadProducts(1);
       return;
     }
     this.loading = true;

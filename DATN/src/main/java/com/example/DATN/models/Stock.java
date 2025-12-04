@@ -3,6 +3,9 @@ package com.example.DATN.models;
 import com.example.DATN.constant.StockType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.util.UUID;
 
 @Entity
 @Table(name = "stock")
@@ -12,9 +15,10 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Stock extends BaseEntity {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @UuidGenerator
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "variant_id", nullable = false)
@@ -32,6 +36,7 @@ public class Stock extends BaseEntity {
     private Store store;
 
     private Integer minQuantity;
+    private Integer receivedQuantity;
     private Integer quantity = 0;
 }
 

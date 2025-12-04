@@ -1,5 +1,10 @@
 export interface Warehouse {
-  id: number;
+  warehouseCode:string;
   name: string;
-  address?: string; // Optional address field
+  location?: string;
+  capacity?: number | null;
+  addressDetail?: string; // For building the location string
+  provinceCode?:number;
+  districtCode?:number;
+  wardCode?:number;
 }

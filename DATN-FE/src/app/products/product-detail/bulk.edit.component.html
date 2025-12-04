@@ -7,6 +7,10 @@
         <th>Tên size</th>
         <th>Giá</th>
         <th>Tồn kho</th>
+        <th>Cân nặng (g)</th>
+        <th>Cao (cm)</th>
+        <th>Rộng (cm)</th>
+        <th>Dài (cm)</th>
         <th>Trạng thái</th>
       </tr>
     </thead>
@@ -26,6 +30,26 @@
         </td>
         <td>
           <input type="number" [(ngModel)]="v.stock" 
+                 (ngModelChange)="onFieldChange(v)" 
+                 [ngModelOptions]="{standalone: true}" />
+        </td>
+        <td>
+          <input type="number" [(ngModel)]="v.weight" 
+                 (ngModelChange)="onFieldChange(v)" 
+                 [ngModelOptions]="{standalone: true}" />
+        </td>
+        <td>
+          <input type="number" [(ngModel)]="v.height" 
+                 (ngModelChange)="onFieldChange(v)" 
+                 [ngModelOptions]="{standalone: true}" />
+        </td>
+        <td>
+          <input type="number" [(ngModel)]="v.width" 
+                 (ngModelChange)="onFieldChange(v)" 
+                 [ngModelOptions]="{standalone: true}" />
+        </td>
+        <td>
+          <input type="number" [(ngModel)]="v.length" 
                  (ngModelChange)="onFieldChange(v)" 
                  [ngModelOptions]="{standalone: true}" />
         </td>

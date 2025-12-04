@@ -45,6 +45,10 @@ export class BulkEditComponent implements OnInit {
           ...v,
           price: v.price ?? 0,
           stock: v.stock ?? 0,
+          weight: v.weight ?? 0,
+          height: v.height ?? 0,
+          width: v.width ?? 0,
+          length: v.length ?? 0,
           sku: v.sku ?? '',
           isAvailable: v.isAvailable ?? 'AVAILABLE',
           discountPrice: v.discountPrice ?? 0,
@@ -78,6 +82,10 @@ export class BulkEditComponent implements OnInit {
         const payload: any = {};
         if (variant.price !== undefined) payload.price = variant.price;
         if (variant.stock !== undefined) payload.stock = variant.stock;
+        if (variant.weight !== undefined) payload.weight = variant.weight;
+        if (variant.height !== undefined) payload.height = variant.height;
+        if (variant.width !== undefined) payload.width = variant.width;
+        if (variant.length !== undefined) payload.length = variant.length;
         if (variant.isAvailable !== undefined) payload.isAvailable = variant.isAvailable;
         if (variant.discountPrice !== undefined) payload.discountPrice = variant.discountPrice;
         if (variant.size !== undefined) payload.sizeName = variant.size.name;

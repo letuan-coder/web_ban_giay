@@ -6,9 +6,11 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Setter
 @Getter
@@ -19,8 +21,8 @@ import java.time.LocalDate;
 @Table(name = "order_items")
 public class OrderItem extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @UuidGenerator
+    UUID id;
 
     String name;
     String code;

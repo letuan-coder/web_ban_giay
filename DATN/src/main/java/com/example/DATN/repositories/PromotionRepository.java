@@ -9,5 +9,4 @@ import java.util.List;
 
 @Repository
 public interface PromotionRepository extends JpaRepository<Promotion, Long> {
-    List<Promotion> findAllByProductVariants(ProductVariant productVariant);
 }
