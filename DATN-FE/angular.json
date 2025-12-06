@@ -80,7 +80,8 @@
               "buildTarget": "DATN-FE:build:production"
             },
             "development": {
-              "buildTarget": "DATN-FE:build:development"
+              "buildTarget": "DATN-FE:build:development",
+              "proxyConfig": "src/proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

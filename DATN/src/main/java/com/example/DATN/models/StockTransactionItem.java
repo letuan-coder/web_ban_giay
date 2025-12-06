@@ -3,6 +3,7 @@ package com.example.DATN.models;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
 
@@ -15,6 +16,7 @@ import java.util.UUID;
 @Table(name ="stock_transaction_items")
 public class StockTransactionItem extends BaseEntity{
     @Id
+    @UuidGenerator
     private UUID id;
 
     @ManyToOne

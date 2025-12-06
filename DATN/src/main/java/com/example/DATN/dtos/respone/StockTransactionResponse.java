@@ -16,6 +16,7 @@ import java.util.UUID;
 public class StockTransactionResponse {
     @JsonSerialize(using = ToStringSerializer.class)
     private UUID id;
+    private String code;
     private TransactionType type;
     private TransactionStatus transactionStatus;
     private UUID supplierId;

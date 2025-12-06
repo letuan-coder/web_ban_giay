@@ -59,10 +59,10 @@ public class SecurityConfig {
         httpSecurity.cors(cors -> cors.configurationSource(corsConfigurationSource()));
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
         //rateLimit không dùng trong thời gian dev
-//        httpSecurity.addFilterBefore(
-//                rateLimitFilter,
-//                org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class
-//        );
+        httpSecurity.addFilterBefore(
+                rateLimitFilter,
+                org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class
+        );
         httpSecurity.authorizeHttpRequests(request -> request
 
                         .requestMatchers(HttpMethod.GET, "/api/vnpay/return").permitAll()

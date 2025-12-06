@@ -201,7 +201,7 @@
                 <span>
                   <strong>{{ item.value.variantDetails.productName }}</strong>
                    - {{ item.value.variantDetails.colorName }}
-                    - Size {{ item.value.variantDetails.sizeName }}
+                    - Size {{ item.value.variantDetails.size }}
                   <br>
                   <small class="text-muted">SKU: {{ item.value.variantDetails.sku }}</small>
                 </span>
@@ -215,8 +215,11 @@
                 <div *ngIf="activeItemIndex === i && (searchResults.length > 0 || searchLoading)" class="autocomplete-list">
                   <div *ngIf="searchLoading" class="list-group-item">Đang tìm...</div>
                   <button type="button" *ngFor="let variant of searchResults" class="list-group-item list-group-item-action" (click)="selectVariant(variant)">
-                    <br>
-                    <small class="text-muted">SKU: {{ variant.sku }}</small>
+                    <div>
+                        <strong>{{ variant.productName }}</strong> - {{ variant.colorName }} - Size: {{ variant.size }}
+                        <br>
+                        <small class="text-muted">SKU: {{ variant.sku }} | Giá: {{ variant.price | number }}đ</small>
+                    </div>
                   </button>
                 </div>
               </div>
@@ -262,7 +265,7 @@
         <table class="table table-striped table-hover">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>Mã Phiếu</th>
               <th>Loại</th>
               <th>Trạng thái</th>
               <th>Nhà cung cấp</th>
@@ -273,7 +276,7 @@
           </thead>
           <tbody>
             <tr *ngFor="let transaction of transactions">
-              <td>{{ transaction.id }}</td>
+              <td>{{ transaction.code }}</td>
               <td>{{ transaction.type }}</td>
               <td>{{ transaction.transactionStatus }}</td>
               <td>{{ transaction.supplierName || 'N/A' }}</td>

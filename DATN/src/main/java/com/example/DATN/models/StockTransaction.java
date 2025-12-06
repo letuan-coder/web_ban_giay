@@ -22,7 +22,7 @@ public class StockTransaction extends BaseEntity{
     @Id
     @UuidGenerator
     private UUID id;
-    private String code; // mã OUT, IN, DEBT...
+    private String code;
 
     @Enumerated(EnumType.STRING)
     private TransactionType type;

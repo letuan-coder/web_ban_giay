@@ -47,6 +47,7 @@ export interface StockTransactionItemResponse {
 // Define the StockTransactionResponse interface based on backend DTO
 export interface StockTransactionResponse {
   id: number;
+  code:string;
   type:['IMPORT', 'EXPORT', 'TRANSFER', 'RETURN_SUPPLIER', 'RETURN_WAREHOUSE', 'ADJUST'];
   transactionStatus: 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'PENDING_COMPLETION';
   supplierId?: number;

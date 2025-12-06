@@ -47,7 +47,7 @@ public class StockTransactionService {
         long code = snowflakeIdGenerator.nextId();
         switch (request.getType()) {
             case IMPORT_TO_STORE:
-                String typeCode = IMPORT_TO_WAREHOUSE+code;
+                String typeCode = IMPORT_TO_STORE+code;
                 savedTransaction.setCode(typeCode);
                 ImportStoreTransactionRequest importStoreTransactionRequest =
                         ImportStoreTransactionRequest.builder()
@@ -58,10 +58,12 @@ public class StockTransactionService {
                                 .expectedReceivedDate(request.getExpectedReceivedDate())
                                 .build();
 
-                handleImportToStore(importStoreTransactionRequest, transaction);
+                handleImportToStore(importStoreTransactionRequest, savedTransaction);
 
                 break;
             case IMPORT_TO_WAREHOUSE:
+                String typeWarehouseCode = IMPORT_TO_WAREHOUSE+code;
+                savedTransaction.setCode(typeWarehouseCode);
                 ImportWareHouseTransactionRequest importWareHouseTransactionRequest =
                         ImportWareHouseTransactionRequest.builder()
                                 .type(TransactionType.IMPORT_TO_WAREHOUSE)
@@ -70,11 +72,10 @@ public class StockTransactionService {
                                 .items(request.getItems())
                                 .expectedReceivedDate(request.getExpectedReceivedDate())
                                 .build();
-
-                handleImportToWareHouse(importWareHouseTransactionRequest, transaction);
+                handleImportToWareHouse(importWareHouseTransactionRequest, savedTransaction);
                 break;
             case TRANSFER:
-                handleTransfer(request, transaction);
+                handleTransfer(request, savedTransaction);
                 break;
             case EXPORT_TO_STORE:
                 ImportStoreTransactionRequest exportWarehouseTransactionRequest =
@@ -85,7 +86,7 @@ public class StockTransactionService {
                                 .items(request.getItems())
                                 .expectedReceivedDate(request.getExpectedReceivedDate())
                                 .build();
-                handleExportFromWareHouse(exportWarehouseTransactionRequest, transaction);
+                handleExportFromWareHouse(exportWarehouseTransactionRequest, savedTransaction);
                 throw new ApplicationException(ErrorCode.INVALID_VALIDATION, "INVALID EXPORT");
             case RETURN_TO_WAREHOUSE:
                 ReturnWareHouseTransactionRequest returnWareHouseTransactionRequest =
@@ -96,7 +97,7 @@ public class StockTransactionService {
                                 .items(request.getItems())
                                 .expectedReceivedDate(request.getExpectedReceivedDate())
                                 .build();
-                handleReturnToWarehouse(returnWareHouseTransactionRequest, transaction);
+                handleReturnToWarehouse(returnWareHouseTransactionRequest, savedTransaction);
             case RETURN_TO_SUPPLIER:
                 ReturnToSupplierTransactionRequest returnToSupplierTransactionRequest =
                         ReturnToSupplierTransactionRequest.builder()
@@ -106,7 +107,7 @@ public class StockTransactionService {
                                 .items(request.getItems())
                                 .expectedReceivedDate(request.getExpectedReceivedDate())
                                 .build();
-                handleReturnToSupplier(returnToSupplierTransactionRequest, transaction);
+                handleReturnToSupplier(returnToSupplierTransactionRequest, savedTransaction);
             default:
                 throw new ApplicationException(ErrorCode.INVALID_VALIDATION);
         }
@@ -115,22 +116,22 @@ public class StockTransactionService {
             ProductVariant variant = variantRepository.findById(itemRequest.getVariantId())
                     .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
             StockTransactionItem transactionItem = StockTransactionItem.builder()
-                    .transaction(transaction)
+                    .transaction(savedTransaction)
                     .variant(variant)
                     .quantity(itemRequest.getQuantity())
                     .build();
-            transaction.getItems().add(transactionItem);
-            log.info("Transaction id={}, type={}", transaction.getId(), transaction.getType());
+            savedTransaction.getItems().add(transactionItem);
+            log.info("Transaction id={}, type={}", savedTransaction.getId(), savedTransaction.getType());
 
             if (request.getType() == TransactionType.IMPORT_TO_STORE) {
-                updateStock(transaction.getToWareHouse(), transaction.getToStore(),
+                updateStock(savedTransaction.getToWareHouse(), savedTransaction.getToStore(),
                         variant, itemRequest.getQuantity(), true);
             } else if (request.getType() == TransactionType.TRANSFER) {
-                updateStock(transaction.getFromWareHouse(), transaction.getFromStore(), variant, itemRequest.getQuantity(), false);
-                updateStock(transaction.getToWareHouse(), transaction.getToStore(), variant, itemRequest.getQuantity(), true);
+                updateStock(savedTransaction.getFromWareHouse(), savedTransaction.getFromStore(), variant, itemRequest.getQuantity(), false);
+                updateStock(savedTransaction.getToWareHouse(), savedTransaction.getToStore(), variant, itemRequest.getQuantity(), true);
             }
         }
-        transactionRepository.save(transaction);
+        transactionRepository.save(savedTransaction);
     }
 
     private void handleReturnToSupplier(ReturnToSupplierTransactionRequest request,
@@ -181,7 +182,7 @@ public class StockTransactionService {
         if (request.getFromSupplierId() == null || (request.getToWarehouseId() == null)) {
             throw new ApplicationException(ErrorCode.INVALID_VALIDATION);
         }
-        Supplier supplier = supplierRepository.findBySupplierCode(request.getFromSupplierId())
+        Supplier supplier = supplierRepository.findByTaxCode(request.getFromSupplierId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.SUPPLIER_NOT_FOUND));
         transaction.setSupplier(supplier);
         WareHouse wareHouse = wareHouseRepository.findBywarehouseCode(request.getToWarehouseId())

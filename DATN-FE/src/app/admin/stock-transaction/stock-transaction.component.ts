@@ -19,7 +19,8 @@ interface VariantDisplay {
   sku: string;
   productName: string;
   colorName: string;
-  sizeName: string;
+  size: string | number; // Assuming size can be string or number based on usage
+  price: number; // For displaying price
 }
 
 @Component({
@@ -42,7 +43,7 @@ export class StockTransactionComponent implements OnInit, OnDestroy {
   transactions: StockTransactionResponse[] = [];
   
   private searchTerms = new Subject<string>();
-  searchResults: VariantResponse[] = [];
+  searchResults: any[] = [];
   searchLoading = false;
   activeItemIndex: number | null = null;
 
@@ -89,19 +90,12 @@ export class StockTransactionComponent implements OnInit, OnDestroy {
         return this.productVariantService.search(term);
       })
     ).subscribe({
-      next: (response: any) => {
-        let results: VariantResponse[] = [];
-        
-        if (response.data) {
-          if (Array.isArray(response.data.content)) {
-            results = response.data.content;
-          } else if (Array.isArray(response.data)) {
-            results = response.data;
-          } else if (typeof response.data === 'object' && response.data !== null) {
-            results = [response.data];
-          }
-        }
-        this.searchResults = results;
+      next: (response: any[]) => {
+        this.searchResults = response.map(item => ({
+          ...item,
+          productName: item.name,
+          colorName: item.color,
+        }));
         this.searchLoading = false;
       },
       error: () => {
@@ -283,7 +277,8 @@ export class StockTransactionComponent implements OnInit, OnDestroy {
           sku: variant.sku,
           productName: productName,
           colorName: variant.colorName,
-          sizeName: variant.size
+          size: variant.size, // Direct usage of variant.size
+          price: variant.price // Include price
       };
 
       const newItem = this.createItem(variantDetails);

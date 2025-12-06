@@ -24,7 +24,7 @@ export class ProductVariantService {
   deleteProductColor(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
-  search(id:string):Observable<any> {
-    return this.http.get(`${this.apiUrl}/sku/${id}`);
+  search(term: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/search`, { params: { keyword: term } });
   }
 }
