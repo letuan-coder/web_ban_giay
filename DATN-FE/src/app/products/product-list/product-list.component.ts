@@ -20,7 +20,7 @@ export class ProductListComponent implements OnInit {
   error = '';
   selectedProductIds = new Set<string>();
 
-  currentPage = 1;
+  currentPage = 0;
   pageSize = 15;
   totalPages = 0;
 
@@ -40,20 +40,20 @@ export class ProductListComponent implements OnInit {
     this.router.navigate(['products/create']);
   }
 
-  loadProducts(page: number) {
+  loadProducts(page: number, name?: string) {
     this.loading = true;
     this.error = '';
-    this.isSearch = false; 
-    this.searchTerm = ''; 
+    this.isSearch = !!name;
     this.currentPage = page;
-    this.productService.getAll(this.currentPage, this.pageSize).subscribe({
+
+    this.productService.getAll(page + 1, this.pageSize, name).subscribe({
       next: (res: any) => {
         this.totalPages = res.data.totalPages;
         this.processProducts(res.data.content);
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Không tải được sản phẩm. Kiểm tra console.';
+        this.error = 'Không tải được sản phẩm. Vui lòng thử lại.';
         console.error(err);
         this.loading = false;
       }
@@ -61,28 +61,37 @@ export class ProductListComponent implements OnInit {
   }
 
   searchProducts(): void {
-    if (!this.searchTerm.trim()) {
-      this.loadProducts(1);
+    const trimmedSearchTerm = this.searchTerm.trim();
+    if (!trimmedSearchTerm) {
+      this.loadProducts(0);
       return;
     }
+
     this.loading = true;
     this.error = '';
     this.isSearch = true;
+    this.currentPage = 0;
     this.totalPages = 0;
-    this.productService.search(this.searchTerm).subscribe({
+
+    this.productService.search(trimmedSearchTerm).subscribe({
       next: (res: any) => {
-        this.processProducts(res.data);
+        if (res.data && res.data.length > 0) {
+          this.processProducts(res.data);
+          this.totalPages = 1; 
+        } else {
+          // If Redis search returns nothing, fall back to DB search
+          this.loadProducts(0, trimmedSearchTerm);
+        }
         this.loading = false;
       },
       error: (err) => {
         this.error = 'Không tìm thấy sản phẩm.';
         console.error(err);
-        this.products = []; 
+        this.products = [];
         this.loading = false;
       }
     });
   }
-
   processProducts(products: any[]): void {
 
     const productsWithImages = products.map((product: any) => {
@@ -104,7 +113,7 @@ export class ProductListComponent implements OnInit {
 
   goToPage(page: number): void {
     if (page >= 0 && page < this.totalPages) {
-      this.loadProducts(page);
+      this.loadProducts(page, this.isSearch ? this.searchTerm : '');
     }
   }
 
@@ -112,13 +121,12 @@ export class ProductListComponent implements OnInit {
     return Array.from({ length: this.totalPages }, (_, i) => i);
   }
 
-
   deleteProduct(id: string): void {
     if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
       this.loading = true;
       this.productService.deleteProduct(id).subscribe({
         next: () => {
-          this.loadProducts(this.currentPage);
+          this.loadProducts(this.currentPage, this.isSearch ? this.searchTerm : '');
         },
         error: (err) => {
           this.error = 'Đã xảy ra lỗi khi xóa sản phẩm.';
@@ -148,7 +156,7 @@ export class ProductListComponent implements OnInit {
     forkJoin(deleteRequests).subscribe({
       next: () => {
         this.selectedProductIds.clear();
-        this.loadProducts(this.currentPage); // Refresh data
+        this.loadProducts(this.currentPage, this.isSearch ? this.searchTerm : ''); // Refresh data
       },
       error: (err) => {
         this.error = 'Đã xảy ra lỗi khi xóa sản phẩm.';

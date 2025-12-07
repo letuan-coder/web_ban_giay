@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
+public interface ProductRepository extends JpaRepository<Product, UUID>,
+        JpaSpecificationExecutor<Product> {
     List<Product> findByProductCode(String productCode);
     List<Product> findByNameContainingIgnoreCase(String name);
     List<Product> findBySupplier(Supplier supplier);

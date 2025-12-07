@@ -34,8 +34,12 @@ export class ProductService {
   constructor(private http: HttpClient) { }
 
 
-  getAll(page: number, size: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}?page=${page}&limit=${size}`);
+  getAll(page: number, size: number, name?: string): Observable<any> {
+    let url = `${this.baseUrl}?page=${page}&limit=${size}`;
+    if (name) {
+      url += `&name=${name}`;
+    }
+    return this.http.get<any>(url);
   }
 
   createProductWithVariants(formData: FormData): Observable<any> {
@@ -94,8 +98,8 @@ export class ProductService {
   getAdminById(id: string): Observable<any> {
     return this.http.get<any>(`${this.adminUrl}/${id}`);
   }
-  search(name: string): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/search?name=${name}`);
+  search(keyword: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/search?keyword=${keyword}`);
   }
   getProductsBySupplier(id: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/supplier/${id}`);

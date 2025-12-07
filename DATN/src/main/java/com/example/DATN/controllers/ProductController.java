@@ -8,7 +8,6 @@ import com.example.DATN.dtos.respone.product.ProductDetailReponse;
 import com.example.DATN.dtos.respone.product.ProductResponse;
 import com.example.DATN.dtos.respone.product.ProductSupplierResponse;
 import com.example.DATN.dtos.respone.product.SearchProductResponse;
-import com.example.DATN.services.ImageProductService;
 import com.example.DATN.services.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +27,10 @@ import java.util.UUID;
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
 public class ProductController {
+
     private final ProductService productService;
-    private final ImageProductService imageProductService;
+//    private final ProductRedisService productRedisService;
+
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<ProductResponse> createProduct(
@@ -102,13 +103,13 @@ public class ProductController {
                 .build();
     }
 
-    @GetMapping("/search")
-    public ApiResponse<List<ProductResponse>> searchProducts
-            (@RequestParam("name") String name) {
-        return ApiResponse.<List<ProductResponse>>builder()
-                .data(productService.searchProductsByName(name))
-                .build();
-    }
+//    @GetMapping("/search")
+//    public ApiResponse<List<ProductRedis>> searchProducts
+//            (@RequestParam("keyword") String keyword) {
+//        return ApiResponse.<List<ProductRedis>>builder()
+//                .data(productRedisService.searchByKeyword(keyword))
+//                .build();
+//    }
 
     @GetMapping("/{id}")
     public ApiResponse<ProductDetailReponse> getProductById

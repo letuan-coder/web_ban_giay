@@ -3,7 +3,7 @@ package com.example.DATN.services;
 import com.example.DATN.dtos.respone.cart.CartItemResponse;
 import com.example.DATN.dtos.respone.cart.CartResponse;
 import com.example.DATN.dtos.respone.cart.GuestCartResponse;
-import com.example.DATN.dtos.respone.product.ProductVariantResponse;
+import com.example.DATN.dtos.respone.cart.ProductCartItemResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.GetJwtIdForGuest;
@@ -14,7 +14,6 @@ import com.example.DATN.models.Cart;
 import com.example.DATN.models.User;
 import com.example.DATN.repositories.CartItemRepository;
 import com.example.DATN.repositories.CartRepository;
-import com.example.DATN.repositories.UserRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
@@ -40,11 +39,9 @@ public class CartService {
     final private CartRepository cartRepository;
     final private CartMapper cartMapper;
     final private RedisTemplate redisTemplate;
-    final private UserRepository userRepository;
     private final CartItemRepository cartItemRepository;
     private final CartItemMapper cartItemMapper;
     private final ObjectMapper objectMapper;
-    private String CART_REDIS_KEY_PREFIX = "cart:user:";
     private final GetUserByJwtHelper getUserByJwtHelper;
     private final GetJwtIdForGuest getJwtIdForGuest;
 
@@ -124,12 +121,9 @@ public class CartService {
         BigDecimal totalPrice = BigDecimal.ZERO;
         for (CartItemResponse response : responses) {
             // Lấy thông tin product variant từ response
-            ProductVariantResponse variant = response.getProductVariant();
-            BigDecimal price = variant.getDiscountPrice() != null
-                    ? variant.getDiscountPrice()
-                    : variant.getPrice();
+            ProductCartItemResponse variant = response.getProductVariant();
             BigDecimal quantity = BigDecimal.valueOf(response.getQuantity());
-            totalPrice = totalPrice.add(price.multiply(quantity));
+            totalPrice = totalPrice.add(variant.getPrice().multiply(quantity));
         }
         return totalPrice;
     }

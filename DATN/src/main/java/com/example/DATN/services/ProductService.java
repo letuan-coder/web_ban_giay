@@ -52,6 +52,7 @@ public class ProductService {
     private final ImageProductRepository imageProductRepository;
     private final ColorRepository colorRepository;
     private final SupplierRepository supplierRepository;
+//    private final ProductRedisRepository productRedisRepository;
 
     //    public List<ProductResponse> getProductByProductCode(String productCode) {
 //        List<Product> ListOfProduct = productRepository.findAllByProductCode(productCode);
@@ -106,7 +107,6 @@ public class ProductService {
         product.setThumbnailUrl("");
         product.setSupplier(supplier);
         Product savedProduct = productRepository.save(product);
-
         for(String colorCode :request.getColorCodes()) {
             Color color = colorRepository.findByCode(colorCode)
                     .orElseThrow(()->new ApplicationException(ErrorCode.COLOR_NOT_FOUND));
@@ -122,9 +122,15 @@ public class ProductService {
                     .build();
             ProductColor productColor = productColorMapper
                     .toEntity(productColorService.createProductColor(productColorRequest));
-
+//            ProductRedis productRedis = ProductRedis.builder()
+//                    .id(savedProduct.getId())
+//                    .name(savedProduct.getName())
+//                    .productCode(savedProduct.getProductCode())
+//                    .price(savedProduct.getPrice())
+//                    .thumbnailUrl(savedProduct.getThumbnailUrl())
+//                    .build();
+//            productRedisRepository.save(productRedis);
         }
-
         UploadImageRequest uploadImageRequest = UploadImageRequest.builder()
                 .product(savedProduct)
                 .banner(null)

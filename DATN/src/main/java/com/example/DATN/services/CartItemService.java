@@ -102,7 +102,7 @@ public class CartItemService {
                 });
 
         ProductVariant variant = productVariantRepository
-                .findById(request.getProductVariantId())
+                .findBysku(request.getSku())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
         if (variant.getIsAvailable() == Is_Available.NOT_AVAILABLE) {
             throw new ApplicationException(ErrorCode.PRODUCT_NOT_AVAILABLE);
