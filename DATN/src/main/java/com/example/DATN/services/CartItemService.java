@@ -4,7 +4,6 @@ import com.example.DATN.constant.Is_Available;
 import com.example.DATN.dtos.request.cart.CartItemRequest;
 import com.example.DATN.dtos.request.cart.UpdateCartIItemRequest;
 import com.example.DATN.dtos.respone.cart.CartItemResponse;
-import com.example.DATN.dtos.respone.cart.CartResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.GetJwtIdForGuest;
@@ -163,54 +162,20 @@ public class CartItemService {
 
     }
 
-    public void deleteCartItem(UUID id) {
+    public void deleteCartItem(List<UUID> id) {
         User user = getUserByJwtHelper.getCurrentUser();
-        if (user != null) { // Authenticated user
-            CartItem cartItem = cartItemRepository.findById(id)
-                    .orElseThrow(() -> new ApplicationException(ErrorCode.CART_ITEM_NOT_FOUND));
-            Cart cart = cartItem.getCart();
-            cartItemRepository.deleteById(id);
-
-            // Recalculate total price and invalidate cache
-            BigDecimal newTotalPrice = cart.getItems().stream()
-                    .filter(item -> !item.getId().equals(id))
-                    .map(item -> item.getProductVariant().getPrice().multiply(new BigDecimal(item.getQuantity())))
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            cart.setTotal_price(newTotalPrice);
+        Optional<Cart> cartOtp =cartRepository.findByUser(user);
+        if(cartOtp.isPresent()){
+            List<CartItem> cartItem= cartItemRepository.findAllById(id);
+            cartItemRepository.deleteAll(cartItem);
+        }
+        else{
+            Cart cart = Cart.builder()
+                    .items(null)
+                    .total_price(BigDecimal.ZERO)
+                    .user(user)
+                    .build();
             cartRepository.save(cart);
-
-            redisTemplate.delete("cart:user:" + cart.getUser().getId());
-            redisTemplate.delete("cart:user:" + cart.getUser().getId() + ":items");
-
-        } else { // Guest user
-            String guestKey = getJwtIdForGuest.GetGuestKey();
-            if (guestKey == null || guestKey.isEmpty()) {
-                throw new ApplicationException(ErrorCode.UNAUTHENTICATED);
-            }
-            String redisCartKey = CART_REDIS_KEY_PREFIX + guestKey;
-            String redisCartItemsKey = CART_REDIS_KEY_PREFIX + guestKey + ":items";
-
-            Object cachedGuestItems = redisTemplate.opsForValue().get(redisCartItemsKey);
-            if (cachedGuestItems == null) {
-                throw new ApplicationException(ErrorCode.CART_ITEM_NOT_FOUND); // Or handle as empty cart
-            }
-            List<CartItemResponse> currentCartItemResponses = objectMapper.convertValue(cachedGuestItems, new com.fasterxml.jackson.core.type.TypeReference<List<CartItemResponse>>() {
-            });
-
-            boolean removed = currentCartItemResponses.removeIf(item -> item.getId().equals(id));
-            if (!removed) {
-                throw new ApplicationException(ErrorCode.CART_ITEM_NOT_FOUND);
-            }
-
-            // Update Redis cache for cart items
-            redisTemplate.opsForValue().set(redisCartItemsKey, currentCartItemResponses, 7, TimeUnit.DAYS);
-
-            // Update Redis cache for the main cart object (CartResponse)
-            CartResponse guestCartResponse = new CartResponse();
-            guestCartResponse.setCartItems(currentCartItemResponses);
-            BigDecimal guestTotalPrice = cartService.Calculate_Total_Price(currentCartItemResponses);
-            guestCartResponse.setTotal_price(guestTotalPrice);
-            redisTemplate.opsForValue().set(redisCartKey, guestCartResponse, 7, TimeUnit.DAYS);
         }
     }
 }

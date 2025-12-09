@@ -58,9 +58,13 @@ public class CartItemController {
                 .build();
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCartItem(@PathVariable UUID id) {
+    @DeleteMapping
+    public ApiResponse<CartItemResponse> deleteCartItem(
+            @RequestBody List<UUID> id) {
         cartItemService.deleteCartItem(id);
-        return ResponseEntity.noContent().build();
+        return ApiResponse.<CartItemResponse>builder()
+                .data(null)
+                .message("delete cart-item succes")
+                .build();
     }
 }
