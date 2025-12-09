@@ -6,11 +6,11 @@ import com.example.DATN.dtos.request.product.UpdateProductVariantRequest;
 import com.example.DATN.dtos.respone.product.ProductVariantResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
-import com.example.DATN.mapper.ProductVariantIndexMapper;
+
 import com.example.DATN.mapper.ProductVariantMapper;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.ProductColorRepository;
-import com.example.DATN.repositories.ProductVariantIndexRepository;
+
 import com.example.DATN.repositories.ProductVariantRepository;
 import com.example.DATN.repositories.SizeRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +26,8 @@ public class ProductVariantService {
 
     private final ProductVariantRepository productVariantRepository;
     private final ProductVariantMapper productVariantMapper;
-    private final ProductVariantIndexRepository productVariantIndexRepository;
-    private final ProductVariantIndexMapper productVariantIndexMapper;
+//    private final ProductVariantIndexRepository productVariantIndexRepository;
+//    private final ProductVariantIndexMapper productVariantIndexMapper;
     private final ProductColorRepository productColorRepository;
     private final SizeRepository sizeRepository;
     private final StoreService storeService;
@@ -67,8 +67,8 @@ public class ProductVariantService {
 //                            .build();
 //                    stock.add(stockForStore);
 //                }
-                ProductVariantIndex index = productVariantIndexMapper.toIndex(productVariant);
-                productVariantIndexRepository.save(index);
+//                ProductVariantIndex index = productVariantIndexMapper.toIndex(productVariant);
+//                productVariantIndexRepository.save(index);
             }
             productVariantRepository.saveAll(productVariants);
         List<ProductVariant> savedProductVariants = productVariantRepository.saveAll(productVariants);

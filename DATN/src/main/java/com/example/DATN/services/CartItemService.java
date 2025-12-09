@@ -134,24 +134,32 @@ public class CartItemService {
     }
 
     @Transactional(rollbackOn = Exception.class)
-    public CartItemResponse updateCartItem(UpdateCartIItemRequest request) {
+    public void updateCartItem(UUID id, UpdateCartIItemRequest request) {
         User user = getUserByJwtHelper.getCurrentUser();
-        CartItem existingItem = cartItemRepository
-                .findById(request.getId())
-                .orElseThrow(() -> new ApplicationException(ErrorCode.CART_ITEM_NOT_FOUND));
-        existingItem.setQuantity(request.getQuantity());
-        CartItem savedItem = cartItemRepository.save(existingItem);
-        Cart cart = savedItem.getCart();
-        BigDecimal newTotalPrice = cart.getItems().stream()
-                .map(item -> item.getProductVariant().getPrice().multiply(new BigDecimal(item.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        cart.setTotal_price(newTotalPrice);
-        cartRepository.save(cart);
-        redisTemplate.delete("cart:user:" + cart.getUser().getId());
-        redisTemplate.delete("cart:user:" + cart.getUser().getId() + ":items");
-
-        return cartItemMapper.toCartItemResponse(savedItem);
+        Cart cart = cartRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.CART_NOT_FOUND));
+        ProductVariant productVariant = productVariantRepository.findBysku(request.getSku())
+                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
+        Optional<CartItem> existingItemOpt= cartItemRepository
+                .findByProductVariantAndCart(productVariant, cart);
+        if(existingItemOpt.isPresent()) {
+            CartItem existingItem = existingItemOpt.get();
+            existingItem.setQuantity(request.getQuantity());
+            existingItem.setTotal_price(
+                    existingItem.getProductVariant()
+                            .getPrice().multiply
+                                    (BigDecimal.valueOf(request.getQuantity()))
+            );
+            cartItemRepository.save(existingItem);
+        }
+        else{
+            CartItemRequest cartItemRequest = CartItemRequest.builder()
+                    .sku(request.getSku())
+                    .quantity(request.getQuantity())
+                    .build();
+            AddCartItem(cartItemRequest);
+        }
+//        return cartItemMapper.toCartItemResponse(savedItem);
 
     }
 

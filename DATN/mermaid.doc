@@ -1,0 +1,177 @@
+erDiagram
+    %% --- Thực thể Người dùng và Quyền ---
+    User {
+        Long id PK
+        string username
+        string email
+        string password
+        LocalDate dob
+    }
+    Role {
+        string name PK
+        string description
+    }
+    Permission {
+        string name PK
+        string description
+    }
+    UserAddress {
+        UUID id PK
+        string receiverName
+        string phoneNumber
+        string streetDetail
+        bool isDefault
+    }
+    User ||--o{ UserAddress : "sở hữu"
+    User }o--o{ Role : "có vai trò"
+    Role }o--o{ Permission : "có quyền"
+
+    %% --- Thực thể Giỏ hàng ---
+    Cart {
+        UUID id PK
+        BigDecimal total_price
+    }
+    CartItem {
+        UUID id PK
+        int quantity
+        BigDecimal total_price
+    }
+    User ||--o| Cart : "có"
+    Cart ||--o{ CartItem : "chứa"
+
+    %% --- Thực thể Sản phẩm ---
+    Product {
+        UUID id PK
+        string name
+        string productCode
+        string description
+        BigDecimal price
+    }
+    Category {
+        Long id PK
+        string name
+    }
+    Brand {
+        Long id PK
+        string name
+    }
+    Supplier {
+        UUID id PK
+        string name
+        string email
+    }
+    Product }o--|| Category : "thuộc về"
+    Product }o--|| Brand : "thuộc về"
+    Product }o--|| Supplier : "cung cấp bởi"
+
+    %% --- Biến thể Sản phẩm ---
+    ProductColor {
+        UUID id PK
+    }
+    ProductVariant {
+        UUID id PK
+        string sku
+        BigDecimal price
+    }
+    Color {
+        string code PK
+        string name
+    }
+    Size {
+        string code PK
+        int name
+    }
+    ImageProduct {
+        UUID id PK
+        string imageUrl
+    }
+    Product ||--o{ ProductColor : "có"
+    ProductColor ||--o{ ProductVariant : "có"
+    ProductColor ||--o{ ImageProduct : "có"
+    ProductColor }o--|| Color : "là"
+    ProductVariant }o--|| Size : "là"
+    CartItem }o--|| ProductVariant : "tham chiếu đến"
+
+    %% --- Quản lý Kho ---
+    WareHouse {
+        UUID id PK
+        string name
+        string location
+    }
+    Store {
+        UUID id PK
+        string name
+        string location
+    }
+    Stock {
+        UUID id PK
+        int quantity
+    }
+    ProductVariant ||--o{ Stock : "có"
+    Stock }o--|| WareHouse : "tại"
+    Stock }o--|| Store : "tại"
+
+    %% --- Quản lý Đơn hàng ---
+    "Order" {
+        UUID id PK
+        string orderCode
+        BigDecimal total_price
+        string ghnOrderCode
+    }
+    OrderItem {
+        UUID id PK
+        int quantity
+        BigDecimal price
+    }
+    User ||--o{ "Order" : "đặt"
+    "Order" ||--o{ OrderItem : "chứa"
+    OrderItem }o--|| ProductVariant : "tham chiếu đến"
+    "Order" }o--|| UserAddress : "giao đến"
+
+    %% --- Quản lý Trả hàng ---
+    OrderReturn {
+        UUID id PK
+        string reasonReturn
+    }
+    OrderReturnItem {
+        UUID id PK
+        int quantity
+    }
+    "Order" ||--o{ OrderReturn : "có thể"
+    OrderReturn ||--o{ OrderReturnItem : "chứa"
+    OrderReturnItem }o--|| OrderItem : "tham chiếu đến"
+    User ||--o{ OrderReturn : "yêu cầu"
+
+    %% --- Quản lý Giao dịch Kho ---
+    StockTransaction {
+        UUID id PK
+        string code
+        TransactionType type
+    }
+    StockTransactionItem {
+        UUID id PK
+        int quantity
+    }
+    StockTransaction ||--o{ StockTransactionItem : "chứa"
+    StockTransaction }o--|| Supplier : "từ"
+    StockTransaction }o--|| WareHouse : "từ/đến"
+    StockTransaction }o--|| Store : "từ/đến"
+    StockTransactionItem }o--|| ProductVariant : "của"
+    StockTransactionItem }o--|| StockTransactionItem : "là gốc của"
+
+    %% --- Các thực thể khác ---
+    Banner {
+        UUID id PK
+        string bannerName
+    }
+    Promotion {
+        Long id PK
+        string name
+    }
+    Product }o--o{ Promotion : "có"
+    Refund {
+        UUID id PK
+        string reason
+    }
+    "Order" ||--o{ Refund : "có thể"
+    OrderReturn ||--o{ Refund : "có thể"

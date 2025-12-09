@@ -4,22 +4,14 @@ import com.example.DATN.dtos.request.product.ProductVariantRequest;
 import com.example.DATN.dtos.request.product.UpdateProductVariantRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.product.ProductVariantResponse;
-import com.example.DATN.mapper.ProductVariantIndexMapper;
 import com.example.DATN.models.ProductColor;
 import com.example.DATN.models.ProductVariant;
-import com.example.DATN.models.ProductVariantIndex;
 import com.example.DATN.repositories.ProductColorRepository;
-import com.example.DATN.repositories.ProductVariantIndexRepository;
 import com.example.DATN.repositories.ProductVariantRepository;
 import com.example.DATN.services.ProductVariantService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.SearchHit;
-import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -35,37 +27,37 @@ import java.util.stream.Collectors;
 public class ProductVariantController {
 
     private final ProductVariantService productVariantService;
-    private final ProductVariantIndexRepository indexRepository;
-    private final ProductVariantIndexMapper productVariantIndexMapper;
+//    private final ProductVariantIndexRepository indexRepository;
+//    private final ProductVariantIndexMapper productVariantIndexMapper;
     private final ProductVariantRepository productVariantRepository;
     private final ProductColorRepository productColorRepository;
     private final ElasticsearchOperations operations;
 
-    @GetMapping("/search")
-    public List<ProductVariantIndex> search
-            (@RequestParam String keyword,
-             @RequestParam(defaultValue = "0") int page,
-             @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        NativeQuery query = NativeQuery.builder()
-                .withQuery(q -> q.bool(b -> b.should(
-                                sh -> sh.match(m -> m.field("name").query(keyword))
-                        ).should(
-                                sh -> sh.match(m -> m.field("color").query(keyword))
-                        ).should(
-                                sh -> sh.match(m -> m.field("size").query(keyword))
-                        ).should(
-                                sh -> sh.wildcard(w -> w.field("sku").value("*" + keyword + "*"))
-                        )
-                ))
-                .withPageable(pageable)
-                .build();
-        SearchHits<ProductVariantIndex> result =
-                operations.search(query, ProductVariantIndex.class);
-        return result.getSearchHits().stream()
-                .map(SearchHit::getContent)
-                .toList();
-    }
+//    @GetMapping("/search")
+//    public List<ProductVariantIndex> search
+//            (@RequestParam String keyword,
+//             @RequestParam(defaultValue = "0") int page,
+//             @RequestParam(defaultValue = "20") int size) {
+//        Pageable pageable = PageRequest.of(page, size);
+//        NativeQuery query = NativeQuery.builder()
+//                .withQuery(q -> q.bool(b -> b.should(
+//                                sh -> sh.match(m -> m.field("name").query(keyword))
+//                        ).should(
+//                                sh -> sh.match(m -> m.field("color").query(keyword))
+//                        ).should(
+//                                sh -> sh.match(m -> m.field("size").query(keyword))
+//                        ).should(
+//                                sh -> sh.wildcard(w -> w.field("sku").value("*" + keyword + "*"))
+//                        )
+//                ))
+//                .withPageable(pageable)
+//                .build();
+//        SearchHits<ProductVariantIndex> result =
+//                operations.search(query, ProductVariantIndex.class);
+//        return result.getSearchHits().stream()
+//                .map(SearchHit::getContent)
+//                .toList();
+//    }
 
 
 
@@ -78,10 +70,10 @@ public class ProductVariantController {
 
         List<UUID> ids = responses.stream().map(ProductVariantResponse::getId).collect(Collectors.toList());
         List<ProductVariant> variants = productVariantRepository.findAllById(ids);
-        List<ProductVariantIndex> variantIndices = variants.stream()
-                .map(productVariantIndexMapper::toIndex)
-                .collect(Collectors.toList());
-        indexRepository.saveAll(variantIndices);
+//        List<ProductVariantIndex> variantIndices = variants.stream()
+//                .map(productVariantIndexMapper::toIndex)
+//                .collect(Collectors.toList());
+//        indexRepository.saveAll(variantIndices);
 
         ApiResponse response = ApiResponse.<List<ProductVariantResponse>>builder()
                 .data(responses)
@@ -115,10 +107,10 @@ public class ProductVariantController {
 
         List<UUID> ids = responses.stream().map(ProductVariantResponse::getId).collect(Collectors.toList());
         List<ProductVariant> variants = productVariantRepository.findAllById(ids);
-        List<ProductVariantIndex> variantIndices = variants.stream()
-                .map(productVariantIndexMapper::toIndex)
-                .collect(Collectors.toList());
-        indexRepository.saveAll(variantIndices);
+//        List<ProductVariantIndex> variantIndices = variants.stream()
+//                .map(productVariantIndexMapper::toIndex)
+//                .collect(Collectors.toList());
+//        indexRepository.saveAll(variantIndices);
 
         ApiResponse response = ApiResponse.<List<ProductVariantResponse>>builder()
                 .data(responses)
@@ -131,7 +123,7 @@ public class ProductVariantController {
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Void> deleteProductVariant(@PathVariable UUID id) {
         productVariantService.deleteProductVariant(id);
-        indexRepository.deleteById(id);
+//        indexRepository.deleteById(id);
         return ApiResponse.<Void>builder().build();
     }
 
@@ -140,10 +132,10 @@ public class ProductVariantController {
     public ApiResponse<Void> deleteProductColor(@PathVariable UUID id) {
         Optional<ProductColor> productColor = productColorRepository.findById(id);
         List<ProductVariant> variantsToDelete = productVariantRepository.findAllByproductColor(productColor.get());
-        if (variantsToDelete != null && !variantsToDelete.isEmpty()) {
-            List<UUID> variantIds = variantsToDelete.stream().map(ProductVariant::getId).collect(Collectors.toList());
-            indexRepository.deleteAllById(variantIds);
-        }
+//        if (variantsToDelete != null && !variantsToDelete.isEmpty()) {
+//            List<UUID> variantIds = variantsToDelete.stream().map(ProductVariant::getId).collect(Collectors.toList());
+//            indexRepository.deleteAllById(variantIds);
+//        }
         productVariantService.deleteProductColor(id);
         return ApiResponse.<Void>builder().build();
     }
@@ -158,10 +150,10 @@ public class ProductVariantController {
         List<UUID> ids = responses.stream().map(ProductVariantResponse::getId)
                 .collect(Collectors.toList());
         List<ProductVariant> variants = productVariantRepository.findAllById(ids);
-        List<ProductVariantIndex> variantIndices = variants.stream()
-                .map(productVariantIndexMapper::toIndex)
-                .collect(Collectors.toList());
-        indexRepository.saveAll(variantIndices);
+//        List<ProductVariantIndex> variantIndices = variants.stream()
+//                .map(productVariantIndexMapper::toIndex)
+//                .collect(Collectors.toList());
+//        indexRepository.saveAll(variantIndices);
         ApiResponse response = ApiResponse.<List<ProductVariantResponse>>builder()
                 .data(responses)
                 .build();

@@ -39,8 +39,6 @@ public class ProductController {
                 .data(productService.createProduct(request))
                 .build();
     }
-    
-
 
     @GetMapping
     public ApiResponse<PageResponse<ProductResponse>> getAllProducts(
