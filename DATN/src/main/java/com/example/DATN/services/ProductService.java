@@ -52,6 +52,7 @@ public class ProductService {
     private final ImageProductRepository imageProductRepository;
     private final ColorRepository colorRepository;
     private final SupplierRepository supplierRepository;
+    private final ProductReviewRepository productReviewRepository;
 //    private final ProductRedisRepository productRedisRepository;
 
     //    public List<ProductResponse> getProductByProductCode(String productCode) {
@@ -184,10 +185,8 @@ public class ProductService {
     }
 
     public ProductDetailReponse getProductById(UUID id) {
-
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
-
         return productMapper.toDetail(product);
     }
 
@@ -251,6 +250,7 @@ public class ProductService {
     }
 
     private ProductResponse mapProductToProductResponse(Product product) {
+        List<ProductReview> productReviews = productReviewRepository.findAllByProduct(product);
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -267,6 +267,7 @@ public class ProductService {
                 .colorResponses(productColorMapper.toProductColorResponses(product.getProductColors()))
                 .altText(product.getAltText())
                 .price(product.getPrice())
+                .averageRating(productMapper.calculateAverageRating(productReviews))
                 .build();
     }
 }

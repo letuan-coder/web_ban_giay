@@ -28,8 +28,12 @@ public class ProductReview extends BaseEntity{
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "order_item_id")
+    private OrderItem orderItem;
+
     // Người đánh giá
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

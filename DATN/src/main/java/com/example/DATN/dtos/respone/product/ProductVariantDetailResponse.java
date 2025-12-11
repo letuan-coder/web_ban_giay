@@ -1,6 +1,7 @@
 package com.example.DATN.dtos.respone.product;
 
 import com.example.DATN.constant.Is_Available;
+import com.example.DATN.dtos.respone.ProductReviewResponse;
 import com.example.DATN.dtos.respone.StockResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,7 +26,6 @@ public class ProductVariantDetailResponse {
     private BigDecimal price;
     private Integer total_stock;
     private List<StockResponse> stocks;
-
     // Helper method to calculate and set total_stock from the 'stocks' list
     public void calculateAndSetTotalStock() {
         if (this.stocks != null) {

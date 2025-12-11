@@ -88,7 +88,7 @@ public class Product extends BaseEntity {
     private Set<Promotion> promotions = new HashSet<>();
 
     @OneToMany(mappedBy = "product",
-            fetch = FetchType.LAZY,
+            fetch = FetchType.EAGER,
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     @JsonManagedReference

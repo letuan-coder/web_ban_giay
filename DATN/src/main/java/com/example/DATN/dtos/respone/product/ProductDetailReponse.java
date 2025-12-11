@@ -1,6 +1,7 @@
 package com.example.DATN.dtos.respone.product;
 
 import com.example.DATN.constant.Is_Available;
+import com.example.DATN.dtos.respone.ProductReviewResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,4 +23,5 @@ public class ProductDetailReponse {
     private Is_Available available;
     private List<ProductColorDetailResponse> colorResponses;
     private List<ProductVariantDetailResponse> variantDetailResponses;
+    private List<ProductReviewResponse> reviewResponses;
 }

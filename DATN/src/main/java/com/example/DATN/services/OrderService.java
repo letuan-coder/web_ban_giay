@@ -126,7 +126,8 @@ public class OrderService {
         order.setOrderCode(orderCode);
         order.setUserAddress(userAddress);
         order.setCreatedAt(LocalDateTime.now());
-        order.setOrderStatus(OrderStatus.PENDING);
+//        order.setOrderStatus(OrderStatus.PENDING);
+        order.setOrderStatus(OrderStatus.COMPLETED);
         order.setPaymentStatus(PaymentStatus.UNPAID);
         order.setPaymentMethod(PaymentMethodEnum.CASH_ON_DELIVERY);
         List<OrderItem> orderItems = new ArrayList<>();

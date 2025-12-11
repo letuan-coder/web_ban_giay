@@ -15,13 +15,13 @@ public class ProductReviewController {
     private final ProductReviewService productReviewService;
 
     @PostMapping
-//            ("/{orderCode}")
+            ("/{orderCode}")
     public ApiResponse<Void> createProductReview(
-//            @PathVariable String orderCode,
+            @PathVariable String orderCode,
             @RequestBody @Valid ProductReviewRequest request
     ){
         productReviewService.AddReview(
-//                orderCode,
+                orderCode,
                 request);
         return ApiResponse.<Void>builder()
                 .data(null)

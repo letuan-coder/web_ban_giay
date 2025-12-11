@@ -30,7 +30,7 @@ public class ProductVariant extends BaseEntity {
     @UuidGenerator
     UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_color_id", nullable = false)
     @JsonBackReference
     @OnDelete(action = OnDeleteAction.CASCADE)

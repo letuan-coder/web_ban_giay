@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -46,7 +47,7 @@ public class OrderItemService {
     }
 
     @Transactional
-    public OrderItemResponse updateOrderItemQuantity(Long itemId, int quantity) {
+    public OrderItemResponse updateOrderItemQuantity(UUID itemId, int quantity) {
         OrderItem orderItem = orderItemRepository.findById(itemId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_ITEM_NOT_FOUND));
 
@@ -58,7 +59,7 @@ public class OrderItemService {
     }
 
     @Transactional
-    public void removeOrderItem(Long itemId) {
+    public void removeOrderItem(UUID itemId) {
         OrderItem orderItem = orderItemRepository.findById(itemId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_ITEM_NOT_FOUND));
         Order order = orderItem.getOrder();
@@ -69,7 +70,7 @@ public class OrderItemService {
         orderRepository.save(order);
     }
 
-    public OrderItemResponse getOrderItemById(Long itemId) {
+    public OrderItemResponse getOrderItemById(UUID itemId) {
         OrderItem orderItem = orderItemRepository.findById(itemId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_ITEM_NOT_FOUND));
         return orderItemMapper.toOrderItemResponse(orderItem);
