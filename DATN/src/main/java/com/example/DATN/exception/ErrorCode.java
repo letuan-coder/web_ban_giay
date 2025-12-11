@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatusCode;
 @AllArgsConstructor
 public enum ErrorCode {
     // Auth & User
+    PASSWORD_MATCHED(1057,"password must be differrent from old password",HttpStatus.BAD_REQUEST),
     PASSWORD_NOT_MATCH(1038, "Incorrect password", HttpStatus.BAD_REQUEST),
     PASSWORD_CONFIRM_NOT_MATCH(1039, "Password and confirm password do not match", HttpStatus.BAD_REQUEST),
     ROLE_NOT_FOUND(1036, "ROLE NOT FOUND", HttpStatus.NOT_FOUND),

@@ -29,7 +29,6 @@ import java.util.UUID;
 public class ProductController {
 
     private final ProductService productService;
-//    private final ProductRedisService productRedisService;
 
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -101,13 +100,6 @@ public class ProductController {
                 .build();
     }
 
-//    @GetMapping("/search")
-//    public ApiResponse<List<ProductRedis>> searchProducts
-//            (@RequestParam("keyword") String keyword) {
-//        return ApiResponse.<List<ProductRedis>>builder()
-//                .data(productRedisService.searchByKeyword(keyword))
-//                .build();
-//    }
 
     @GetMapping("/{id}")
     public ApiResponse<ProductDetailReponse> getProductById

@@ -31,7 +31,7 @@ public class OrderItemService {
             (Long orderId, OrderItemRequest itemRequest) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
-        ProductVariant variant= productVariantRepository.findById(itemRequest.getProductVariantId())
+        ProductVariant variant= productVariantRepository.findBysku(itemRequest.getSku())
                 .orElseThrow(()->new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
         OrderItem orderItem = orderItemMapper.toOrderItem(itemRequest);
         orderItem.setOrder(order);

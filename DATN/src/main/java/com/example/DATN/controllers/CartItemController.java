@@ -47,11 +47,10 @@ public class CartItemController {
                 .build();
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping
     public ApiResponse<CartItemResponse> updateCartItem(
-            @PathVariable UUID id,
             @RequestBody UpdateCartIItemRequest request) {
-       cartItemService.updateCartItem(id, request);
+       cartItemService.updateCartItem( request);
         return ApiResponse.<CartItemResponse>builder()
                 .data(null)
                 .message("update cart-item succes")

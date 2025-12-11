@@ -25,6 +25,7 @@ public class FileStorageService {
     private final Path storageBannerFolder = Paths.get("uploads/banners");
     private final Path storageThumbnailFolder = Paths.get("uploads/thumbnails");
     private final Path storeDefaultFolder = Paths.get("/uploads/default/");
+    private final Path storeAvatarFolder = Paths.get("uploads/avatar/");
 
     public FileStorageService() {
         try {
@@ -32,6 +33,8 @@ public class FileStorageService {
             Files.createDirectories(storageBannerFolder);
             Files.createDirectories(storageThumbnailFolder);
             Files.createDirectories(storeDefaultFolder);
+            Files.createDirectories(storeAvatarFolder);
+
         } catch (IOException e) {
             throw new RuntimeException("Cannot initialize storage folder", e);
         }
@@ -56,7 +59,12 @@ public class FileStorageService {
         } else if (request.getProduct() != null) {
             destinationFilePath = this.storageThumbnailFolder.
                     resolve(Paths.get(generatedFileName)).normalize().toAbsolutePath();
-        } else {
+        }
+        else if (request.getUserAvatar()!=null){
+            destinationFilePath = this.storeAvatarFolder.
+                    resolve(Paths.get(generatedFileName)).normalize().toAbsolutePath();
+        }
+        else {
             destinationFilePath = this.storageBannerFolder.
                     resolve(Paths.get(generatedFileName)).normalize().toAbsolutePath();
         }
@@ -85,6 +93,7 @@ public class FileStorageService {
                 storageFolder,
                 storageBannerFolder,
                 storageThumbnailFolder,
+                storeAvatarFolder,
                 storeDefaultFolder
         };
 

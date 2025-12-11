@@ -43,6 +43,8 @@ public class User extends BaseEntity {
     LocalDate dob;
 
 
+    String userImage;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 50)
     AuthProvider provider;

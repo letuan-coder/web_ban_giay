@@ -6,14 +6,8 @@ import com.example.DATN.dtos.request.UploadImageRequest;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.Format_ImageUrl_Helper;
-import com.example.DATN.models.Banner;
-import com.example.DATN.models.ImageProduct;
-import com.example.DATN.models.Product;
-import com.example.DATN.models.ProductColor;
-import com.example.DATN.repositories.BannerRepository;
-import com.example.DATN.repositories.ImageProductRepository;
-import com.example.DATN.repositories.ProductColorRepository;
-import com.example.DATN.repositories.ProductRepository;
+import com.example.DATN.models.*;
+import com.example.DATN.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +27,7 @@ public class ImageProductService {
     private final ProductColorRepository productColorRepository;
     private final BannerRepository bannerRepository;
     private final Format_ImageUrl_Helper formatImageUrlHelper;
+    private final UserRepository userRepository;
 
     public static boolean isImageFile(MultipartFile file) {
         String contentType = file.getContentType();
@@ -80,8 +75,6 @@ public class ImageProductService {
             StoreFileRequest storeFileRequest = StoreFileRequest.builder()
                     .file(file)
                     .imageProduct(imageProduct)
-                    .product(null)
-                    .banner(null)
                     .fileName(productSlug)
                     .build();
             String generatedFileName = fileStorageService.storeFile(storeFileRequest);
@@ -95,14 +88,13 @@ public class ImageProductService {
         if (!isImageFile(request.getFile())) {
             throw new ApplicationException(ErrorCode.FILE_UPLOAD_ERROR);
         }
+        MultipartFile file = request.getFile();
         String fileName = null;
         if (request.getImageProduct() != null) {
             ImageProduct imageProduct = request.getImageProduct();
             StoreFileRequest storeRequest = StoreFileRequest.builder()
                     .imageProduct(imageProduct)
                     .file(request.getFile())
-                    .banner(null)
-                    .product(null)
                     .fileName(imageProduct.getAltText())
                     .build();
             fileName = fileStorageService.storeFile(storeRequest);
@@ -112,26 +104,35 @@ public class ImageProductService {
         } else if (request.getProduct() != null) {
             Product product = request.getProduct();
             StoreFileRequest storeRequest = StoreFileRequest.builder()
-                    .imageProduct(null)
-                    .banner(null)
                     .file(request.getFile())
                     .fileName(product.getSlug())
                     .product(product)
                     .build();
             product.setThumbnailUrl(fileStorageService.storeFile(storeRequest));
             productRepository.save(product);
-        } else if (request.getProduct() == null && request.getImageProduct() == null) {
+
+        } else if (request.getBanner()!=null) {
             Banner banner = request.getBanner();
             fileName = formatImageUrlHelper.toSlug(banner.getBannerName());
             StoreFileRequest storeRequest = StoreFileRequest.builder()
-                    .imageProduct(null)
                     .banner(banner)
-                    .product(null)
                     .file(request.getFile())
                     .fileName(fileName)
                     .build();
             banner.setImageUrl(fileStorageService.storeFile(storeRequest));
             bannerRepository.save(banner);
+        }
+       else if (request.getUserAvatar() != null) {
+            User user = request.getUserAvatar();
+            StoreFileRequest storeRequest = StoreFileRequest.builder()
+                    .userAvatar(user)
+                    .file(request.getFile())
+                    .fileName("avatar_"+user.getId())
+                    .build();
+            user.setUserImage(fileStorageService.storeFile(storeRequest));
+            userRepository.save(user);
+        }        else {
+            throw new ApplicationException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }
 

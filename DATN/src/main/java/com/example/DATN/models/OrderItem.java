@@ -47,6 +47,7 @@ public class OrderItem extends BaseEntity {
 
     @Column(nullable = false)
     private BigDecimal price;
+    private Boolean Rated;
 
     private LocalDate returnDate;
 }

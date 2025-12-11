@@ -3,28 +3,26 @@ package com.example.DATN.services;
 import cn.ipokerface.snowflake.SnowflakeIdGenerator;
 import com.example.DATN.constant.AuthProvider;
 import com.example.DATN.constant.PredefinedRole;
+import com.example.DATN.dtos.request.UploadImageRequest;
 import com.example.DATN.dtos.request.user.RegisterRequest;
+import com.example.DATN.dtos.request.user.UpdatePasswordRequest;
 import com.example.DATN.dtos.request.user.UpdateUserRequest;
 import com.example.DATN.dtos.respone.user.UserResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
-import com.example.DATN.helper.GetJwtIdForGuest;
 import com.example.DATN.helper.GetUserByJwtHelper;
-import com.example.DATN.mapper.CartMapper;
 import com.example.DATN.mapper.UserMapper;
 import com.example.DATN.models.Role;
 import com.example.DATN.models.User;
 import com.example.DATN.repositories.CartRepository;
 import com.example.DATN.repositories.RoleRepository;
 import com.example.DATN.repositories.UserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,15 +42,11 @@ public class UserService {
     private final CartRepository cartRepository;
 
     private final GetUserByJwtHelper getUserByJwtHelper;
-    private final GetJwtIdForGuest getJwtIdForGuest;
-    private final RedisTemplate redisTemplate;
-    private final ObjectMapper objectMapper;
+    private final ImageProductService imageProductService;
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
-    CartService cartService;
     UserRepository userRepository;
     SnowflakeIdGenerator snowflakeIdGenerator;
-    CartMapper cartMapper;
     UserMapper userMapper;
 
     public List<UserResponse> getAllUsers() {
@@ -63,7 +57,7 @@ public class UserService {
     @Transactional(rollbackOn = Exception.class)
     public UserResponse createUser(RegisterRequest registerRequest) {
         User user = new User();
-        if(userRepository.existsByUsername(registerRequest.getUsername())){
+        if (userRepository.existsByUsername(registerRequest.getUsername())) {
             throw new ApplicationException(ErrorCode.USERNAME_ALREADY_EXISTS);
         }
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
@@ -71,24 +65,24 @@ public class UserService {
         }
         Long newId = snowflakeIdGenerator.nextId();
         user.setId(newId);
-        if(!registerRequest.getPassword().equals(registerRequest.getPassword())){
+        if (!registerRequest.getPassword().equals(registerRequest.getPassword())) {
             throw new ApplicationException(ErrorCode.PASSWORD_CONFIRM_NOT_MATCH);
         }
-        Role role =null;
+        Role role = null;
         user.setUsername(registerRequest.getUsername());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        Optional<Role> adminRoleOpt = roleRepository.findByName(PredefinedRole.USER.name()) ;
-        if(!adminRoleOpt.isPresent()){
-           role = Role.builder()
+        Optional<Role> adminRoleOpt = roleRepository.findByName(PredefinedRole.USER.name());
+        if (!adminRoleOpt.isPresent()) {
+            role = Role.builder()
                     .name(PredefinedRole.USER.name())
                     .description("user role")
                     .permissions(null)
                     .build();
             roleRepository.save(role);
-        }
-        else {
+        } else {
             role = adminRoleOpt.get();
         }
+        user.setUserImage("");
         user.setFirstName(registerRequest.getFirstName());
         user.setLastName(registerRequest.getLastName());
         user.setDob(registerRequest.getDob());
@@ -110,16 +104,38 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    public UserResponse updateUser(Long id, UpdateUserRequest updateRequest) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
-        userMapper.updateUser(user, updateRequest);
-        user.setUsername(updateRequest.getUsername());
-        user.setPassword(passwordEncoder.encode(updateRequest.getPassword()));
+    @Transactional(rollbackOn = Exception.class)
+    public UserResponse updateUser(
+            UpdateUserRequest updateRequest) {
+        User user = getUserByJwtHelper.getCurrentUser();
+        UploadImageRequest uploadImageRequest = UploadImageRequest.builder()
+                .file(updateRequest.getFile())
+                .userAvatar(user)
+                .imageUrl(user.getId().toString())
+                .altText(user.getUsername())
+                .build();
+        imageProductService.uploadImage(uploadImageRequest);
         user.setFirstName(updateRequest.getFirstName());
         user.setLastName(updateRequest.getLastName());
-        var roles = roleRepository.findAllById(updateRequest.getRoles());
-        user.setRoles(new HashSet<>(roles));
+        return userMapper.toUserResponse(userRepository.save(user));
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public UserResponse updatePassword(UpdatePasswordRequest updateRequest) {
+        User user = getUserByJwtHelper.getCurrentUser();
+        if (passwordEncoder.matches(updateRequest.getPassword(), user.getPassword())) {
+            throw new ApplicationException(ErrorCode.PASSWORD_MATCHED);
+        } else {
+            if (!passwordEncoder.matches(updateRequest.getOldPassword(), user.getPassword())) {
+                throw new ApplicationException(ErrorCode.PASSWORD_NOT_MATCH);
+            }
+            if (!updateRequest.getPassword().equals(updateRequest.getConfirmPassword())) {
+                throw new ApplicationException(ErrorCode.PASSWORD_NOT_MATCH);
+
+            }
+            user.setUsername(updateRequest.getUsername());
+            user.setPassword(passwordEncoder.encode(updateRequest.getPassword()));
+        }
         return userMapper.toUserResponse(userRepository.save(user));
     }
 

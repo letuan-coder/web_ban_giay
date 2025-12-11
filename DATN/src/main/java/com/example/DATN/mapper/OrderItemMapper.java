@@ -14,7 +14,7 @@ import java.util.List;
 public interface OrderItemMapper {
     OrderItem toEntity(OrderItemResponse response);
 
-    @Mapping(target = "productVariant.id",source = "productVariantId")
+    @Mapping(target = "productVariant.sku",source = "sku")
     OrderItem toOrderItem(OrderItemRequest request);
 
     @Mapping(target = "productName",source = "productVariant.productColor.product.name")

@@ -9,8 +9,6 @@ import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.GetJwtIdForGuest;
 import com.example.DATN.helper.GetUserByJwtHelper;
 import com.example.DATN.mapper.CartItemMapper;
-import com.example.DATN.mapper.CartMapper;
-import com.example.DATN.mapper.ProductVariantMapper;
 import com.example.DATN.models.Cart;
 import com.example.DATN.models.CartItem;
 import com.example.DATN.models.ProductVariant;
@@ -18,7 +16,6 @@ import com.example.DATN.models.User;
 import com.example.DATN.repositories.CartItemRepository;
 import com.example.DATN.repositories.CartRepository;
 import com.example.DATN.repositories.ProductVariantRepository;
-import com.example.DATN.repositories.UserRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
@@ -37,14 +34,11 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class CartItemService {
 
-    private final CartService cartService;
-    private final CartMapper cartMapper;
     private final CartItemRepository cartItemRepository;
     private final CartItemMapper cartItemMapper;
     private final CartRepository cartRepository;
     private final ProductVariantRepository productVariantRepository;
-    private final UserRepository userRepository;
-    private final ProductVariantMapper productVariantMapper;
+
     private String CART_REDIS_KEY_PREFIX = "cart:";
     private final GetJwtIdForGuest getJwtIdForGuest;
     private final RedisTemplate<String, Object> redisTemplate;
@@ -52,18 +46,18 @@ public class CartItemService {
     private final ObjectMapper objectMapper;
 
     public List<CartItemResponse> getAllCartItems() {
-        String guestKey = getJwtIdForGuest.GetGuestKey();
-        if (guestKey != null && !guestKey.isEmpty()) {
-            String redisGuestKey = CART_REDIS_KEY_PREFIX + guestKey + ":items";
-            Object cachedGuestData = redisTemplate.opsForValue().get(redisGuestKey);
-            if (cachedGuestData != null) {
-                return objectMapper.convertValue(
-                        cachedGuestData,
-                        new TypeReference<List<CartItemResponse>>() {
-                        }
-                );
-            }
-        }
+//        String guestKey = getJwtIdForGuest.GetGuestKey();
+//        if (guestKey != null && !guestKey.isEmpty()) {
+//            String redisGuestKey = CART_REDIS_KEY_PREFIX + guestKey + ":items";
+//            Object cachedGuestData = redisTemplate.opsForValue().get(redisGuestKey);
+//            if (cachedGuestData != null) {
+//                return objectMapper.convertValue(
+//                        cachedGuestData,
+//                        new TypeReference<List<CartItemResponse>>() {
+//                        }
+//                );
+//            }
+//        }
         User user = getUserByJwtHelper.getCurrentUser();
         String redisUserKey = "cart:user:" + user.getId() + ":items";
         Object cachedUserData = redisTemplate.opsForValue().get(redisUserKey);
@@ -133,25 +127,27 @@ public class CartItemService {
     }
 
     @Transactional(rollbackOn = Exception.class)
-    public void updateCartItem(UUID id, UpdateCartIItemRequest request) {
+    public void updateCartItem(UpdateCartIItemRequest request) {
         User user = getUserByJwtHelper.getCurrentUser();
-        Cart cart = cartRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new ApplicationException(ErrorCode.CART_NOT_FOUND));
-        ProductVariant productVariant = productVariantRepository.findBysku(request.getSku())
-                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
-        Optional<CartItem> existingItemOpt= cartItemRepository
-                .findByProductVariantAndCart(productVariant, cart);
-        if(existingItemOpt.isPresent()) {
-            CartItem existingItem = existingItemOpt.get();
-            existingItem.setQuantity(request.getQuantity());
-            existingItem.setTotal_price(
-                    existingItem.getProductVariant()
-                            .getPrice().multiply
-                                    (BigDecimal.valueOf(request.getQuantity()))
-            );
-            cartItemRepository.save(existingItem);
-        }
-        else{
+        Optional<Cart> cartOpt = cartRepository.findByUser(user);
+        if (!cartOpt.isPresent())
+        {
+            Cart cart = cartOpt.get();
+            ProductVariant productVariant = productVariantRepository.findBysku(request.getSku())
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
+            Optional<CartItem> existingItemOpt = cartItemRepository
+                    .findByProductVariantAndCart(productVariant, cart);
+            if (existingItemOpt.isPresent()) {
+                CartItem existingItem = existingItemOpt.get();
+                existingItem.setQuantity(request.getQuantity());
+                existingItem.setTotal_price(
+                        existingItem.getProductVariant()
+                                .getPrice().multiply
+                                        (BigDecimal.valueOf(request.getQuantity()))
+                );
+                cartItemRepository.save(existingItem);
+            }
+        }else {
             CartItemRequest cartItemRequest = CartItemRequest.builder()
                     .sku(request.getSku())
                     .quantity(request.getQuantity())
@@ -164,12 +160,11 @@ public class CartItemService {
 
     public void deleteCartItem(List<UUID> id) {
         User user = getUserByJwtHelper.getCurrentUser();
-        Optional<Cart> cartOtp =cartRepository.findByUser(user);
-        if(cartOtp.isPresent()){
-            List<CartItem> cartItem= cartItemRepository.findAllById(id);
+        Optional<Cart> cartOtp = cartRepository.findByUser(user);
+        if (cartOtp.isPresent()) {
+            List<CartItem> cartItem = cartItemRepository.findAllById(id);
             cartItemRepository.deleteAll(cartItem);
-        }
-        else{
+        } else {
             Cart cart = Cart.builder()
                     .items(null)
                     .total_price(BigDecimal.ZERO)

@@ -1,6 +1,7 @@
 package com.example.DATN.controllers;
 
 import com.example.DATN.dtos.request.user.RegisterRequest;
+import com.example.DATN.dtos.request.user.UpdatePasswordRequest;
 import com.example.DATN.dtos.request.user.UpdateUserRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.user.UserResponse;
@@ -10,6 +11,7 @@ import com.example.DATN.services.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
@@ -62,14 +64,22 @@ public class UserController {
                 .message("Xóa thành công người dùng"+" "+user.getUsername())
                 .build();
     }
-    @PutMapping("/{id}")
+    @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<UserResponse> updateProfile(
-            @PathVariable Long id, @RequestBody @Valid UpdateUserRequest request) {
+            @ModelAttribute @Valid UpdateUserRequest request) {
         return ApiResponse.<UserResponse>builder()
-                .data(userService.updateUser(id, request))
+                .data(userService.updateUser(request))
                 .build();
     }
 
+    @PatchMapping("/password/{userId}")
+    public ApiResponse<UserResponse> updatePassword(
+//            @PathVariable Long id,
+            @RequestBody @Valid UpdatePasswordRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .data(userService.updatePassword(request))
+                .build();
+    }
     @GetMapping("/{id}")
     public ApiResponse<UserResponse> getUser(@PathVariable Long id) {
         return ApiResponse.<UserResponse>builder()

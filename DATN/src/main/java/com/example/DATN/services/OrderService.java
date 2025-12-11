@@ -1,7 +1,6 @@
 package com.example.DATN.services;
 
 import cn.ipokerface.snowflake.SnowflakeIdGenerator;
-import com.example.DATN.constant.Is_Available;
 import com.example.DATN.constant.OrderStatus;
 import com.example.DATN.constant.PaymentMethodEnum;
 import com.example.DATN.constant.PaymentStatus;
@@ -33,7 +32,6 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-
     private final OrderMapper orderMapper;
     private final GetUserByJwtHelper getUserByJwtHelper;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
@@ -120,19 +118,11 @@ public class OrderService {
         User user = getUserByJwtHelper.getCurrentUser();
         UserAddress userAddress = userAddressRepository.findByUser(user)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND));
-
-        List<UUID> uuidList = new ArrayList<>();
-        OrderItem orderItem = new OrderItem();
-        for (OrderItemRequest orderItemRequest : request.getOrderItemRequests()) {
-            uuidList.add(orderItemRequest.getProductVariantId());
-            orderItem.setQuantity(orderItemRequest.getQuantity());
-        }
-        List<ProductVariant> listProductVariant =
-                productVariantRepository.findAllById(uuidList);
         Order order = new Order();
         order.setUser(user);
         Long code= snowflakeIdGenerator.nextId();
         String orderCode = OrderCodePrefix+code;
+        order.setNote(request.getNote());
         order.setOrderCode(orderCode);
         order.setUserAddress(userAddress);
         order.setCreatedAt(LocalDateTime.now());
@@ -140,19 +130,37 @@ public class OrderService {
         order.setPaymentStatus(PaymentStatus.UNPAID);
         order.setPaymentMethod(PaymentMethodEnum.CASH_ON_DELIVERY);
         List<OrderItem> orderItems = new ArrayList<>();
-        for (ProductVariant item : listProductVariant) {
-            if (item.getIsAvailable() == Is_Available.NOT_AVAILABLE) {
-                throw new ApplicationException(ErrorCode.PRODUCT_NOT_AVAILABLE);
+        for (OrderItemRequest orderItemRequest : request.getOrderItemRequests()) {
+
+            Optional<ProductVariant> productVariantOpt =
+                    productVariantRepository.findBysku(orderItemRequest.getSku());
+            if(productVariantOpt.isPresent()) {
+                ProductVariant item = productVariantOpt.get();
+                OrderItem orderItem = new OrderItem();
+                orderItem.setProductVariant(item);
+                orderItem.setQuantity(orderItemRequest.getQuantity());
+                orderItem.setName(item.getProductColor().getProduct().getName());
+//                orderItem.setWeight(item.getWeight());
+//                orderItem.setHeight(item.getHeight());
+//                orderItem.setWidth(item.getWidth());
+//                orderItem.setLength(item.getLength());
+                orderItem.setWeight(request.getTotal_weight());
+                orderItem.setHeight(request.getTotal_height());
+                orderItem.setWidth(request.getTotal_width());
+                orderItem.setLength(request.getTotal_length());
+                orderItem.setCode(item.getSku());
+                orderItem.setProductVariant(item);
+                orderItem.setPrice(item.getPrice());
+                orderItem.setCreatedAt(LocalDateTime.now());
+                orderItem.setOrder(order);
+                orderItem.setRated(false);
+                orderItems.add(orderItem);
             }
-            orderItem.setName(item.getProductColor().getProduct().getName());
-            orderItem.setCode(item.getSku());
-            orderItem.setProductVariant(item);
-            orderItem.setPrice(item.getPrice());
-            orderItem.setCreatedAt(LocalDateTime.now());
-            orderItem.setOrder(order);
-            orderItems.add(orderItem);
         }
         order.setItems(orderItems);
+        if(orderItems.isEmpty()){
+            throw new ApplicationException(ErrorCode.PRODUCT_NOT_AVAILABLE);
+        }
         BigDecimal total = orderItems.stream()
                 .map(item -> item.getPrice()
                         .multiply(BigDecimal
@@ -173,6 +181,7 @@ public class OrderService {
         Integer totalHeight = orderItems.stream()
                 .mapToInt(i -> i.getHeight() * i.getQuantity())
                 .sum();
+        order.setTotal_weight(totalWeight);
         order.setTotal_height(totalHeight);
         order.setTotal_width(totalWidth);
         order.setTotal_length(totalLength);
