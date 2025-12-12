@@ -111,7 +111,7 @@ public class ImageProductService {
             product.setThumbnailUrl(fileStorageService.storeFile(storeRequest));
             productRepository.save(product);
 
-        } else if (request.getBanner()!=null) {
+        } else if (request.getBanner() != null) {
             Banner banner = request.getBanner();
             fileName = formatImageUrlHelper.toSlug(banner.getBannerName());
             StoreFileRequest storeRequest = StoreFileRequest.builder()
@@ -121,17 +121,16 @@ public class ImageProductService {
                     .build();
             banner.setImageUrl(fileStorageService.storeFile(storeRequest));
             bannerRepository.save(banner);
-        }
-       else if (request.getUserAvatar() != null) {
+        } else if (request.getUserAvatar() != null) {
             User user = request.getUserAvatar();
             StoreFileRequest storeRequest = StoreFileRequest.builder()
                     .userAvatar(user)
                     .file(request.getFile())
-                    .fileName("avatar_"+user.getId())
+                    .fileName("avatar_" + user.getId())
                     .build();
             user.setUserImage(fileStorageService.storeFile(storeRequest));
             userRepository.save(user);
-        }        else {
+        } else {
             throw new ApplicationException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }

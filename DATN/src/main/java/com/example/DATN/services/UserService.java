@@ -7,6 +7,7 @@ import com.example.DATN.dtos.request.UploadImageRequest;
 import com.example.DATN.dtos.request.user.RegisterRequest;
 import com.example.DATN.dtos.request.user.UpdatePasswordRequest;
 import com.example.DATN.dtos.request.user.UpdateUserRequest;
+import com.example.DATN.dtos.respone.user.UserDetailResponse;
 import com.example.DATN.dtos.respone.user.UserResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
@@ -28,6 +29,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -46,6 +48,7 @@ public class UserService {
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
     UserRepository userRepository;
+    FileStorageService fileStorageService;
     SnowflakeIdGenerator snowflakeIdGenerator;
     UserMapper userMapper;
 
@@ -105,23 +108,33 @@ public class UserService {
     }
 
     @Transactional(rollbackOn = Exception.class)
-    public UserResponse updateUser(
+    public UserDetailResponse updateUser(
             UpdateUserRequest updateRequest) {
         User user = getUserByJwtHelper.getCurrentUser();
-        UploadImageRequest uploadImageRequest = UploadImageRequest.builder()
-                .file(updateRequest.getFile())
-                .userAvatar(user)
-                .imageUrl(user.getId().toString())
-                .altText(user.getUsername())
-                .build();
-        imageProductService.uploadImage(uploadImageRequest);
+        userMapper.updateUser(user, updateRequest);
         user.setFirstName(updateRequest.getFirstName());
         user.setLastName(updateRequest.getLastName());
-        return userMapper.toUserResponse(userRepository.save(user));
+        return userMapper.toUserDetailResponse(userRepository.save(user));
+    }
+    public UserDetailResponse UploadUserImage(MultipartFile file) {
+        User user = getUserByJwtHelper.getCurrentUser();
+        if (user.getUserImage()!=null && user.getUserImage()!=""){
+            fileStorageService.deleteFile(user.getUserImage());
+            user.setUserImage("");
+            userRepository.save(user);
+        }
+        UploadImageRequest uploadImageRequest = UploadImageRequest.builder()
+                .imageUrl("avatar"+user.getId())
+                .file(file)
+                .userAvatar(user)
+                .altText("avatar"+user.getUsername())
+                .build();
+        imageProductService.uploadImage(uploadImageRequest);
+       return userMapper.toUserDetailResponse(userRepository.save(user));
     }
 
     @Transactional(rollbackOn = Exception.class)
-    public UserResponse updatePassword(UpdatePasswordRequest updateRequest) {
+    public void updatePassword(UpdatePasswordRequest updateRequest) {
         User user = getUserByJwtHelper.getCurrentUser();
         if (passwordEncoder.matches(updateRequest.getPassword(), user.getPassword())) {
             throw new ApplicationException(ErrorCode.PASSWORD_MATCHED);
@@ -133,19 +146,15 @@ public class UserService {
                 throw new ApplicationException(ErrorCode.PASSWORD_NOT_MATCH);
 
             }
-            user.setUsername(updateRequest.getUsername());
             user.setPassword(passwordEncoder.encode(updateRequest.getPassword()));
         }
-        return userMapper.toUserResponse(userRepository.save(user));
+
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public UserResponse deleteUser(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
-        UserResponse userResponse = userMapper.toUserResponse(user);
+    public void deleteUser(Long id) {
+  
         userRepository.deleteById(id);
-        return userResponse;
     }
 
     public UserResponse getmyinfo() {

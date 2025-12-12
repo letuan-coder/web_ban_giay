@@ -2,6 +2,7 @@ package com.example.DATN.mapper;
 
 import com.example.DATN.dtos.request.user.RegisterRequest;
 import com.example.DATN.dtos.request.user.UpdateUserRequest;
+import com.example.DATN.dtos.respone.user.UserDetailResponse;
 import com.example.DATN.dtos.respone.user.UserResponse;
 import com.example.DATN.models.User;
 import org.mapstruct.Mapper;
@@ -17,4 +18,6 @@ public interface UserMapper {
     @Mapping(target = "orders",ignore = true)
     @Mapping(target = "roles",source = "roles")
     UserResponse toUserResponse(User user);
+
+    UserDetailResponse toUserDetailResponse(User user);
 }

@@ -4,18 +4,18 @@ import com.example.DATN.dtos.request.user.RegisterRequest;
 import com.example.DATN.dtos.request.user.UpdatePasswordRequest;
 import com.example.DATN.dtos.request.user.UpdateUserRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
+import com.example.DATN.dtos.respone.user.UserDetailResponse;
 import com.example.DATN.dtos.respone.user.UserResponse;
-import com.example.DATN.models.User;
 import com.example.DATN.repositories.UserRepository;
 import com.example.DATN.services.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -44,8 +44,9 @@ public class UserController {
                 .data(userService.getAllUsers())
                 .build();
     }
+
     @GetMapping("/myinfo")
-    ApiResponse<UserResponse> myinfo(){
+    ApiResponse<UserResponse> myinfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         authentication.getAuthorities();
         authentication.getName();
@@ -56,30 +57,42 @@ public class UserController {
 
 
     @DeleteMapping("/{id}")
-    public ApiResponse<UserResponse> deleteUser(@PathVariable Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với id: " + id));
-        return ApiResponse.<UserResponse>builder()
-                .data(userService.deleteUser(id))
-                .message("Xóa thành công người dùng"+" "+user.getUsername())
+    public ApiResponse<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ApiResponse.<Void>builder()
+                .data(null)
+                .message("Xóa thành công người dùng")
                 .build();
     }
-    @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<UserResponse> updateProfile(
-            @ModelAttribute @Valid UpdateUserRequest request) {
-        return ApiResponse.<UserResponse>builder()
+
+    @PatchMapping
+    public ApiResponse<UserDetailResponse> updateProfile(
+            @RequestBody @Valid UpdateUserRequest request) {
+        return ApiResponse.<UserDetailResponse>builder()
                 .data(userService.updateUser(request))
                 .build();
     }
 
-    @PatchMapping("/password/{userId}")
-    public ApiResponse<UserResponse> updatePassword(
-//            @PathVariable Long id,
-            @RequestBody @Valid UpdatePasswordRequest request) {
-        return ApiResponse.<UserResponse>builder()
-                .data(userService.updatePassword(request))
+    @PostMapping
+    public ApiResponse<UserDetailResponse> uploadImageProfile(
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+        UserDetailResponse response = userService.UploadUserImage(file);
+        return ApiResponse.<UserDetailResponse>builder()
+                .data(null)
+                .message("upload avatar successfully")
                 .build();
     }
+
+    @PatchMapping("/password")
+    public ApiResponse<Void> updatePassword(
+            @RequestBody @Valid UpdatePasswordRequest request) {
+        userService.updatePassword(request);
+        return ApiResponse.<Void>builder()
+                .data(null)
+                .message("update password successfully !!")
+                .build();
+    }
+
     @GetMapping("/{id}")
     public ApiResponse<UserResponse> getUser(@PathVariable Long id) {
         return ApiResponse.<UserResponse>builder()

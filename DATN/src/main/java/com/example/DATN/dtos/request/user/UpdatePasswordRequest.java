@@ -14,9 +14,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class UpdatePasswordRequest {
-    @NotBlank(message = "USERNAME_REQUIRED")
-    @Size(min = 4, message = "USERNAME_MIN_LENGTH")
-    String username;
+
 
     @NotBlank(message = "PASSWORD_REQUIRED")
     @Size(min = 8, message = "PASSWORD_MIN_LENGTH")

@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
@@ -31,6 +30,5 @@ public class UpdateUserRequest {
     @DobConstraint(min = 18, message = "INVALID_DOB")
     LocalDate dob;
 
-    private MultipartFile file;
 }
 
