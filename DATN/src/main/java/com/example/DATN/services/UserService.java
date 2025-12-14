@@ -153,16 +153,16 @@ public class UserService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(Long id) {
-  
+
         userRepository.deleteById(id);
     }
 
-    public UserResponse getmyinfo() {
+    public UserDetailResponse getmyinfo() {
         var context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();
         User user = userRepository.findByUsername(username).
                 orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
-        return userMapper.toUserResponse(user);
+        return userMapper.toUserDetailResponse(user);
     }
 
     @PostAuthorize("returnObject.username == authentication.name")

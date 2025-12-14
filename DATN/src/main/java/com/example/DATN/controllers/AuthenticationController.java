@@ -102,7 +102,8 @@ public class AuthenticationController {
     @PostMapping("/google")
     public ApiResponse<AuthenticationResponse> googleLogin(
             @RequestBody GoogleLoginRequest request) {
-        AuthenticationResponse authResponse = authenticationService.loginWithGoogle(request.getToken());
+        AuthenticationResponse authResponse =
+                authenticationService.loginWithGoogle(request.getToken());
         return ApiResponse.<AuthenticationResponse>builder()
                 .data(authResponse)
                 .build();

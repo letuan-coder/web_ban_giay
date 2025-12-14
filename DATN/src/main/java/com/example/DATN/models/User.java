@@ -28,6 +28,9 @@ public class User extends BaseEntity {
             , unique = true)
     String username;
 
+    @Column(name = "google_id", unique = true, length = 255)
+    String googleId;
+
     @NotBlank(message = "FIRST_NAME_REQUIRED")
     String firstName;
 
@@ -49,8 +52,6 @@ public class User extends BaseEntity {
     @Column(length = 50)
     AuthProvider provider;
 
-    @Column(length = 255)
-    String providerId;
 
     @ManyToMany
     Set<Role> roles;

@@ -47,6 +47,7 @@ public class OrderController {
                 .build();
     }
 
+
     @GetMapping
     public ApiResponse<List<OrderResponse>> getOrdersByUser() {
         List<OrderResponse> response = orderService.getOrdersByUser();
@@ -60,10 +61,11 @@ public class OrderController {
                 .build();
     }
 
-    @GetMapping("/{orderId}")
-    public ApiResponse<OrderResponse> getOrderById(@PathVariable Long orderId) {
+    @GetMapping("/{orderCode}")
+    public ApiResponse<OrderResponse> getOrderById
+            (@PathVariable String orderCode) {
         return ApiResponse.<OrderResponse>builder()
-                .data(orderService.getOrderById(orderId))
+                .data(orderService.getOrderByCode(orderCode))
                 .build();
     }
 }

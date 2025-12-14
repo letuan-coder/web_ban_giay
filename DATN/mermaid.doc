@@ -1,177 +1,91 @@
-erDiagram
-    %% --- Thực thể Người dùng và Quyền ---
-    User {
-        Long id PK
-        string username
-        string email
-        string password
-        LocalDate dob
-    }
-    Role {
-        string name PK
-        string description
-    }
-    Permission {
-        string name PK
-        string description
-    }
-    UserAddress {
-        UUID id PK
-        string receiverName
-        string phoneNumber
-        string streetDetail
-        bool isDefault
-    }
-    User ||--o{ UserAddress : "sở hữu"
-    User }o--o{ Role : "có vai trò"
-    Role }o--o{ Permission : "có quyền"
+@startuml
+' Sơ đồ Usecase Tổng quát cho Hệ thống Bán Giày Dép
 
-    %% --- Thực thể Giỏ hàng ---
-    Cart {
-        UUID id PK
-        BigDecimal total_price
-    }
-    CartItem {
-        UUID id PK
-        int quantity
-        BigDecimal total_price
-    }
-    User ||--o| Cart : "có"
-    Cart ||--o{ CartItem : "chứa"
+' Cấu hình giao diện
+/'skinparam actorStyle awesome'/
+left to right direction
+title Sơ đồ Usecase Tổng Quát - Hệ Thống Bán Giày Dép
 
-    %% --- Thực thể Sản phẩm ---
-    Product {
-        UUID id PK
-        string name
-        string productCode
-        string description
-        BigDecimal price
-    }
-    Category {
-        Long id PK
-        string name
-    }
-    Brand {
-        Long id PK
-        string name
-    }
-    Supplier {
-        UUID id PK
-        string name
-        string email
-    }
-    Product }o--|| Category : "thuộc về"
-    Product }o--|| Brand : "thuộc về"
-    Product }o--|| Supplier : "cung cấp bởi"
+' --- Định nghĩa các Actor ---
+actor "Người dùng" as User
+actor "Nhân viên" as Staff
+actor "Quản trị viên" as Admin
+actor "Hệ thống GHN" as GHN_System
+actor "Hệ thống VNPAY" as VNPAY_System
+actor "Hệ thống Email" as Email_System
 
-    %% --- Biến thể Sản phẩm ---
-    ProductColor {
-        UUID id PK
-    }
-    ProductVariant {
-        UUID id PK
-        string sku
-        BigDecimal price
-    }
-    Color {
-        string code PK
-        string name
-    }
-    Size {
-        string code PK
-        int name
-    }
-    ImageProduct {
-        UUID id PK
-        string imageUrl
-    }
-    Product ||--o{ ProductColor : "có"
-    ProductColor ||--o{ ProductVariant : "có"
-    ProductColor ||--o{ ImageProduct : "có"
-    ProductColor }o--|| Color : "là"
-    ProductVariant }o--|| Size : "là"
-    CartItem }o--|| ProductVariant : "tham chiếu đến"
+' --- Định nghĩa mối quan hệ kế thừa giữa các Actor ---
+Staff --|> User
+Admin --|> Staff
 
-    %% --- Quản lý Kho ---
-    WareHouse {
-        UUID id PK
-        string name
-        string location
-    }
-    Store {
-        UUID id PK
-        string name
-        string location
-    }
-    Stock {
-        UUID id PK
-        int quantity
-    }
-    ProductVariant ||--o{ Stock : "có"
-    Stock }o--|| WareHouse : "tại"
-    Stock }o--|| Store : "tại"
+' --- Gói các Usecase trong một hệ thống ---
+rectangle "Hệ Thống Bán Hàng" {
 
-    %% --- Quản lý Đơn hàng ---
-    "Order" {
-        UUID id PK
-        string orderCode
-        BigDecimal total_price
-        string ghnOrderCode
-    }
-    OrderItem {
-        UUID id PK
-        int quantity
-        BigDecimal price
-    }
-    User ||--o{ "Order" : "đặt"
-    "Order" ||--o{ OrderItem : "chứa"
-    OrderItem }o--|| ProductVariant : "tham chiếu đến"
-    "Order" }o--|| UserAddress : "giao đến"
+  ' --- Usecases của Khách vãng lai ---
+  usecase "Xem sản phẩm" as UC1
+  usecase "Tìm kiếm & Lọc sản phẩm" as UC2
+  usecase "Đăng ký tài khoản" as UC3
+  usecase "Đăng ký nhận tin" as UC4
 
-    %% --- Quản lý Trả hàng ---
-    OrderReturn {
-        UUID id PK
-        string reasonReturn
-    }
-    OrderReturnItem {
-        UUID id PK
-        int quantity
-    }
-    "Order" ||--o{ OrderReturn : "có thể"
-    OrderReturn ||--o{ OrderReturnItem : "chứa"
-    OrderReturnItem }o--|| OrderItem : "tham chiếu đến"
-    User ||--o{ OrderReturn : "yêu cầu"
 
-    %% --- Quản lý Giao dịch Kho ---
-    StockTransaction {
-        UUID id PK
-        string code
-        TransactionType type
-    }
-    StockTransactionItem {
-        UUID id PK
-        int quantity
-    }
-    StockTransaction ||--o{ StockTransactionItem : "chứa"
-    StockTransaction }o--|| Supplier : "từ"
-    StockTransaction }o--|| WareHouse : "từ/đến"
-    StockTransaction }o--|| Store : "từ/đến"
-    StockTransactionItem }o--|| ProductVariant : "của"
-    StockTransactionItem }o--|| StockTransactionItem : "là gốc của"
+  ' --- Usecases của Người dùng ---
+  usecase "Đăng nhập / Đăng xuất" as UC5
+  usecase "Quản lý tài khoản" as UC6
+  usecase "Quản lý giỏ hàng" as UC7
+  usecase "Đặt hàng" as UC8
+  usecase "Xem lịch sử đơn hàng" as UC9
+  usecase "Đánh giá sản phẩm" as UC10
+  usecase "Thanh toán đơn hàng" as UC11
+  
+  User -- UC5
+  User -- UC6
+  User -- UC7
+  User -- UC8
+  User -- UC9
+  User -- UC10
+  User -- UC11
+  
+  ' --- Usecases của Nhân viên ---
+  usecase "Quản lý đơn hàng" as UC12
+  usecase "Quản lý kho hàng (Nhập/Xuất)" as UC13
+  
+  Staff -- UC12
+  Staff -- UC13
 
-    %% --- Các thực thể khác ---
-    Banner {
-        UUID id PK
-        string bannerName
-    }
-    Promotion {
-        Long id PK
-        string name
-    }
-    Product }o--o{ Promotion : "có"
-    Refund {
-        UUID id PK
-        string reason
-    }
-    "Order" ||--o{ Refund : "có thể"
-    OrderReturn ||--o{ Refund : "có thể"
+  ' --- Usecases của Quản trị viên ---
+  usecase "Quản lý Sản phẩm (CRUD)" as UC14
+  usecase "Quản lý Thuộc tính SP" as UC15
+  usecase "Quản lý Người dùng & Phân quyền" as UC16
+  usecase "Quản lý Cửa hàng & Kho" as UC17
+  usecase "Quản lý Nhà cung cấp" as UC18
+  usecase "Quản lý Khuyến mãi" as UC19
+  usecase "Quản lý Banner" as UC20
+  usecase "Xem báo cáo doanh thu" as UC21
+
+  Admin -- UC14
+  Admin -- UC15
+  Admin -- UC16
+  Admin -- UC17
+  Admin -- UC18
+  Admin -- UC19
+  Admin -- UC20
+  Admin -- UC21
+
+  ' --- Usecases tương tác với hệ thống ngoài ---
+  usecase "Tạo đơn giao hàng" as UC_GHN_CREATE
+  usecase "Cập nhật trạng thái GHN" as UC_GHN_UPDATE
+  usecase "Xử lý thanh toán VNPAY" as UC_VNPAY
+  usecase "Gửi Email thông báo" as UC_EMAIL
+
+  ' --- Mối quan hệ giữa các Usecase ---
+  UC8 ..> UC_GHN_CREATE : <<include>>
+  UC11 ..> UC_VNPAY : <<include>>
+  
+  ' Mối quan hệ với các hệ thống bên ngoài
+  UC_GHN_CREATE - GHN_System
+  UC_GHN_UPDATE - GHN_System
+  UC_VNPAY - VNPAY_System
+  UC_EMAIL - Email_System
+}
+
+@enduml

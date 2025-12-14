@@ -200,8 +200,9 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    public OrderResponse getOrderById(Long orderId) {
-        Order order = orderRepository.findById(orderId)
+
+    public OrderResponse getOrderByCode(String orderCode) {
+        Order order = orderRepository.findByOrderCode(orderCode)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
         return orderMapper.toResponse(order);
     }

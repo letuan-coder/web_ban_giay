@@ -42,5 +42,4 @@ public class Store extends BaseEntity {
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
     private Set<Stock> stocks = new HashSet<>();
 
-
 }

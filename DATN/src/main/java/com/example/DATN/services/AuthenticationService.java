@@ -13,7 +13,10 @@ import com.example.DATN.models.ForgotToken;
 import com.example.DATN.models.InvalidateToken;
 import com.example.DATN.models.Role;
 import com.example.DATN.models.User;
-import com.example.DATN.repositories.*;
+import com.example.DATN.repositories.ForgotTokenRepository;
+import com.example.DATN.repositories.InvalidateTokenRepository;
+import com.example.DATN.repositories.RoleRepository;
+import com.example.DATN.repositories.UserRepository;
 import com.example.DATN.structure.MailStructure;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -47,7 +50,6 @@ import java.util.*;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class AuthenticationService {
     private final ForgotTokenRepository forgotTokenRepository;
-    private final CategoryRepository categoryRepository;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -124,10 +126,67 @@ public class AuthenticationService {
         userRepository.save(user);
     }
 
+
+//    public AuthenticationResponse loginWithGoogle(String token) {
+//        GoogleIdTokenVerifier verifier =
+//                new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+//                .setAudience(Collections.singletonList(googleClientId))
+//                .build();
+//
+//        GoogleIdToken idToken;
+//        try {
+//            idToken = verifier.verify(token);
+//        } catch (GeneralSecurityException | IOException e) {
+//            throw new ApplicationException(ErrorCode.UNAUTHENTICATED, "Token verification failed.");
+//        }
+//
+//        if (idToken == null) {
+//            throw new ApplicationException(ErrorCode.UNAUTHENTICATED, "Invalid ID token.");
+//        }
+//
+//        GoogleIdToken.Payload payload = idToken.getPayload();
+//        String email = payload.getEmail();
+//        String googleId = payload.getSubject(); // sub
+//        User usergoogle = userRepository.findByGoogleId(googleId).orElse(null);
+//        if (usergoogle != null) {
+//            String jwt = GenerateJWT(usergoogle);
+//            return AuthenticationResponse.builder()
+//                    .token(jwt)
+//                    .success(true)
+//                    .message("Đăng nhập bằng Google thành công")
+//                    .build();
+//        }
+//        User user = userRepository.findByEmail(email).orElseGet(() -> {
+//            User newUser = new User();
+//            newUser.setId(snowflakeIdGenerator.nextId());
+//            newUser.setEmail(email);
+//            newUser.setGoogle_id(googleId);
+//            newUser.setUsername(email);
+//            newUser.setFirstName((String) payload.get("given_name"));
+//            newUser.setLastName((String) payload.get("family_name"));
+//            newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString())); // Generate a random password
+//            newUser.setProvider(AuthProvider.GOOGLE);
+//            newUser.setUserImage((String) payload.get("picture"));
+//            Role userRole = roleRepository.findByName(PredefinedRole.USER.name())
+//                    .orElseThrow(() -> new ApplicationException(ErrorCode.ROLE_NOT_FOUND));
+//            newUser.setRoles(Collections.singleton(userRole));
+//
+//            return userRepository.save(newUser);
+//        });
+//        user.setEmail(email);
+//        String jwt = GenerateJWT(user);
+//        return AuthenticationResponse.builder()
+//                .token(jwt)
+//                .success(true)
+//                .message("Đăng nhập bằng Google thành công")
+//                .build();
+//    }
+
     public AuthenticationResponse loginWithGoogle(String token) {
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-                .setAudience(Collections.singletonList(googleClientId))
-                .build();
+        GoogleIdTokenVerifier verifier =
+                new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                        .setAudience(Collections.singletonList(googleClientId))
+                        .build();
 
         GoogleIdToken idToken;
         try {
@@ -141,23 +200,34 @@ public class AuthenticationService {
         }
 
         GoogleIdToken.Payload payload = idToken.getPayload();
+        String googleId = payload.getSubject(); // sub
         String email = payload.getEmail();
 
-        User user = userRepository.findByEmail(email).orElseGet(() -> {
-            User newUser = new User();
-            newUser.setId(snowflakeIdGenerator.nextId());
-            newUser.setEmail(email);
-            newUser.setUsername(email);
-            newUser.setFirstName((String) payload.get("given_name"));
-            newUser.setLastName((String) payload.get("family_name"));
-            newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString())); // Generate a random password
-            newUser.setProvider(AuthProvider.GOOGLE);
-            Role userRole = roleRepository.findByName(PredefinedRole.USER.name())
-                    .orElseThrow(() -> new ApplicationException(ErrorCode.ROLE_NOT_FOUND));
-            newUser.setRoles(Collections.singleton(userRole));
+        User user = userRepository.findByGoogleId(googleId).orElse(null);
+        if (user == null) {
+            user = userRepository.findByEmail(email).orElse(null);
 
-            return userRepository.save(newUser);
-        });
+            if (user == null) {
+                user = new User();
+                user.setId(snowflakeIdGenerator.nextId());
+                user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+
+                Role userRole = roleRepository.findByName(PredefinedRole.USER.name())
+                        .orElseThrow(() -> new ApplicationException(ErrorCode.ROLE_NOT_FOUND));
+                user.setRoles(Collections.singleton(userRole));
+            }
+
+            user.setGoogleId(googleId);
+            user.setProvider(AuthProvider.GOOGLE);
+            user.setUsername("google_" + googleId); // ổn định
+        }
+
+        user.setEmail(email);
+        user.setFirstName((String) payload.get("given_name"));
+        user.setLastName((String) payload.get("family_name"));
+        user.setUserImage((String) payload.get("picture"));
+
+        userRepository.save(user);
 
         String jwt = GenerateJWT(user);
         return AuthenticationResponse.builder()

@@ -46,11 +46,11 @@ public class UserController {
     }
 
     @GetMapping("/myinfo")
-    ApiResponse<UserResponse> myinfo() {
+    ApiResponse<UserDetailResponse> myinfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         authentication.getAuthorities();
         authentication.getName();
-        return ApiResponse.<UserResponse>builder()
+        return ApiResponse.<UserDetailResponse>builder()
                 .data(userService.getmyinfo())
                 .build();
     }
