@@ -1,91 +1,252 @@
-@startuml
-' Sơ đồ Usecase Tổng quát cho Hệ thống Bán Giày Dép
+erDiagram
+    User ||--o{ Order : has
+    User ||--o{ UserAddress : has
+    User ||--|| Cart : has
+    User ||--o{ ProductReview : writes
+    User ||--o{ OrderReturn : requests
+    User }o--o{ Role : has
 
-' Cấu hình giao diện
-/'skinparam actorStyle awesome'/
-left to right direction
-title Sơ đồ Usecase Tổng Quát - Hệ Thống Bán Giày Dép
+    Role }o--o{ Permission : has
 
-' --- Định nghĩa các Actor ---
-actor "Người dùng" as User
-actor "Nhân viên" as Staff
-actor "Quản trị viên" as Admin
-actor "Hệ thống GHN" as GHN_System
-actor "Hệ thống VNPAY" as VNPAY_System
-actor "Hệ thống Email" as Email_System
+    Cart ||--o{ CartItem : contains
 
-' --- Định nghĩa mối quan hệ kế thừa giữa các Actor ---
-Staff --|> User
-Admin --|> Staff
+    Product ||--o{ ProductColor : has
+    Product ||--o{ ProductReview : receives
+    Product }o--o{ Promotion : has
+    Product }o--|| Brand : belongs to
+    Product }o--|| Category : belongs to
+    Product }o--|| Supplier : supplied by
 
-' --- Gói các Usecase trong một hệ thống ---
-rectangle "Hệ Thống Bán Hàng" {
+    ProductColor ||--o{ ProductVariant : has
+    ProductColor ||--o{ ImageProduct : has
+    ProductColor }o--|| Color : is
 
-  ' --- Usecases của Khách vãng lai ---
-  usecase "Xem sản phẩm" as UC1
-  usecase "Tìm kiếm & Lọc sản phẩm" as UC2
-  usecase "Đăng ký tài khoản" as UC3
-  usecase "Đăng ký nhận tin" as UC4
+    ProductVariant ||--o{ Stock : has
+    ProductVariant }o--|| Size : is
+    ProductVariant ||--o{ CartItem : "is in"
+    ProductVariant ||--o{ OrderItem : "is in"
+    ProductVariant ||--o{ StockTransactionItem : "is in"
 
+    Order ||--o{ OrderItem : contains
+    Order ||--o{ OrderReturn : leads to
+    Order ||--o{ Refund : can have
+    Order }o--|| PaymentMethod : "uses"
+    Order }o--|| UserAddress : "ships to"
 
-  ' --- Usecases của Người dùng ---
-  usecase "Đăng nhập / Đăng xuất" as UC5
-  usecase "Quản lý tài khoản" as UC6
-  usecase "Quản lý giỏ hàng" as UC7
-  usecase "Đặt hàng" as UC8
-  usecase "Xem lịch sử đơn hàng" as UC9
-  usecase "Đánh giá sản phẩm" as UC10
-  usecase "Thanh toán đơn hàng" as UC11
-  
-  User -- UC5
-  User -- UC6
-  User -- UC7
-  User -- UC8
-  User -- UC9
-  User -- UC10
-  User -- UC11
-  
-  ' --- Usecases của Nhân viên ---
-  usecase "Quản lý đơn hàng" as UC12
-  usecase "Quản lý kho hàng (Nhập/Xuất)" as UC13
-  
-  Staff -- UC12
-  Staff -- UC13
+    OrderItem ||--o{ OrderReturnItem : can be in
+    OrderItem ||--|| ProductReview : can have
 
-  ' --- Usecases của Quản trị viên ---
-  usecase "Quản lý Sản phẩm (CRUD)" as UC14
-  usecase "Quản lý Thuộc tính SP" as UC15
-  usecase "Quản lý Người dùng & Phân quyền" as UC16
-  usecase "Quản lý Cửa hàng & Kho" as UC17
-  usecase "Quản lý Nhà cung cấp" as UC18
-  usecase "Quản lý Khuyến mãi" as UC19
-  usecase "Quản lý Banner" as UC20
-  usecase "Xem báo cáo doanh thu" as UC21
+    OrderReturn ||--o{ OrderReturnItem : contains
+    OrderReturn ||--o{ Refund : can result in
 
-  Admin -- UC14
-  Admin -- UC15
-  Admin -- UC16
-  Admin -- UC17
-  Admin -- UC18
-  Admin -- UC19
-  Admin -- UC20
-  Admin -- UC21
+    Stock }o--|| WareHouse : located in
+    Stock }o--|| Store : located in
 
-  ' --- Usecases tương tác với hệ thống ngoài ---
-  usecase "Tạo đơn giao hàng" as UC_GHN_CREATE
-  usecase "Cập nhật trạng thái GHN" as UC_GHN_UPDATE
-  usecase "Xử lý thanh toán VNPAY" as UC_VNPAY
-  usecase "Gửi Email thông báo" as UC_EMAIL
+    WareHouse ||--o{ StockTransaction : "from/to"
+    Store ||--o{ StockTransaction : "from/to"
+    Supplier ||--o{ StockTransaction : "from"
 
-  ' --- Mối quan hệ giữa các Usecase ---
-  UC8 ..> UC_GHN_CREATE : <<include>>
-  UC11 ..> UC_VNPAY : <<include>>
-  
-  ' Mối quan hệ với các hệ thống bên ngoài
-  UC_GHN_CREATE - GHN_System
-  UC_GHN_UPDATE - GHN_System
-  UC_VNPAY - VNPAY_System
-  UC_EMAIL - Email_System
-}
+    StockTransaction ||--o{ StockTransactionItem : contains
 
-@enduml
+    Brand {
+        Long id PK
+        String name
+    }
+
+    Category {
+        Long id PK
+        String name
+    }
+
+    Color {
+        String code PK
+        String name
+        String hexCode
+    }
+
+    Size {
+        String code PK
+        Integer name
+    }
+
+    Supplier {
+        UUID id PK
+        String name
+        String taxCode
+        String email
+    }
+
+    User {
+        Long id PK
+        String username
+        String email
+        String password
+    }
+
+    Role {
+        String name PK
+        String description
+    }
+
+    Permission {
+        String name PK
+        String description
+    }
+
+    Cart {
+        UUID id PK
+        Long user_id FK
+    }
+
+    CartItem {
+        UUID id PK
+        UUID cart_id FK
+        UUID product_variant_id FK
+        Integer quantity
+    }
+
+    Product {
+        UUID id PK
+        String name
+        String slug
+        String productCode
+        Long brand_id FK
+        Long category_id FK
+        UUID supplier_id FK
+    }
+
+    ProductColor {
+        UUID id PK
+        String color_code FK
+        UUID product_id FK
+    }
+
+    ImageProduct {
+        UUID id PK
+        UUID product_color_id FK
+        String imageUrl
+    }
+
+    ProductVariant {
+        UUID id PK
+        UUID product_color_id FK
+        String size_code FK
+        String sku
+        BigDecimal price
+    }
+
+    Stock {
+        UUID id PK
+        UUID variant_id FK
+        UUID warehouse_id FK
+        UUID store_id FK
+        Integer quantity
+        StockType stockType
+    }
+
+    WareHouse {
+        UUID id PK
+        String name
+        String location
+    }
+
+    Store {
+        UUID id PK
+        String name
+        String location
+    }
+
+    StockTransaction {
+        UUID id PK
+        TransactionType type
+        TransactionStatus status
+        UUID supplier_id FK
+        UUID from_warehouse_id FK
+        UUID to_warehouse_id FK
+        UUID from_store_id FK
+        UUID to_store_id FK
+    }
+
+    StockTransactionItem {
+        UUID id PK
+        UUID transaction_id FK
+        UUID variant_id FK
+        Integer quantity
+    }
+
+    Order {
+        UUID id PK
+        String orderCode
+        UUID user_id FK
+        Long payment_method_id FK
+        UUID user_address_id FK
+        BigDecimal total_price
+        OrderStatus orderStatus
+    }
+
+    OrderItem {
+        UUID id PK
+        UUID order_id FK
+        UUID productVariant_id FK
+        Integer quantity
+        BigDecimal price
+    }
+
+    UserAddress {
+        UUID id PK
+        UUID user_id FK
+        String receiverName
+        String phoneNumber
+        String streetDetail
+    }
+
+    ProductReview {
+        UUID id PK
+        UUID product_id FK
+        Long user_id FK
+        UUID order_item_id FK
+        int rating
+        String comment
+    }
+
+    Promotion {
+        Long id PK
+        String name
+        PromotionType promotionType
+        BigDecimal discountValue
+    }
+
+    PaymentMethod {
+        Long id PK
+        String displayName
+    }
+
+    OrderReturn {
+        UUID id PK
+        Long user_id FK
+        UUID order_id FK
+        String reasonReturn
+        OrderReturnStatus status
+    }
+
+    OrderReturnItem {
+        UUID id PK
+        UUID order_return_id FK
+        UUID order_item_id FK
+        Integer quantity
+    }
+
+    Refund {
+        UUID id PK
+        UUID order_return_id FK
+        UUID order_id FK
+        BigDecimal amount
+        RefundStatus status
+    }
+
+    Banner {
+        UUID id PK
+        String bannerName
+        String imageUrl
+        BannerType type
+    }

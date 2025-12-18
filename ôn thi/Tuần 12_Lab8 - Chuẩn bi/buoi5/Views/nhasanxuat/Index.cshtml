@@ -1,0 +1,33 @@
+﻿
+
+@{
+//ViewData["Title"] = "Index";
+//Layout = "~/Views/_LayoutPage1.cshtml";
+}
+<h2> Thông tin nhà sản xuất</h2>
+<p>
+    <a href="@Url.Action("themNSX")">Thêm mới</a>
+</p>
+<table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+        <th>Tên nhà sản xuất</th>
+        <th>Địa chỉ</th>
+
+        
+    </tr>
+  
+    @{ 
+        foreach (var item in ViewBag.nsx)
+        {
+            <tr>
+                <td>@item.Tennsx</td>
+                <td>@item.Diachi</td>
+                <td>
+                    <a asp-controller="nhasanxuat" asp-action="formxoaNSX" asp-route-id="@item.Mansx" class="btn btn-primary">Xóa </a>
+                    <a asp-controller="nhasanxuat" asp-action="formsuaNSX" asp-route-id="@item.Mansx" class="btn btn-primary">Chỉnh Sửa  </a>
+                </td>
+            </tr>
+        }
+    }
+
+</table>

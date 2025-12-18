@@ -1,0 +1,34 @@
+﻿@model IEnumerable<buoi5.Models.Loaihanghoa>
+
+@{
+    ViewData["Title"] = "Index";
+    //Layout = "~/Views/_LayoutPage1.cshtml";
+}
+
+<h1>Loại hàng hóa</h1>
+
+<p>
+    <a asp-action="formthemLHH">Thêm mới</a>
+</p>
+<table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+        <th>Ma loai</th>
+        <th>Ten loai</th>
+
+
+    </tr>
+    @{
+        foreach (var item in ViewBag.lhh)
+        {
+            <tr>
+                <td>@item.Maloai</td>
+                <td>@item.Tenloai</td>
+                <td>
+                 <a asp-controller="loaihanghoa" asp-action="formxoaLHH" asp-route-id="@item.Maloai" class="btn btn-primary">Xóa</a>
+                    <a asp-controller="loaihanghoa" asp-action="formsuaLHH" asp-route-id="@item.Maloai" class="btn btn-primary">Chỉnh sửa</a>
+                </td>
+            </tr>
+        }
+    }
+
+</table>

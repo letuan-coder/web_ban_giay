@@ -1,0 +1,60 @@
+﻿@model buoi5.Models.Nhanvien
+
+@{
+    ViewData["Title"] = "formsuaNV";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    List<SelectListItem> ls = new List<SelectListItem>();
+    ls.Add(new SelectListItem("Nam", "true"));
+    ls.Add(new SelectListItem("Nữ", "false"));
+}
+
+<h4>Nhân viên </h4>
+<hr />
+<div>
+    <a asp-action="Index">Quay lai</a>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="suaNV">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Manv" class="control-label"></label>
+                <input asp-for="Manv" readonly="readonly" class="form-control" />
+                <span asp-validation-for="Manv" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Tennv" class="control-label"></label>
+                <input asp-for="Tennv" class="form-control" />
+                <span asp-validation-for="Tennv" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Ngaysinh" class="control-label"></label>
+                <input asp-for="Ngaysinh" type="date" class="form-control" />
+                <span asp-validation-for="Ngaysinh" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Phai" class="control-label"></label>
+                <select asp-for="Phai" asp-items="@ls"></select>
+                <span asp-validation-for="Phai" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Diachi" class="control-label"></label>
+                <input asp-for="Diachi" class="form-control" />
+                <span asp-validation-for="Diachi" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Password" class="control-label"></label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Sửa" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+

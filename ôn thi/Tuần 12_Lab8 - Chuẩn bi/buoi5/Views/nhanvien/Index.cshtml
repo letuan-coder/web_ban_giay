@@ -1,0 +1,75 @@
+﻿@model IEnumerable<buoi5.Models.Nhanvien>
+
+@{
+    ViewData["Title"] = "Index";
+    //Layout = "~/Views/_LayoutPage1.cshtml";
+}
+
+<h2>Nhân viên</h2>
+
+
+<p>
+    <a asp-action="formthemNV">Thêm mới</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+             Mã nhân viên
+            </th>
+            <th>
+               Tên nhân viên
+            </th>
+            <th>
+               Ngày sinh
+            </th>
+            <th>
+                Phái
+            </th>
+            <th>
+                Địa chỉ
+            </th>
+            <th>
+                Password
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @item.Manv
+            </td>
+            <td>
+               @item.Tennv
+            </td>
+            <td>
+               @item.Ngaysinh.Value.ToShortDateString()
+            </td>
+            <td>
+                @{ 
+                    if(item.Phai == true)
+                    {
+                        <span>Nam</span>
+                    }
+                    else
+                    {
+                        <span>Nữ</span>
+                    }
+                }
+            </td>
+            <td>
+               @item.Diachi
+            </td>
+            <td>
+                @item.Password
+            </td>
+            <td>
+                <a asp-controller="Nhanvien" asp-action="formxoaNV" asp-route-id="@item.Manv" class="btn btn-primary">Xóa</a>
+                <a asp-controller="Nhanvien" asp-action="formsuaNV" asp-route-id="@item.Manv" class="btn btn-primary">Chỉnh sửa</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

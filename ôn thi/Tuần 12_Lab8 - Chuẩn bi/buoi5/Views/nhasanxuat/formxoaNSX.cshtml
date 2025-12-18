@@ -1,0 +1,51 @@
+﻿@model buoi5.Models.Nhasanxuat
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+@if ((int)ViewBag.flag == 0)
+{
+    <h3>Bạn thật sự có muốn xóa NSX này không ?</h3>
+}
+else
+{
+    <h3>Bạn không thể xóa NSX này ?</h3>
+}
+<p>
+    <a asp-action="Index" class="btn btn-primary">Hủy bỏ </a>
+</p>
+
+<div>
+   
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Mansx)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Mansx)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Tennsx)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Tennsx)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Diachi)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Diachi)
+        </dd>
+    </dl>
+     @if ((int)ViewBag.flag == 0)
+    {
+        <form asp-action="xoaNSX" asp-route-id="@Model.Mansx">
+            <input type="submit" value="Xóa" class="btn btn-danger" /> |
+        
+    </form>
+    }
+</div>

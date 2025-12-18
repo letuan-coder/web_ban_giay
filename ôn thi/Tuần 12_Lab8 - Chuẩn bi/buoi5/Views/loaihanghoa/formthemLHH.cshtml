@@ -1,0 +1,38 @@
+﻿@model buoi5.Models.Loaihanghoa
+
+@{
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<h4>Thêm loại hàng hóa </h4>
+<div>
+    <a asp-action="Index">Quay lai</a>
+</div>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-controller="loaihanghoa" asp-action="themLHH" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Maloai" class="control-label"></label>
+                <input asp-for="Maloai" class="form-control" />
+                <span asp-validation-for="Maloai" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Tenloai" class="control-label"></label>
+                <input asp-for="Tenloai" class="form-control" />
+                <span asp-validation-for="Tenloai" class="text-danger"></span>
+            </div>
+           
+            <div class="form-group">
+                <input type="submit" value="Thêm" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+

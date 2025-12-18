@@ -118,7 +118,7 @@ public class UserService {
     }
     public UserDetailResponse UploadUserImage(MultipartFile file) {
         User user = getUserByJwtHelper.getCurrentUser();
-        if (user.getUserImage()!=null && user.getUserImage()!=""){
+        if (!user.getOrders().isEmpty()){
             fileStorageService.deleteFile(user.getUserImage());
             user.setUserImage("");
             userRepository.save(user);

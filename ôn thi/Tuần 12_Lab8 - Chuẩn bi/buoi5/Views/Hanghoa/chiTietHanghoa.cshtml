@@ -1,0 +1,85 @@
+﻿@model buoi5.Models.Hanghoa
+
+@{
+    ViewData["Title"] = "chiTietHanghoa";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+   
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- CSS only -->
+    
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+<div>
+<h1>Thông tin hàng hóa</h1>
+        <a asp-action="Index">Quay lai</a>
+        <div>
+            Hình ảnh:
+            <br />
+            @*<img src="~/images/download.jpg" />*@
+            @*<img src=@Model.Hinh />*@
+            <img src="@Url.Content(Model.Hinh)" width="150" height="180" />
+        </div>
+
+
+<div class="row">
+
+    <dd class="col-3"> Mã hàng:  @Model.Mahang</dd>
+    &nbsp
+
+
+</div>
+<div class="row">
+
+    <dd class="col-3">Tên hàng: @Model.Tenhang</dd>
+    &nbsp
+
+</div>
+ <div <div class="row">
+
+    <dd class="col-3"> Đơn vị tính: @Model.Donvitinh</dd>
+    &nbsp
+</div>
+      <div class="row">
+
+          <dd class="col-3">Đơn giá: @Model.Dongia</dd>
+          &nbsp
+
+      </div>
+
+<table border="1">
+    <tr>
+        <th>Mã loại hàng hóa</th>
+        <th>Tên loại hàng hóa</th>
+    </tr>
+    <tr>
+        <td>@Model.Maloai</td>
+        <td>@Model.MaloaiNavigation.Tenloai</td>
+    </tr>
+</table>
+
+<table border="1">
+    <tr>
+        <th>Mã nhà sản xuất </th>
+        <th>Tên nhà sản xuất </th>
+        <th>Địa chỉ </th>
+    </tr>
+    <tr>
+        <td>@Model.Mansx</td>
+        <td>@Model.MansxNavigation.Tennsx</td>
+        <td>@Model.MansxNavigation.Diachi</td>
+        
+    </tr>
+</table>
+
+
+
+
+    </div></body></html>

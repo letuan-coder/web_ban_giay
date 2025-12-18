@@ -1,0 +1,79 @@
+﻿@model buoi5.Models.Nhanvien
+
+@{
+    
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <div>
+
+
+
+    <h3>Nhân viên này đã tồn tại trong hệ thống</h3>
+    <h4>Thêm nhân viên </h4>
+        <hr />
+
+<div class="form-group">
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Manv)
+        </dt>
+        <dd>
+                @Html.DisplayFor(model => model.Manv)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Tennv)
+        </dt>
+        <dd>
+             @Html.DisplayFor(model => model.Tennv)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Ngaysinh)
+        </dt>
+        <dd>
+                @Html.DisplayFor(model => model.Ngaysinh)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Phai)
+        </dt>
+        <dd>
+                @*@Html.DisplayFor(model => model.Phai)*@
+           @{
+               if(Model.Phai == true)
+               {
+                   <span>Nam</span>
+               }
+               else
+               {
+                   <span>Nữ</span>
+               }
+           }
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Diachi)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Diachi)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Password)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Password)
+        </dd>
+    </dl>
+    @Html.ActionLink("Quay lai", "loithemNV", Model)
+   
+</div>
+    </div>
+</body>
+</html>

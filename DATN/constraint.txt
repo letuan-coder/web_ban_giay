@@ -1,0 +1,223 @@
+# Ràng Buộc Dữ Liệu Toàn Diện của Hệ Thống
+
+Đây là danh sách chi tiết các ràng buộc về mặt dữ liệu, cấu trúc, xác thực và logic kinh doanh được áp dụng cho các thực thể (models) và Đối tượng Truyền dữ liệu (DTOs) trong toàn bộ dự án.
+
+---
+
+### **A. MODULE QUẢN LÝ NGƯỜI DÙNG & PHÂN QUYỀN**
+
+#### **1. Thực thể `User`**
+-   `id` (Long): Khóa chính, được tạo tự động khi đăng nhập bằng Google hoặc theo cơ chế khác.
+-   `username` (String):
+    -   `@Column(unique = true)`: **Duy nhất** trên toàn hệ thống.
+    -   Trong `RegisterRequest`: `@Size(min = 4)` - Yêu cầu tối thiểu 4 ký tự khi đăng ký.
+-   `googleId` (String): `@Column(unique = true)` - **Duy nhất**, dùng để liên kết với tài khoản Google.
+-   `email` (String):
+    -   `@Column(unique = true)` (logic): Phải là **duy nhất**.
+    -   Trong các DTO (`RegisterRequest`, `UpdateUserRequest`): `@Email` - Phải có định dạng email hợp lệ.
+-   `password` (String):
+    -   Bắt buộc (`nullable = false`).
+    -   Trong `RegisterRequest`: `@Size(min = 8)` - Yêu cầu tối thiểu 8 ký tự.
+    -   *Logic*: Luôn được mã hóa bằng `BCryptPasswordEncoder` trước khi lưu vào cơ sở dữ liệu.
+-   `dob` (LocalDate):
+    -   Trong `RegisterRequest`: `@DobConstraint(min = 12)` - Người dùng phải đủ 12 tuổi trở lên.
+-   `firstName`, `lastName` (String):
+    -   Bắt buộc (`@NotBlank`).
+-   **Mối quan hệ:**
+    -   `roles`: Quan hệ **Nhiều-Nhiều** (`@ManyToMany`) với thực thể `Role`.
+    -   `cart`: Quan hệ **Một-Một** (`@OneToOne`) với `Cart`. Một user chỉ có một giỏ hàng.
+    -   `orders`: Quan hệ **Một-Nhiều** (`@OneToMany`) với `Order`.
+    -   `userAddress`: Quan hệ **Một-Nhiều** (`@OneToMany`) với `UserAddress`.
+
+#### **2. Thực thể `Role` và `Permission`**
+-   `name` (String): Khóa chính.
+-   `description` (String): Mô tả về quyền/vai trò.
+-   **Mối quan hệ (`Role`):**
+    -   `permissions`: Quan hệ **Nhiều-Nhiều** (`@ManyToMany`) với `Permission`. Một vai trò có thể có nhiều quyền.
+
+#### **3. Thực thể `UserAddress`**
+-   `id` (UUID): Khóa chính.
+-   `receiverName`, `phoneNumber`, `streetDetail`: Bắt buộc (`@NotBlank` trong `UserAddressRequest`).
+-   `provinceCode`, `districtCode`, `wardCode`: Bắt buộc để xác định địa chỉ hành chính.
+-   `phoneNumber`: `@Size(min = 10, max = 15)` - Độ dài từ 10 đến 15 ký tự.
+-   `isDefault` (boolean):
+    -   *Logic*: Mỗi `User` chỉ có thể có **một** địa chỉ được đặt làm mặc định (`true`). Hệ thống phải tự động chuyển các địa chỉ mặc định cũ thành `false` khi một địa chỉ mới được đặt làm mặc định.
+-   **Mối quan hệ:**
+    -   `user`: Quan hệ **Nhiều-Một** (`@ManyToOne`) với `User`. Mỗi địa chỉ phải thuộc về một người dùng.
+
+---
+
+### **B. MODULE QUẢN LÝ SẢN PHẨM**
+
+#### **1. Thực thể `Product`**
+-   `id` (UUID): Khóa chính.
+-   `productCode` (String): Bắt buộc, **duy nhất (unique)**. Được tạo tự động.
+-   `name` (String): Bắt buộc (`@NotEmpty` trong DTO).
+-   `slug` (String): Bắt buộc, được tạo tự động từ `name`.
+-   `ThumbnailUrl` (String): Bắt buộc (`@NotNull`).
+-   `importPrice`, `price` (BigDecimal): Bắt buộc.
+    -   *Logic*: `importPrice` không nên cao hơn `price`.
+-   **Mối quan hệ:**
+    -   `brand`: Quan hệ **Nhiều-Một** (`@ManyToOne`). Bắt buộc (`@NotNull` trong DTO).
+    -   `category`: Quan hệ **Nhiều-Một** (`@ManyToOne`). Bắt buộc (`@NotNull` trong DTO).
+    -   `supplier`: Quan hệ **Nhiều-Một** (`@ManyToOne`).
+    -   `productColors`: Quan hệ **Một-Nhiều** (`@OneToMany`) với `ProductColor`.
+    -   `promotions`: Quan hệ **Nhiều-Nhiều** (`@ManyToMany`) với `Promotion`.
+    -   `reviews`: Quan hệ **Một-Nhiều** (`@OneToMany`) với `ProductReview`.
+
+#### **2. Thực thể `ProductColor` và `ImageProduct`**
+-   **`ProductColor`:**
+    -   `id` (UUID): Khóa chính.
+    -   **Mối quan hệ:**
+        -   `product`: Quan hệ **Nhiều-Một** (`@ManyToOne`).
+        -   `color`: Quan hệ **Nhiều-Một** (`@ManyToOne`).
+        -   `images`: Quan hệ **Một-Nhiều** (`@OneToMany`) với `ImageProduct`.
+        -   `variants`: Quan hệ **Một-Nhiều** (`@OneToMany`) với `ProductVariant`.
+-   **`ImageProduct`:**
+    -   `id` (UUID): Khóa chính.
+    -   `imageUrl` (String): Đường dẫn ảnh.
+    -   **Mối quan hệ:**
+        -   `productColor`: Quan hệ **Nhiều-Một** (`@ManyToOne`). Mỗi ảnh phải thuộc về một màu của sản phẩm.
+    -   *Logic*: Tối đa 5 ảnh cho mỗi `ProductColor`.
+
+#### **3. Thực thể `ProductVariant`**
+-   `id` (UUID): Khóa chính.
+-   `sku` (String): Bắt buộc, **duy nhất (unique)**. Được tạo tự động.
+-   `price` (BigDecimal): `@Min(0)` - Giá không được âm.
+-   **Ràng buộc duy nhất σύνθετο (`@UniqueConstraint`):**
+    -   Cặp (`product_color_id`, `size_code`) là **duy nhất**. Một màu sản phẩm không thể có hai biến thể cùng một kích cỡ.
+-   **Mối quan hệ:**
+    -   `productColor`: Quan hệ **Nhiều-Một** (`@ManyToOne`).
+    -   `size`: Quan hệ **Nhiều-Một** (`@ManyToOne`).
+    -   `stocks`: Quan hệ **Một-Nhiều** (`@OneToMany`) với `Stock`.
+
+#### **4. Các thực thể phụ trợ (`Brand`, `Category`, `Color`, `Size`, `Supplier`)**
+-   **`Brand`, `Category`:**
+    -   `id` (Long): Khóa chính, tự tăng.
+    -   `name` (String): Bắt buộc (`@NotEmpty`), không được trùng lặp (logic).
+-   **`Color`, `Size`:**
+    -   `code` (String): Khóa chính.
+    -   `name`: Bắt buộc. `Integer` cho `Size` (`@Min(20)`), `String` cho `Color`.
+    -   `hexCode` (`Color`): Bắt buộc, phải là mã màu HEX hợp lệ.
+-   **`Supplier`:**
+    -   `id` (UUID): Khóa chính.
+    -   `name`, `taxCode`, `email`, `phoneNumber`: Tất cả đều là **duy nhất (unique)**.
+    -   `email`: `@Email` - Phải là định dạng email hợp lệ.
+    -   `phoneNumber`: `@Pattern` - Phải là số điện thoại Việt Nam hợp lệ.
+    -   Các trường thông tin liên hệ: Bắt buộc (`@NotBlank`).
+
+---
+
+### **C. MODULE QUẢN LÝ ĐƠN HÀNG & THANH TOÁN**
+
+#### **1. Thực thể `Order`**
+-   `id` (UUID): Khóa chính.
+-   `orderCode` (String): **Duy nhất (unique)**, được tạo tự động.
+-   `total_price` (BigDecimal): Bắt buộc (`@NotNull`).
+-   `orderStatus`, `paymentStatus`, `ghnStatus`: Phải là các giá trị hợp lệ từ các Enum tương ứng.
+-   **Mối quan hệ:**
+    -   `user`: Quan hệ **Nhiều-Một** (`@ManyToOne`), bắt buộc.
+    -   `userAddress`: Quan hệ **Nhiều-Một** (`@ManyToOne`), bắt buộc.
+    -   `items`: Quan hệ **Một-Nhiều** (`@OneToMany`) với `OrderItem`. Một đơn hàng phải có ít nhất một sản phẩm.
+    -   `paymentMethod`: Quan hệ **Nhiều-Một** (`@ManyToOne`).
+
+#### **2. Thực thể `OrderItem`**
+-   `id` (UUID): Khóa chính.
+-   `quantity` (Integer): Bắt buộc, phải lớn hơn 0.
+-   `price` (BigDecimal): Bắt buộc.
+-   **Mối quan hệ:**
+    -   `order`: Quan hệ **Nhiều-Một** (`@ManyToOne`), bắt buộc.
+    -   `productVariant`: Quan hệ **Nhiều-Một** (`@ManyToOne`), bắt buộc.
+
+#### **3. Thực thể `OrderReturn` và `OrderReturnItem`**
+-   **`OrderReturn`:**
+    -   `id` (UUID): Khóa chính.
+    -   `status` (Enum): Trạng thái của yêu cầu trả hàng.
+    -   **Mối quan hệ:**
+        -   `user`, `order`: Phải liên kết đến người dùng và đơn hàng gốc (`@ManyToOne`).
+-   **`OrderReturnItem`:**
+    -   `id` (UUID): Khóa chính.
+    -   `quantity` (Integer): Số lượng trả phải nhỏ hơn hoặc bằng số lượng đã mua.
+    -   **Mối quan hệ:**
+        -   `orderReturn`, `orderItem`: Phải liên kết đến yêu cầu trả hàng và mục hàng gốc (`@ManyToOne`).
+
+#### **4. Thực thể `PaymentMethod`**
+-   `id` (Long): Khóa chính.
+-   `displayName` (String): Bắt buộc (`@NotBlank`).
+
+#### **5. Thực thể `Refund`**
+-   `id` (UUID): Khóa chính.
+-   `amount` (BigDecimal): Số tiền hoàn.
+-   `status` (Enum `RefundStatus`): Trạng thái hoàn tiền.
+-   **Mối quan hệ:**
+    -   `order`, `orderReturn`: Phải liên kết đến đơn hàng gốc và yêu cầu trả hàng.
+
+---
+
+### **D. MODULE QUẢN LÝ KHO & HÀNG HÓA**
+
+#### **1. Thực thể `Stock`**
+-   `id` (UUID): Khóa chính.
+-   `quantity` (Integer): Số lượng tồn kho, không được âm.
+-   **Mối quan hệ:**
+    -   `variant`: Quan hệ **Nhiều-Một** (`@ManyToOne`), bắt buộc.
+    -   `warehouse`: Quan hệ **Nhiều-Một** (`@ManyToOne`), có thể null.
+    -   `store`: Quan hệ **Nhiều-Một** (`@ManyToOne`), có thể null.
+    -   *Logic*: Một `Stock` phải thuộc về `warehouse` hoặc `store`, không thể cả hai hoặc không thuộc về đâu cả.
+
+#### **2. Thực thể `WareHouse` và `Store`**
+-   `id` (UUID): Khóa chính.
+-   `name`, `location`: Bắt buộc, **duy nhất (unique)**.
+-   `phoneNumber` (`Store`): Bắt buộc, **duy nhất (unique)**.
+
+#### **3. Thực thể `StockTransaction`**
+-   `id` (UUID): Khóa chính.
+-   `type` (Enum `TransactionType`): Bắt buộc.
+-   `status` (Enum `TransactionStatus`): Bắt buộc.
+-   **Mối quan hệ:**
+    -   Có thể liên kết đến `supplier`, `fromWareHouse`, `toWareHouse`, `fromStore`, `toStore` tùy thuộc vào `type`.
+    -   `items`: Quan hệ **Một-Nhiều** (`@OneToMany`). Trong DTO, `@Size(min = 1)` - Giao dịch phải có ít nhất một mặt hàng.
+
+#### **4. Thực thể `StockTransactionItem`**
+-   `id` (UUID): Khóa chính.
+-   `quantity` (Integer): Bắt buộc, `@Min(1)` - phải lớn hơn 0.
+-   **Mối quan hệ:**
+    -   `transaction`: Quan hệ **Nhiều-Một** (`@ManyToOne`), bắt buộc.
+    -   `variant`: Quan hệ **Nhiều-Một** (`@ManyToOne`), bắt buộc.
+
+---
+
+### **E. CÁC MODULE KHÁC**
+
+#### **1. Thực thể `Cart` và `CartItem`**
+-   **`Cart`:**
+    -   `id` (UUID): Khóa chính.
+    -   **Mối quan hệ:**
+        -   `user`: Quan hệ **Một-Một** (`@OneToOne`), `unique=true`.
+-   **`CartItem`:**
+    -   `id` (UUID): Khóa chính.
+    -   `quantity`: Số lượng.
+    -   **Mối quan hệ:**
+        -   `cart`, `productVariant`: Bắt buộc (`@ManyToOne`).
+    -   *Logic*: Khi thêm sản phẩm đã có vào giỏ hàng, chỉ cập nhật số lượng thay vì tạo mới.
+
+#### **2. Thực thể `ProductReview`**
+-   `id` (UUID): Khóa chính.
+-   `rating` (int): Bắt buộc, giá trị từ 1 đến 5.
+-   **Mối quan hệ:**
+    -   `product`, `order`, `orderItem`, `user`: Bắt buộc (`@ManyToOne`, `@OneToOne`).
+    -   *Logic*: Người dùng chỉ có thể đánh giá một `OrderItem` một lần.
+
+#### **3. Thực thể `Banner`**
+-   `id` (UUID): Khóa chính.
+-   `imageUrl` (String): Bắt buộc (`@NotNull`).
+-   `type` (Enum `BannerType`): Bắt buộc.
+
+#### **4. Thực thể `NewsletterSubscription`**
+-   `email` (String): Khóa chính (`@Id`), **duy nhất (unique)**.
+-   `@Email`: Phải là định dạng email hợp lệ.
+
+#### **5. Ràng buộc về tập tin và tải lên**
+-   `MAX_FILE_SIZE_MB`: Kích thước tệp tải lên không được vượt quá 10MB.
+-   **Định dạng tệp:** Chỉ chấp nhận các loại `image/*` (jpg, jpeg, png, webp, gif).
+-   `FILE_LIMIT`: Mỗi màu sản phẩm chỉ được có tối đa 5 hình ảnh.

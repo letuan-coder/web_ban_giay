@@ -16,7 +16,7 @@ import lombok.experimental.FieldDefaults;
 public class UpdatePasswordRequest {
     @NotBlank(message = "PASSWORD_REQUIRED")
     @Size(min = 8, message = "PASSWORD_MIN_LENGTH")
-    String OldPassword;
+    String oldPassword;
 
     @NotBlank(message = "PASSWORD_REQUIRED")
     @Size(min = 8, message = "PASSWORD_MIN_LENGTH")

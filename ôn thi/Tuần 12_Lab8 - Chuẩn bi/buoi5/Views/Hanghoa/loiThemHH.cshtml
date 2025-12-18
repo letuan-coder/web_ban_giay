@@ -1,0 +1,75 @@
+﻿@model buoi5.Models.Hanghoa
+
+@{
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <div>
+
+
+
+        <h3> hàng hóa này đã tồn tại trong hệ thống</h3>
+        <h4>Thêm hàng hóa </h4>
+       
+        <hr />
+
+        <div class="form-group">
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.Mahang)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Mahang)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Tenhang)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Tenhang)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Donvitinh)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Donvitinh)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Dongia)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Dongia)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Mansx)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Mansx)
+                </dd>
+
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Maloai)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Maloai)
+                </dd>
+
+                @Html.ActionLink("Quay lai", "loiThemHH", Model)
+
+            </dl>
+           
+
+        </div>
+    </div>
+</body>
+</html>

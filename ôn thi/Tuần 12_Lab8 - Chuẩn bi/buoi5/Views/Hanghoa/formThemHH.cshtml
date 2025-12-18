@@ -1,0 +1,135 @@
+﻿@model buoi5.Models.HangHoaModel
+
+@{
+    ViewData["Title"] = "formThemHH";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h3>Thêm hàng hóa</h3>
+<hr />
+<div>
+    <a asp-action="Index">Quay lai</a>
+</div>
+<hr />
+<form asp-action="ThemHH" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class=" form-group">
+        <label asp-for="Hinh" class="control-label"></label>
+
+        @*<input type='file' id="upload" onchange="fileImage" />
+        <img id="img" src="#" alt="your image" />*@
+
+        <input asp-for="Hinh" type="file" accept="image/*">
+        @* hoặc *@
+        @*@Html.TextBox("Hinh", "", new { type = "file", accept = "image/*" })*@
+       
+        <img id="preview" src="#" width="150" height="100" class="hidden" />
+        <br />
+
+    </div>
+       
+    <hr />
+    <div>
+        <h5>Thông tin hàng hóa</h5>
+    </div>
+    <hr />
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group">
+                <label asp-for="Mahang" class="control-label"></label>
+                <input asp-for="Mahang" class="form-control" />
+                <span asp-validation-for="Mahang" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Tenhang" class="control-label"></label>
+                <input asp-for="Tenhang" class="form-control" />
+                <span asp-validation-for="Tenhang" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Donvitinh" class="control-label"></label>
+                <input asp-for="Donvitinh" class="form-control" />
+                <span asp-validation-for="Donvitinh" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Dongia" class="control-label"></label>
+                <input asp-for="Dongia" class="form-control" />
+                <span asp-validation-for="Dongia" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <table>
+        <tr>
+                <th style="width:200px">Mã nhà sản xuất: </th>
+            @* <th style="width:200px">Tên nhà sản xuất: </th>
+            <th style="width:200px">Địa chỉ : </th>*@
+            <td id="xemNSX"></td>
+        </tr>
+        <tr>
+            <td><select asp-items="@ViewBag.DSNSX" asp-for="Mansx" onchange="xemNsx_change()" style="width:170px"></select></td>                        
+        </tr>            
+    </table>  
+    <table>
+        <tr>
+    <th style="width:200px">Mã loại: </th>
+    <td id="xemlhh"></td>
+        </tr>
+        <tr>
+        <td> <select asp-items="@ViewBag.DSLHH" asp-for="Maloai" onchange="xemLHH_change()" style="width:170px"></select></td>
+        </tr>
+        
+    </table>
+   
+    <div class="form-group">
+        <input type="submit" value="Them" class="btn btn-primary" />
+    </div>
+       
+ 
+</form>
+
+<script type="text/javascript">
+    function xemNsx_change()
+    {
+        const mansx = document.getElementById("Mansx").value;
+
+        // Create an XMLHttpRequest object
+        const xhttp = new XMLHttpRequest();
+
+        // Define a callback function
+        xhttp.onload = function () {
+            // Here you can use the Data
+            // //nhan gia tri tra ve
+            document.getElementById("xemNSX").innerHTML = xhttp.responseText;
+        }
+
+        // Send a request
+        const strUrl = "/Hanghoa/xemNsx/" + mansx;
+        xhttp.open("GET", strUrl);
+        xhttp.send();
+    }
+    function xemLHH_change() {
+        const malhh = document.getElementById("Maloai").value;
+
+        // Create an XMLHttpRequest object
+        const xhttp = new XMLHttpRequest();
+
+        // Define a callback function
+        xhttp.onload = function () {
+            // Here you can use the Data
+            // //nhan gia tri tra ve
+            document.getElementById("xemlhh").innerHTML = xhttp.responseText;
+        }
+
+        // Send a request
+        const strUrl = "/Hanghoa/xemLHH/" + malhh;
+        xhttp.open("GET", strUrl);
+        xhttp.send();
+    }
+    Hinh.onchange = evt => {
+        const [file] = Hinh.files
+        if (file) {
+            preview.src = URL.createObjectURL(file);
+            $("#preview").removeClass("hidden");
+        }
+    }
+
+
+</script>

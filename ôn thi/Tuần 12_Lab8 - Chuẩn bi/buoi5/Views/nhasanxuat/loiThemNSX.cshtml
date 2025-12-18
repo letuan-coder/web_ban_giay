@@ -1,0 +1,52 @@
+﻿@model buoi5.Models.Nhasanxuat
+
+@{
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <div>
+
+
+
+        <h3>Nhà sản xuất này đã tồn tại trong hệ thống</h3>
+        <h4>Thêm nhà sản xuất </h4>
+        <hr />
+
+        <div class="form-group">
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.Mansx)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Mansx)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Tennsx)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Tennsx)
+                </dd> 
+                <dt>
+                    @Html.DisplayNameFor(model => model.Diachi)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Diachi)
+                </dd>
+                
+            </dl>
+            @Html.ActionLink("Quay lai", "loithemNSX", Model)
+
+        </div>
+    </div>
+</body>
+</html>

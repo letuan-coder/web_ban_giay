@@ -73,7 +73,7 @@ public class UserController {
                 .build();
     }
 
-    @PostMapping
+    @PostMapping(consumes = "multipart/form-data")
     public ApiResponse<UserDetailResponse> uploadImageProfile(
             @RequestPart(value = "file", required = false) MultipartFile file) {
         UserDetailResponse response = userService.UploadUserImage(file);

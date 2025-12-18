@@ -1,0 +1,581 @@
+D:\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.deps.json
+D:\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.json
+D:\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.dev.json
+D:\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.dll
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.csprojAssemblyReference.cache
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CoreCompileInputs.cache
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cache
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfoInputs.cache
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfo.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.input.cache
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.output.cache
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorCoreGenerate.cache
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Home\Index.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\Error.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_CookieConsentPartial.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_Layout.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_ValidationScriptsPartial.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewImports.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewStart.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cache
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cs
+D:\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.pdb
+D:\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.dll
+D:\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.pdb
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formsuaKH.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formthemKH.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formxoaKH.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\Index.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\loiThemKH.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_LayoutPage1.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.Views.pdb
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.dll
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.pdb
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CopyComplete
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formsuaNV.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formthemNV.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formxoaNV.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\Index.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\loiThemNV.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\dangnhap.g.cshtml.cs
+D:\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\indexDangNhap.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.deps.json
+C:\Users\Administrator\Downloads\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.json
+C:\Users\Administrator\Downloads\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.dev.json
+C:\Users\Administrator\Downloads\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.dll
+C:\Users\Administrator\Downloads\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.pdb
+C:\Users\Administrator\Downloads\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.dll
+C:\Users\Administrator\Downloads\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.pdb
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.csprojAssemblyReference.cache
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CoreCompileInputs.cache
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cache
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfoInputs.cache
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfo.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.input.cache
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.output.cache
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorCoreGenerate.cache
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\chiTietHanghoa.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formsuaHH.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formThemHH.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formXoaHH.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\Index.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\loiThemHH.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemLHH.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemNsx.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\dangnhap.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\dangxuat.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formsuaKH.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formthemKH.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formxoaKH.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\Index.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\indexDangNhap.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\loiThemKH.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formsuaLHH.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formthemLHH.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formxoaLHH.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\Index.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\loiThemLHH.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formsuaNV.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formthemNV.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formxoaNV.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\Index.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\loiThemNV.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formsuaNSX.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formxoaNSX.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\Index.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\loiThemNSX.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\themNSX.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\Error.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_CookieConsentPartial.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_Layout.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_ValidationScriptsPartial.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_LayoutPage1.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewImports.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewStart.g.cshtml.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cache
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cs
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.Views.pdb
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.dll
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.pdb
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CopyComplete
+C:\Users\Administrator\Downloads\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Home\Index.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.deps.json
+C:\Users\Administrator\Desktop\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.json
+C:\Users\Administrator\Desktop\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.dev.json
+C:\Users\Administrator\Desktop\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.dll
+C:\Users\Administrator\Desktop\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.pdb
+C:\Users\Administrator\Desktop\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.dll
+C:\Users\Administrator\Desktop\buoi5\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.pdb
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.csprojAssemblyReference.cache
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CoreCompileInputs.cache
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cache
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfoInputs.cache
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfo.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.input.cache
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.output.cache
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorCoreGenerate.cache
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\chiTietHanghoa.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formsuaHH.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formThemHH.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formXoaHH.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\Index.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\loiThemHH.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemLHH.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemNsx.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Home\Index.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\dangnhap.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\dangxuat.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formsuaKH.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formthemKH.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formxoaKH.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\Index.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\indexDangNhap.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\loiThemKH.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formsuaLHH.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formthemLHH.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formxoaLHH.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\Index.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\loiThemLHH.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formsuaNV.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formthemNV.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formxoaNV.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\Index.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\loiThemNV.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formsuaNSX.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formxoaNSX.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\Index.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\loiThemNSX.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\themNSX.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\Error.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_CookieConsentPartial.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_Layout.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_ValidationScriptsPartial.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_LayoutPage1.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewImports.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewStart.g.cshtml.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cache
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cs
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.Views.pdb
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.dll
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.pdb
+C:\Users\Administrator\Desktop\buoi5\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CopyComplete
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\bin\Debug\netcoreapp2.1\buoi5.deps.json
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.json
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.dev.json
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\bin\Debug\netcoreapp2.1\buoi5.dll
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\bin\Debug\netcoreapp2.1\buoi5.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.dll
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.csprojAssemblyReference.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CoreCompileInputs.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfoInputs.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfo.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.input.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.output.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorCoreGenerate.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\chiTietHanghoa.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formsuaHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formThemHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formXoaHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\loiThemHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemNsx.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Home\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\dangnhap.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\dangxuat.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formsuaKH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formthemKH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formxoaKH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\indexDangNhap.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\loiThemKH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formsuaLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formthemLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formxoaLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\loiThemLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formsuaNV.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formthemNV.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formxoaNV.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\loiThemNV.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formsuaNSX.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formxoaNSX.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\loiThemNSX.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\themNSX.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\Error.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_CookieConsentPartial.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_Layout.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_ValidationScriptsPartial.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_LayoutPage1.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewImports.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewStart.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.Views.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.dll
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\TH LT Windows 2022\Tu lam\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CopyComplete
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\bin\Debug\netcoreapp2.1\buoi5.deps.json
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.json
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.dev.json
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\bin\Debug\netcoreapp2.1\buoi5.dll
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\bin\Debug\netcoreapp2.1\buoi5.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.dll
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.csprojAssemblyReference.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CoreCompileInputs.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfoInputs.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfo.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.input.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.output.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorCoreGenerate.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\chiTietHanghoa.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formsuaHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formThemHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formXoaHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\loiThemHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemNsx.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Home\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\dangnhap.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\dangxuat.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formsuaKH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formthemKH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formxoaKH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\indexDangNhap.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\loiThemKH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formsuaLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formthemLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formxoaLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\loiThemLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formsuaNV.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formthemNV.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formxoaNV.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\loiThemNV.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formsuaNSX.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formxoaNSX.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\loiThemNSX.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\themNSX.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\Error.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_CookieConsentPartial.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_Layout.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_ValidationScriptsPartial.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_LayoutPage1.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewImports.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewStart.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.Views.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.dll
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\lab7\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CopyComplete
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.deps.json
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.json
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.dev.json
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.dll
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.dll
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.csprojAssemblyReference.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CoreCompileInputs.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfoInputs.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfo.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.input.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.output.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorCoreGenerate.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\chiTietHanghoa.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formsuaHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formThemHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formXoaHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\loiThemHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemNsx.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Home\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\dangnhap.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\dangxuat.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formsuaKH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formthemKH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\formxoaKH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\indexDangNhap.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\loiThemKH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formsuaLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formthemLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formxoaLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\loiThemLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formsuaNV.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formthemNV.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formxoaNV.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\loiThemNV.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formsuaNSX.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formxoaNSX.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\loiThemNSX.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\themNSX.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\Error.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_CookieConsentPartial.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_Layout.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_ValidationScriptsPartial.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_LayoutPage1.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewImports.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewStart.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.Views.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.dll
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CopyComplete
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\TH\lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Home\chonHanghoa.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.deps.json
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.json
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.dev.json
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.dll
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.pdb
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.dll
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.pdb
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.csprojAssemblyReference.cache
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CoreCompileInputs.cache
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cache
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfoInputs.cache
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfo.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.input.cache
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.output.cache
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorCoreGenerate.cache
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\chiTietHanghoa.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formsuaHH.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formThemHH.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formXoaHH.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\Index.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\loiThemHH.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemLHH.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemNsx.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Home\chonHanghoa.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Home\Index.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\dangnhap.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\Index.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formsuaLHH.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formthemLHH.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formxoaLHH.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\Index.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\loiThemLHH.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formsuaNV.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formthemNV.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formxoaNV.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\Index.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\loiThemNV.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formsuaNSX.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formxoaNSX.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\Index.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\loiThemNSX.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\themNSX.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\Error.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_CookieConsentPartial.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_Layout.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_ValidationScriptsPartial.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewImports.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewStart.g.cshtml.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cache
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cs
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.Views.pdb
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.dll
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.pdb
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CopyComplete
+D:\BT9\LTWin\Tuần 12\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\sua.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.deps.json
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.json
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.dev.json
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.dll
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.dll
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.csprojAssemblyReference.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CoreCompileInputs.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfoInputs.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfo.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.input.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.output.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorCoreGenerate.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\chiTietHanghoa.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formsuaHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formThemHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formXoaHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\loiThemHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemNsx.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Home\chonHanghoa.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Home\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\DangNhap.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\sua.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formsuaLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formthemLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formxoaLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\loiThemLHH.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formsuaNV.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formthemNV.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formxoaNV.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\loiThemNV.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formsuaNSX.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formxoaNSX.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\Index.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\loiThemNSX.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\themNSX.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\Error.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_CookieConsentPartial.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_Layout.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_ValidationScriptsPartial.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewImports.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewStart.g.cshtml.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.Views.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.dll
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CopyComplete
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\buoi5.deps.json
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.json
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.dev.json
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\buoi5.dll
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\buoi5.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.dll
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CoreCompileInputs.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfoInputs.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfo.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.input.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.output.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorCoreGenerate.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.Views.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.dll
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.pdb
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CopyComplete
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\appsettings.Development.json
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\appsettings.json
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.AssemblyReference.cache
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.GeneratedMSBuildEditorConfig.editorconfig
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\chiTietHanghoa.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formsuaHH.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formThemHH.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formXoaHH.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\Index.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\loiThemHH.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemLHH.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemNsx.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Home\chonHanghoa.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Home\Index.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\DangNhap.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\Index.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\sua.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formsuaLHH.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formthemLHH.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formxoaLHH.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\Index.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\loiThemLHH.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formsuaNV.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formthemNV.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formxoaNV.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\Index.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\loiThemNV.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formsuaNSX.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formxoaNSX.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\Index.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\loiThemNSX.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\themNSX.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\Error.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_CookieConsentPartial.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_Layout.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_ValidationScriptsPartial.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewImports.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewStart.cshtml.g.cs
+D:\Kill2you\Quan_Trong\LT Windows C#\LTWindows 2023\VD\Tuần12_Lab8\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.genruntimeconfig.cache
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\appsettings.Development.json
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\appsettings.json
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\buoi5.deps.json
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.json
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\buoi5.runtimeconfig.dev.json
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\buoi5.dll
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\buoi5.pdb
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.dll
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\bin\Debug\netcoreapp2.1\buoi5.Views.pdb
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.AssemblyReference.cache
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.GeneratedMSBuildEditorConfig.editorconfig
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfoInputs.cache
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.AssemblyInfo.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.CoreCompileInputs.cache
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cache
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorAssemblyInfo.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.sourcelink.json
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.input.cache
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.TagHelpers.output.cache
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorCoreGenerate.cache
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\chiTietHanghoa.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formsuaHH.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formThemHH.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\formXoaHH.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\Index.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\loiThemHH.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemLHH.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Hanghoa\xemNsx.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Home\chonHanghoa.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Home\Index.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\DangNhap.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\Index.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\khachhang\sua.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formsuaLHH.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formthemLHH.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\formxoaLHH.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\Index.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\loaihanghoa\loiThemLHH.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formsuaNV.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formthemNV.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\formxoaNV.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\Index.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhanvien\loiThemNV.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formsuaNSX.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\formxoaNSX.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\Index.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\loiThemNSX.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\nhasanxuat\themNSX.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\Error.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_CookieConsentPartial.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_Layout.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\Shared\_ValidationScriptsPartial.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewImports.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\Razor\Views\_ViewStart.cshtml.g.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cache
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.RazorTargetAssemblyInfo.cs
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.Views.pdb
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.dll
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.pdb
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.genruntimeconfig.cache
+C:\Luu tru\DACN2\DATN\DATN-API\ôn thi\Tuần 12_Lab8 - Chuẩn bi\buoi5\obj\Debug\netcoreapp2.1\buoi5.csproj.Up2Date

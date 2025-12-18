@@ -1,0 +1,22 @@
+﻿@using Microsoft.AspNetCore.Http;
+@using Newtonsoft.Json;
+
+@model buoi5.Models.Phieudathang
+
+@{
+    /**/
+
+    ViewBag.Title = "Giỏ hàng";
+}
+
+<h2>Thông tin giỏ hàng</h2>
+@Html.ActionLink("Trở về", "Index")
+
+@{
+
+    string json = Context.Session.GetString("phieudathang");
+    Phieudathang pdh = JsonConvert.DeserializeObject<Phieudathang>(json);
+    double tongTien = 0;
+}
+
+

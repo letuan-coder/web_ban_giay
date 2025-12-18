@@ -1,0 +1,76 @@
+﻿@model buoi5.Models.Hanghoa
+
+@{
+    ViewData["Title"] = "formXoaHH";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+@if ((int)ViewBag.flag == 0)
+{
+    <h3>Bạn thật sự có muốn xóa hang hoa này không ?</h3>
+}
+else
+{
+    <h3>Bạn không thể xóa hang hoa này không ?</h3>
+}
+<p>
+    <a asp-action="Index" class="btn btn-primary">Hủy bỏ </a>
+</p>
+<div>
+    <h4>Hanghoa</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Mahang)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Mahang)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Tenhang)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Tenhang)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Donvitinh)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Donvitinh)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Dongia)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Dongia)
+        </dd>
+       @* <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Hinh)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Hinh)
+        </dd>*@
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Maloai)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Maloai)
+        </dd>
+        
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Mansx)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Mansx)
+        </dd>
+    </dl>
+    @if ((int)ViewBag.flag == 0)
+    {
+        <form asp-action="XoaHH" asp-route-id="@Model.Mahang">
+            <input type="submit" value="Xóa" class="btn btn-danger" /> |
+        
+    </form>
+    }
+</div>

@@ -1,0 +1,47 @@
+﻿@model buoi5.Models.Loaihanghoa
+
+@{
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <div>
+
+
+
+        <h3>Loại hàng hóa này đã tồn tại trong hệ thống</h3>
+        <h4>Thêm loại hàng hóa </h4>
+        <hr />
+
+        <div class="form-group">
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.Maloai)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Maloai)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Tenloai)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Tenloai)
+                </dd> 
+               
+                
+            </dl>
+            @Html.ActionLink("Quay lai", "loithemLHH", Model)
+
+        </div>
+    </div>
+</body>
+</html>

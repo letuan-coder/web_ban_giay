@@ -1,0 +1,73 @@
+﻿@*@model IEnumerable<buoi5.Models.Hanghoa>*@
+@model buoi5.Models.Hanghoa
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Danh sách hàng hóa</h2>
+@{
+    List<Hanghoa> dshang = ViewBag.dshh;
+    int k = 0;
+    int socot = 4;
+
+    int sodong = 0;
+    int temp = dshang.Count / socot;
+    if (dshang.Count % socot == 0)
+    {
+        sodong = temp;
+    }
+    else
+    {
+        sodong = temp + 1;
+    }
+}
+@for (int i = 0; i < sodong; i++)
+{
+    <div>
+        <div class="row">
+            @for (int j = 0; j < socot; j++)
+            {
+                k = i * socot + j;
+                if (k >= dshang.Count)
+                {
+                    break;
+                }
+                Hanghoa item = dshang[i * socot + j];
+
+                <div class="col-md-3">                    
+                    <form asp-controller="Home" asp-action="chonHanghoa" asp-route-id="@item.Mahang">                        
+                        <div>
+                            @*<span class="font-weight-bold">Mã hàng: </span>*@                            
+                            <label asp-for="Mahang" class="control-label font-weight-bold"></label>
+                            @item.Mahang
+                        </div>
+                        <div>
+                            <label asp-for="Tenhang" class="control-label font-weight-bold"></label>
+                            @item.Tenhang
+                        </div>
+                        <div>
+                            <img width="70" height="80" src="@Url.Content(item.Hinh)" />
+                        </div>
+                        <div>
+                            <label asp-for="Dongia" class="control-label font-weight-bold"></label>
+                            @item.Dongia
+                        </div>
+                        <div>
+                            <label class="font-weight-bold" for="txtSoluong">Số lượng: </label>
+                            <input class="col-6" type="number" value="1" name="txtSoluong" id="txtSoluong" />
+                        </div>
+                        <div>
+                            <input type="submit" class="btn btn-primary" value="Chọn mua" />
+                        </div>                        
+                    </form>
+                </div>
+
+
+            }
+            
+        </div>
+        <hr />
+    </div>
+
+}
