@@ -61,6 +61,14 @@ public class OrderController {
                 .build();
     }
 
+    @GetMapping("/status/{status}")
+    public ApiResponse<List<OrderResponse>> getOrdersByStatus
+            (@PathVariable String status) {
+        return ApiResponse.<List<OrderResponse>>builder()
+                .data(orderService.getOrdersByStatus(status))
+                .build();
+    }
+
     @GetMapping("/{orderCode}")
     public ApiResponse<OrderResponse> getOrderById
             (@PathVariable String orderCode) {

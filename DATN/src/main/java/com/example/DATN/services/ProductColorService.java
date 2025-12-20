@@ -1,6 +1,7 @@
 package com.example.DATN.services;
 
 import com.example.DATN.constant.Is_Available;
+import com.example.DATN.dtos.request.UploadImageRequest;
 import com.example.DATN.dtos.request.product.ProductColorRequest;
 import com.example.DATN.dtos.request.product.ProductVariantRequest;
 import com.example.DATN.dtos.request.product.UpdateProductColorRequest;
@@ -10,15 +11,20 @@ import com.example.DATN.dtos.respone.product.ProductColorResponse;
 import com.example.DATN.dtos.respone.product.ProductVariantResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
-import com.example.DATN.mapper.*;
+import com.example.DATN.mapper.ProductColorMapper;
+import com.example.DATN.mapper.ProductVariantMapper;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,7 +85,26 @@ public class ProductColorService {
         return response;
 
     }
+    public void UploadColorImage(ProductColorRequest request){
+        ProductColor productColor = productColorRepository.findById(request.getProductId())
+                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
 
+
+        for(MultipartFile file : request.getFiles()) {
+            ImageProduct imageProduct = ImageProduct.builder()
+                    .imageUrl(productColor.getId().toString())
+                    .altText(productColor.getProduct().getSlug()+"-"+productColor.getColor().getName())
+                    .productColor(productColor)
+                    .build();
+            UploadImageRequest uploadImageRequest = UploadImageRequest.builder()
+                    .imageProduct(imageProduct)
+                    .altText(imageProduct.getAltText())
+                    .imageUrl(imageProduct.getImageUrl())
+                    .file(file)
+                    .build();
+            imageProductService.uploadImage(uploadImageRequest);
+        }
+    }
     public ProductColorResponse getProductColorById(UUID id) {
         ProductColor productColor = productColorRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));

@@ -1,5 +1,6 @@
 package com.example.DATN.repositories;
 
+import com.example.DATN.constant.OrderStatus;
 import com.example.DATN.models.Order;
 import com.example.DATN.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,6 +15,7 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
    Optional<Order> findByOrderCode(String orderCode);
+   List<Order> findAllByOrderStatus(OrderStatus status);
    List<Order> findByUser(User user);
 }
 

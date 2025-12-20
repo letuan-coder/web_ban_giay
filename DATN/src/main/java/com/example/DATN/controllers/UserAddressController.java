@@ -34,7 +34,8 @@ public class UserAddressController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<UserAddressResponse> updateAddress(@PathVariable UUID id, @RequestBody @Valid UserAddressRequest request) {
+    public ApiResponse<UserAddressResponse> updateAddress
+            (@PathVariable UUID id, @RequestBody @Valid UserAddressRequest request) {
         return ApiResponse.<UserAddressResponse>builder()
                 .data(userAddressService.updateUserAddress(id, request))
                 .build();

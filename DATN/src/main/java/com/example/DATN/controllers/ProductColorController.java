@@ -7,8 +7,10 @@ import com.example.DATN.dtos.respone.product.ProductColorResponse;
 import com.example.DATN.services.ProductColorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +32,19 @@ public class ProductColorController {
                 .data(productColorService.createProductColor(request))
                 .build();
     }
-
+    @PostMapping(value = "/upload/{productColorId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ProductColorResponse> UplpadProductColor
+            (@PathVariable UUID productColorId,
+             @RequestPart(name = "files") List<MultipartFile> files,
+             @ModelAttribute @Valid ProductColorRequest request) {
+        request.setFiles(files);
+        request.setProductId(productColorId);
+        productColorService.UploadColorImage(request);
+        return ApiResponse.<ProductColorResponse>builder()
+                .data(null)
+                .message("Upload image success")
+                .build();
+    }
     @GetMapping
     public ApiResponse<List<ProductColorResponse>> getAllProductColors() {
         return ApiResponse.<List<ProductColorResponse>>builder()

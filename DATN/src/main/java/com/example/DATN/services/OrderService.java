@@ -192,7 +192,18 @@ public class OrderService {
         response.setUserName(user.getUsername());
         return response;
     }
-
+    public List<OrderResponse> getOrdersByStatus(String status)
+    {
+        OrderStatus statusEnum;
+        try {
+            statusEnum = OrderStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ApplicationException(ErrorCode.ORDER_STATUS_INVALID);
+        }
+        List<Order> orders = orderRepository.findAllByOrderStatus(statusEnum);
+        return orders.stream().map(orderMapper::toResponse)
+                .collect(Collectors.toList());
+    }
     public List<OrderResponse> getOrdersByUser() {
         User user = getUserByJwtHelper.getCurrentUser();
         List<Order> orders = orderRepository.findByUser(user);
