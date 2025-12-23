@@ -116,15 +116,20 @@ public class OrderService {
     public OrderResponse createOrder
             (OrderRequest request) {
         User user = getUserByJwtHelper.getCurrentUser();
-        UserAddress userAddress = userAddressRepository.findByUser(user)
-                .orElseThrow(() -> new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND));
+        List<UserAddress> userAddress = userAddressRepository.findByUser(user);
+        UserAddress userAddr = new UserAddress();
+        for (UserAddress address : userAddress){
+            if(address.isDefault()==true){
+                userAddr=address;
+            }
+        }
         Order order = new Order();
         order.setUser(user);
         Long code= snowflakeIdGenerator.nextId();
         String orderCode = OrderCodePrefix+code;
         order.setNote(request.getNote());
         order.setOrderCode(orderCode);
-        order.setUserAddress(userAddress);
+        order.setUserAddress(userAddr);
         order.setCreatedAt(LocalDateTime.now());
 //        order.setOrderStatus(OrderStatus.PENDING);
         order.setOrderStatus(OrderStatus.COMPLETED);

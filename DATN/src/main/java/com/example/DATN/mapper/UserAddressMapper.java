@@ -7,10 +7,12 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface UserAddressMapper {
     UserAddressResponse toResponse(UserAddress userAddress);
-
+    List<UserAddressResponse> toResponseList(List<UserAddress> userAddresses);
     @Mapping(target = "provinceCode", ignore = true)
     @Mapping(target = "districtCode", ignore = true)
     @Mapping(target = "wardCode", ignore = true)

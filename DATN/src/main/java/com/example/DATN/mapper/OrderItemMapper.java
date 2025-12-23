@@ -10,7 +10,9 @@ import org.mapstruct.Named;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring",uses = {ProductVariantMapper.class})
+@Mapper(componentModel = "spring",
+        uses = {ProductVariantMapper.class,
+         ProductMapper.class})
 public interface OrderItemMapper {
     OrderItem toEntity(OrderItemResponse response);
 
@@ -21,6 +23,8 @@ public interface OrderItemMapper {
     @Mapping(target = "colorName",source = "productVariant.productColor.color.name")
     @Mapping(target = "sizeName",source = "productVariant.size.name")
     @Mapping(target = "price", source = "price")
+    @Mapping(target = "imageUrl", source = "productVariant.productColor.images",
+            qualifiedByName = "getFirstImageUrl")
     @Mapping(target = "sku",source = "productVariant.sku")
     OrderItemResponse toOrderItemResponse(OrderItem orderItem);
 

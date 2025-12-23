@@ -1,7 +1,139 @@
-Tôi không thể trực tiếp mở và chỉnh sửa các file Excel (.xlsx, .xls) giống như phần mềm Excel. Tuy nhiên, tôi có thể làm việc với dữ liệu theo các cách sau:
+Generate a comprehensive wireframe for a modern, clean, and user-friendly admin dashboard for an e-commerce platform that sells footwear and apparel. The language must be Vietnamese.
 
-1.  **Đọc và phân tích dữ liệu:** Nếu bạn cung cấp cho tôi nội dung của file Excel dưới dạng văn bản (ví dụ: copy-paste các ô, hoặc cung cấp dưới dạng CSV), tôi có thể đọc, phân tích và trích xuất thông tin từ đó.
-2.  **Tạo dữ liệu:** Tôi có thể tạo dữ liệu ở định dạng bảng (ví dụ: CSV, Markdown table) mà bạn có thể copy và dán vào Excel, hoặc lưu thành file CSV để mở bằng Excel.
-3.  **Hỗ trợ code xử lý Excel:** Nếu bạn có code (ví dụ: Python với thư viện pandas, Java với Apache POI, Node.js với exceljs) để xử lý file Excel, tôi có thể giúp bạn viết, sửa đổi hoặc gỡ lỗi code đó.
+**1. Overall Layout & Navigation:**
+- A fixed-top header with the brand name "ĐÔNG TUẤN STORE CMS" on the left and a "Sign out" button on the right.
+- A collapsible sidebar on the left for main navigation. The sidebar should be well-organized with icons and grouped sections.
+- A main content area on the right that displays the content for the selected navigation item.
 
-Bạn muốn tôi giúp bạn với tác vụ nào liên quan đến file Excel?
+**2. Sidebar Navigation Structure:**
+Create a sidebar with the following items, grouped into logical sections:
+
+- **Trang chủ (Dashboard):** [Icon: Home]
+- **Quản lý Bán hàng:** (Collapsible Section)
+  - **Quản lý Đơn hàng:** [Icon: Shopping Cart]
+  - **Quản lý Đơn trả lại:** [Icon: Arrow U-turn Left] (New)
+  - **Quản lý Đánh giá:** [Icon: Star] (New)
+- **Quản lý Sản phẩm:** (Collapsible Section)
+  - **Sản phẩm:** [Icon: Tag]
+  - **Nhà cung cấp:** [Icon: Truck]
+  - **Danh mục:** [Icon: List]
+  - **Thương hiệu:** [Icon: Briefcase]
+  - **Màu sắc & Kích cỡ:** [Icon: Palette] (New)
+- **Quản lý Kho Vận:** (Collapsible Section)
+  - **Phiếu Kho (Nhập/Xuất):** [Icon: File Text]
+  - **Xác nhận Nhập kho:** [Icon: Archive]
+  - **Danh sách Kho:** [Icon: Box]
+  - **Cửa hàng (Chi nhánh):** [Icon: Shop]
+- **Marketing:** (Collapsible Section)
+  - **Khuyến mãi:** [Icon: Percent]
+  - **Banners:** [Icon: Image]
+  - **Newsletter:** [Icon: Mail] (New)
+- **Hệ thống:** (Collapsible Section)
+  - **Quản lý Người dùng:** [Icon: Users] (New)
+  - **Quản lý Phân quyền:** [Icon: Shield] (New)
+  - **Phương thức thanh toán:** [Icon: Credit Card] (New)
+  - **Giao dịch VNPAY:** [Icon: Dollar Sign] (New)
+
+**3. Page Content Details:**
+
+- **Trang chủ (Dashboard):**
+  - A title "Dashboard".
+  - A set of filters for timeframes: "Tháng" (Monthly) and "Năm" (Yearly).
+  - A large bar chart displaying revenue over the selected timeframe. The chart should be interactive.
+  - Below the chart, a details table with columns "Thời gian" and "Doanh thu". This table populates with finer-grained data (e.g., monthly data for a selected year, or daily data for a selected month) when a bar on the chart is clicked.
+
+- **Quản lý Đơn hàng:**
+  - A table listing all orders.
+  - Columns: "Mã Đơn", "Khách hàng" (Name & Phone), "Tổng tiền", "Ngày đặt", "TT Đơn hàng" (a dropdown with values: Chờ xác nhận, Đã xác nhận, Đã hủy, Hoàn thành), "TT Giao Hàng" (dropdown), "Thanh Toán" (a badge showing status).
+  - Each row has a "Xem" button that opens a modal displaying the order items (product name, SKU, quantity, price).
+
+- **Quản lý Đơn trả lại (New):**
+  - A table listing all return requests.
+  - Columns: "Mã đơn gốc", "Mã đơn trả", "Khách hàng", "Lý do trả hàng", "Ngày yêu cầu", "Trạng thái" (a dropdown: Chờ xử lý, Đã chấp nhận, Đã từ chối, Đã hoàn thành).
+  - Each row has a "Xem chi tiết" button opening a modal that shows the items being returned, the requested quantity, and any images the user uploaded as evidence. It should also show refund status.
+
+- **Quản lý Đánh giá (New):**
+  - A table listing all product reviews.
+  - Columns: "Sản phẩm" (with thumbnail), "Người đánh giá", "Điểm" (rendered as 1-5 stars), "Bình luận", "Ngày đánh giá".
+  - Actions per row: A toggle switch to "Ẩn/Hiện" the review and a "Xóa" button.
+
+- **Sản phẩm:**
+  - This is the main product list page.
+  - At the top: A search bar, "Thêm sản phẩm" button, "Xóa sản phẩm đã chọn" button, and "Tải lại" button.
+  - The main area is a grid of product cards. Each card displays the product image, name, price, and has a checkbox for selection.
+  - Each card has a "Chi tiết" button (linking to the product detail page) and a "Sửa" button.
+  - Pagination controls are at the bottom.
+
+- **Chi tiết Sản phẩm (Accessed from the list page):**
+  - A header with the product name, status badge ("Đang kinh doanh"/"Ngừng kinh doanh"), product code, and slug. Buttons: "Thêm phiên bản" and "Sửa sản phẩm".
+  - A section for color variants. Each color is a card.
+  - Inside each color card:
+    - A gallery of images for that color.
+    - A table of size variants for that color. Columns: Checkbox for selection, "SKU", "Size", "Giá", "Tồn kho", "Cân nặng", dimensions, "Ngày tạo", "Trạng thái", and an action bar with "Sửa hàng loạt", "Áp dụng khuyến mãi", and "Xóa".
+
+- **Tạo Sản phẩm:**
+  - A full-page form.
+  - Section 1: "Thông tin cơ bản" with fields for Tên sản phẩm, Nhà cung cấp, Mô tả, Thương hiệu, Danh mục, Giá bán, Giá nhập, Ảnh đại diện.
+  - Section 2: "Các phiên bản". A dynamic section where the user can click "Thêm màu khác". For each color, they can select an existing color or add a new one (name + hex code), and then use a checklist to select all applicable sizes for that color.
+
+- **Nhà cung cấp / Danh mục / Thương hiệu:**
+  - Standard CRUD (Create, Read, Update, Delete) interfaces.
+  - A table lists the items. Columns: "ID", "Tên".
+  - Each row has "Sửa" and "Xóa" buttons.
+  - An "Thêm" button is prominently displayed, which shows a simple form to add a new item.
+
+- **Màu sắc & Kích cỡ (New):**
+  - A two-tabbed interface.
+  - Tab 1 "Quản lý Màu sắc": A table listing colors with "Tên màu", "Mã Hex" (shown as a colored swatch). Includes Add/Edit/Delete functions. The add/edit form should include a text input for the name and a color picker for the hex code.
+  - Tab 2 "Quản lý Kích cỡ": A simple table listing sizes with a "Tên size" column. Includes Add/Edit/Delete functions.
+
+- **Phiếu Kho (Nhập/Xuất/Chuyển):**
+  - A large form titled "Tạo Phiếu Kho".
+  - A dropdown for "Loại Phiếu" (Nhập, Xuất, Chuyển, Trả hàng,...).
+  - The form fields change dynamically based on the selected type (e.g., "Nhà Cung Cấp" and "Nhập tới Kho" for Import; "Từ Kho" and "Tới Cửa hàng" for Transfer).
+  - A section to add products: "Chi tiết sản phẩm". It should have a search bar to find product variants by SKU or name and add them to a list with a quantity input.
+  - A "Lưu Phiếu Kho" button.
+  - Below the form, a table lists all "Danh Sách Phiếu Kho" that have been created.
+
+- **Xác nhận Nhập kho:**
+  - A simple page with one input field to "Tìm Phiếu Giao Dịch Kho" by its ID/Code.
+  - After searching, if a valid "PENDING" transaction is found, its details are displayed.
+  - A table of expected products is shown. Columns: "Sản phẩm", "SKU", "Số lượng dự kiến", and an input field for "Số lượng thực nhận".
+  - A "Xác nhận Nhập kho" button at the bottom.
+
+- **Danh sách Kho / Cửa hàng (Chi nhánh):**
+  - Standard CRUD interfaces.
+  - Table lists existing warehouses/stores. Columns for Warehouse: "Mã Kho", "Tên", "Vị trí", "Sức chứa". Columns for Store: "ID", "Tên cửa hàng", "Địa chỉ", "Số điện thoại".
+  - Each has an "Thêm" button that opens a form. The form should include address fields with dependent dropdowns for Tỉnh/Thành, Quận/Huyện, Phường/Xã.
+
+- **Khuyến mãi / Banners:**
+  - Both are standard CRUD pages.
+  - **Khuyến mãi:** Form for creating a promotion includes Tên, Loại (Percentage/Fixed), Giá trị, Ngày bắt đầu/kết thúc, and a multi-select list of product variants to apply it to.
+  - **Banners:** Form for creating a banner includes Tên, upload for an image, a dropdown for "Vị trí Banner" (e.g., HOMEPAGE_TOP, MOBILE), start/end dates, and a "Dẫn tới" URL field. The list of banners should support drag-and-drop reordering.
+
+- **Newsletter (New):**
+  - A simple page showing a table of subscribers.
+  - Columns: "Email", "Ngày đăng ký", "Trạng thái" (Active/Inactive).
+  - An "Export CSV" button at the top.
+
+- **Quản lý Người dùng (New):**
+  - A table listing all users.
+  - Columns: "Tên người dùng", "Email", "Vai trò" (e.g., ADMIN, STAFF, USER), "Ngày tạo", "Trạng thái" (Active/Inactive).
+  - Actions per row: "Sửa" (opens a modal to change the user's role) and a toggle switch to change their active status.
+  - An "Thêm người dùng" button at the top.
+
+- **Quản lý Phân quyền (New):**
+  - A table listing available roles.
+  - Columns: "Tên vai trò", "Mô tả".
+  - Each row has a "Sửa quyền" button.
+  - Clicking "Sửa quyền" navigates to a new page that displays the role name and a checklist of all available permissions in the system (e.g., "Quản lý sản phẩm", "Xem đơn hàng", "Xóa người dùng"), allowing the admin to assign/unassign permissions for that role.
+
+- **Phương thức thanh toán (New):**
+  - A simple table listing available payment methods (e.g., "Thanh toán khi nhận hàng", "VNPAY").
+  - Columns: "Tên phương thức", "Trạng thái".
+  - The "Trạng thái" column contains a toggle switch (Enabled/Disabled) for each method.
+
+- **Giao dịch VNPAY (New):**
+  - A read-only table for auditing VNPAY transactions.
+  - Columns: "Mã giao dịch VNPAY", "Mã đơn hàng", "Số tiền", "Thời gian giao dịch", "Trạng thái" (a badge: Success/Failed).
+  - Include search/filter options by date range or order code.

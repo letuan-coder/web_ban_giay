@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -27,8 +28,8 @@ public class UserAddressController {
     }
 
     @GetMapping
-    public ApiResponse<UserAddressResponse> getAddresses() {
-        return ApiResponse.<UserAddressResponse>builder()
+    public ApiResponse<List<UserAddressResponse>> getAddresses() {
+        return ApiResponse.<List<UserAddressResponse>>builder()
                 .data(userAddressService.getUserAddresses())
                 .build();
     }

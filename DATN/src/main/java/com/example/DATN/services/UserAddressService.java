@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.StringJoiner;
 import java.util.UUID;
 
@@ -70,11 +71,10 @@ public class UserAddressService {
         return response;
     }
 
-    public UserAddressResponse getUserAddresses() {
+    public List<UserAddressResponse> getUserAddresses() {
         User user = getUserByJwtHelper.getCurrentUser();
-        UserAddress userAddress = userAddressRepository.findByUser(user)
-                .orElseThrow(() -> new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND));
-        return userAddressMapper.toResponse(userAddress);
+        List<UserAddress> userAddress = userAddressRepository.findByUser(user);
+        return userAddressMapper.toResponseList(userAddress);
     }
 
     @Transactional
