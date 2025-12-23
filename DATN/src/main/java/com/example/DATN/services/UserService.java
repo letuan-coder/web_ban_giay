@@ -58,7 +58,7 @@ public class UserService {
     }
 
     @Transactional(rollbackOn = Exception.class)
-    public UserResponse createUser(RegisterRequest registerRequest) {
+    public void createUser(RegisterRequest registerRequest) {
         User user = new User();
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
             throw new ApplicationException(ErrorCode.USERNAME_ALREADY_EXISTS);
@@ -104,7 +104,7 @@ public class UserService {
         } catch (DataIntegrityViolationException exception) {
             throw new ApplicationException(ErrorCode.USERNAME_ALREADY_EXISTS);
         }
-        return userMapper.toUserResponse(user);
+
     }
 
     @Transactional(rollbackOn = Exception.class)

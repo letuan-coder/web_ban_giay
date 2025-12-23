@@ -1,10 +1,12 @@
 package com.example.DATN.controllers;
 
+import com.example.DATN.constant.PaymentMethodEnum;
 import com.example.DATN.dtos.request.order.OrderRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.order.OrderItemResponse;
 import com.example.DATN.dtos.respone.order.OrderResponse;
 import com.example.DATN.services.OrderService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +22,15 @@ public class OrderController {
 
     @PostMapping
     public ApiResponse<OrderResponse> createOrder(
-            @RequestBody @Valid OrderRequest request) {
-        OrderResponse response = orderService.createOrder(request);
+            @RequestBody @Valid OrderRequest request
+            , HttpServletRequest servletRequest) {
+        OrderResponse response;
+        if (request.getType() == PaymentMethodEnum.CASH_ON_DELIVERY) {
+             response = orderService.createOrder(request);
+        } else {
+
+            response = orderService.createOrderVnPay(request, servletRequest);
+        }
         return ApiResponse.<OrderResponse>builder()
                 .data(response)
                 .build();

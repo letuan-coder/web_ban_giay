@@ -14,5 +14,5 @@ public class VnPaymentRequest {
     private String bankCode;
     @Builder.Default
     private String language="vn";
-    private Long orderId;
+    private String orderCode;
 }

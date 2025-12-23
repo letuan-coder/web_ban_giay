@@ -1,6 +1,8 @@
 package com.example.DATN.services;
 
 import com.example.DATN.dtos.request.ghtk.GhnOrderInfo;
+import com.example.DATN.dtos.respone.ghn.CalculateFeeRequest;
+import com.example.DATN.dtos.respone.ghn.ShippingFeeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,8 @@ public class GhnService {
 
     @Value("${ghn.api.create.url}")
     static String create_url;
+    @Value("${ghn.api.calculate-fee.url}")
+    private String url;
     public static void createOrder(GhnOrderInfo ghnOrderInfo) {
         // URL GHN (sandbox)
         String url =create_url;
@@ -49,6 +53,27 @@ public class GhnService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public ShippingFeeResponse calculateShippingFee(CalculateFeeRequest request){
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Token", ghnToken);
+        headers.set("ShopId", "885");
+
+        HttpEntity<CalculateFeeRequest> entity =
+                new HttpEntity<>(request, headers);
+
+        ResponseEntity<ShippingFeeResponse> response =
+                restTemplate.exchange(
+                        url,
+                        HttpMethod.POST,
+                        entity,
+                        ShippingFeeResponse.class
+                );
+        return response.getBody();
     }
 
 }

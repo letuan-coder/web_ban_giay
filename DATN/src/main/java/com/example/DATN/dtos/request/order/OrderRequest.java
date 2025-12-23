@@ -29,4 +29,5 @@ public class OrderRequest {
     private LocalDateTime receivedDate;
     private List<OrderItemRequest> orderItemRequests;
     private PaymentMethodEnum type;
+    private String bankCode;
 }

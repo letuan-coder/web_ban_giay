@@ -7,10 +7,11 @@ import com.example.DATN.dtos.respone.vnpay.VnPayResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.GetUserByJwtHelper;
-import com.example.DATN.models.Order;
 import com.example.DATN.models.Vnpay;
+import com.example.DATN.repositories.OrderRepository;
 import com.example.DATN.repositories.VnpayRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -27,13 +28,13 @@ public class VnPayServices {
     private final VnpayRepository vnpayRepository;
     private final GetUserByJwtHelper getUserByJwtHelper;
     private final RestTemplate restTemplate;
-    private final OrderService orderService;
     private final String vnp_TmnCode = VnPayConfig.vnp_TmnCode;
     private final String vnp_HashSecret = VnPayConfig.secretKey;
     private final String version = "2.1.0";
     private final String commandRefund= "refund";
     private final String commmandPay= "pay";
     private final String orderType = "other";
+    private final OrderRepository orderRepository;
 
     public ResponseEntity<?> processRefund(
             VnPayRefundRequest refundRequest,
@@ -106,20 +107,19 @@ public class VnPayServices {
         }
     }
 
+    @Transactional(rollbackOn = Exception.class)
     public ResponseEntity<?> createPaymentVNPAY
             (VnPaymentRequest request, HttpServletRequest req)
     {
         try {
 
-            Order order = orderService.findOrderById(request.getOrderId());
-            if (order == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ErrorCode.ORDER_NOT_FOUND);
-            }
+//            Order order = orderRepository.findByOrderCode(request.getOrderCode())
+//                    .orElseThrow(()->new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
+
             String vnp_Version = version;
             String vnp_Command= commmandPay;
-            request.setAmount(order.getTotal_price().longValue());
-            req.setAttribute("order", order.getId());
+            request.setAmount(request.getAmount().longValue());
+            req.setAttribute("order", request.getOrderCode());
 
             long amount = request.getAmount() * 100L;
             String bankCode = request.getBankCode();
@@ -186,12 +186,12 @@ public class VnPayServices {
             response.put("code", "00");
             response.put("message", "success");
             response.put("data", paymentUrl);
-
             return ResponseEntity.ok(response);
 
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of());
+              return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                      .body(Map.of("error", e.getMessage()));
         }
     }
 }

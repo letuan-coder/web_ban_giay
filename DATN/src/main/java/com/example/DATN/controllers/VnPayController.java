@@ -1,12 +1,17 @@
 package com.example.DATN.controllers;
 
 import com.example.DATN.config.VnPayConfig;
+import com.example.DATN.constant.PaymentMethodEnum;
+import com.example.DATN.constant.PaymentStatus;
 import com.example.DATN.dtos.request.vnpay.VnPayRefundRequest;
 import com.example.DATN.dtos.request.vnpay.VnPaymentRequest;
 import com.example.DATN.dtos.request.vnpay.VnQueryRequest;
 import com.example.DATN.dtos.respone.vnpay.VnPayResponse;
+import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
+import com.example.DATN.models.Order;
 import com.example.DATN.models.Vnpay;
+import com.example.DATN.repositories.OrderRepository;
 import com.example.DATN.repositories.VnpayRepository;
 import com.example.DATN.services.VnPayServices;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,19 +40,21 @@ public class VnPayController {
     @Autowired
     private VnpayRepository vnpayRepository;
     private final String vnp_TmnCode = VnPayConfig.vnp_TmnCode;
+    @Autowired
+    private OrderRepository orderRepository;
 
     public VnPayController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-    @PostMapping("/create-payment/{orderId}")
+    @PostMapping("/create-payment/{orderCode}")
     public ResponseEntity<?> createPayment(
-            @PathVariable Long orderId,
+            @PathVariable String orderCode,
             @RequestBody VnPaymentRequest request,
             HttpServletRequest req) {
-        request.setOrderId(orderId);
-        ResponseEntity response =vnpayServices.createPaymentVNPAY(request,req);
-        return response;
+        request.setOrderCode(orderCode);
+       ResponseEntity response= vnpayServices.createPaymentVNPAY(request,req);
+       return ResponseEntity.ok(response);
     }
 
     @PostMapping("/query-payment")
@@ -100,8 +107,9 @@ public class VnPayController {
         return vnpayServices.processRefund(refundRequest, req);
     }
 
-    @GetMapping("/return")
+    @GetMapping("/return/{orderCode}")
     public String vnpayReturn(
+            @PathVariable String orderCode,
             Model model,
             HttpServletRequest request) {
         // Lấy tham số từ VNPAY trả về
@@ -165,6 +173,11 @@ public class VnPayController {
                                         .vnpTxnRef(request.getParameter("vnp_TxnRef"))
                                         .build();
                                 vnpayRepository.save(savedPayment);
+                                Order order = orderRepository.findByOrderCode(orderCode)
+                                        .orElseThrow(()->new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
+                                order.setPaymentMethod(PaymentMethodEnum.VNPAY);
+                                order.setPaymentStatus(PaymentStatus.PAID);
+                                orderRepository.save(order);
                                 //Here Code update PaymnentStatus = 1 into your Database
                             } else {
                                 // Here Code update PaymnentStatus = 2 into your Database

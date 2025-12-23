@@ -63,7 +63,7 @@ public enum ErrorCode {
     PRODUCT_COLOR_EXISTED(1047, "Product color already exists", HttpStatus.BAD_REQUEST),
     INVALID_SIZE_FOR_TYPE(1048, "Invalid size for type", HttpStatus.BAD_REQUEST),
 
-    //
+
     SIZE_NOT_ALLOW(1049, "size must be at least 20", HttpStatus.NOT_FOUND),
     TYPE_ALREADY_EXISTS(1050, "Type already exists", HttpStatus.BAD_REQUEST),
     BANNER_NOT_FOUND(1070, "Banner not found", HttpStatus.NOT_FOUND),
@@ -127,7 +127,8 @@ public enum ErrorCode {
     SUPPLIER_TAXCODE_EXISTED(1103, "Supplier tax code already existed", HttpStatus.BAD_REQUEST),
     SUPPLIER_EMAIL_EXISTED(1104, "Supplier email already existed", HttpStatus.BAD_REQUEST),
     SUPPLIER_PHONE_EXISTED(1105, "Supplier phone number already existed", HttpStatus.BAD_REQUEST),
-
+    //VNPAY
+    PAYMENT_VNPAY_FAIL(1125, "payment vnpay fail", HttpStatus.BAD_REQUEST),
     //refund
     REFUND_NOT_ALLOWDED(1128, "refund is not allowded", HttpStatus.BAD_REQUEST),
 

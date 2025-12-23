@@ -8,6 +8,7 @@ import com.example.DATN.dtos.request.ghtk.GhnOrderInfo;
 import com.example.DATN.dtos.request.ghtk.GhnProduct;
 import com.example.DATN.dtos.request.order.OrderItemRequest;
 import com.example.DATN.dtos.request.order.OrderRequest;
+import com.example.DATN.dtos.request.vnpay.VnPaymentRequest;
 import com.example.DATN.dtos.respone.order.OrderResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
@@ -18,6 +19,7 @@ import com.example.DATN.repositories.OrderItemRepository;
 import com.example.DATN.repositories.OrderRepository;
 import com.example.DATN.repositories.ProductVariantRepository;
 import com.example.DATN.repositories.UserAddressRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,7 @@ public class OrderService {
     private final UserAddressRepository userAddressRepository;
     private final OrderItemRepository orderItemRepository;
     private final String OrderCodePrefix = "OD";
+    private final VnPayServices vnPayServices;
 
     @Transactional
     public void confirmOrder(Long orderId, OrderStatus status) {
@@ -112,35 +115,74 @@ public class OrderService {
 
     }
 
+    public Integer calculateTotalWeight(List<OrderItemRequest> orderItemRequests) {
+        Integer totalWeight = 0;
+        for (OrderItemRequest itemRequest : orderItemRequests) {
+            Optional<ProductVariant> productVariantOpt =
+                    productVariantRepository.findBysku(itemRequest.getSku());
+            if (productVariantOpt.isPresent()) {
+                ProductVariant item = productVariantOpt.get();
+                totalWeight += item.getWeight() * itemRequest.getQuantity();
+            }
+        }
+        return totalWeight;
+    }
+
+    public Integer calculateTotalHeight(List<OrderItemRequest> orderItemRequests) {
+        Integer totalWeight = 0;
+        for (OrderItemRequest itemRequest : orderItemRequests) {
+            Optional<ProductVariant> productVariantOpt =
+                    productVariantRepository.findBysku(itemRequest.getSku());
+            if (productVariantOpt.isPresent()) {
+                ProductVariant item = productVariantOpt.get();
+                totalWeight += item.getWeight() * itemRequest.getQuantity();
+            }
+        }
+        return totalWeight;
+    }
+
+    public Integer calculateTotalLength(List<OrderItemRequest> orderItemRequests) {
+        Integer totalWeight = 0;
+        for (OrderItemRequest itemRequest : orderItemRequests) {
+            Optional<ProductVariant> productVariantOpt =
+                    productVariantRepository.findBysku(itemRequest.getSku());
+            if (productVariantOpt.isPresent()) {
+                ProductVariant item = productVariantOpt.get();
+                totalWeight += item.getWeight() * itemRequest.getQuantity();
+            }
+        }
+        return totalWeight;
+    }
+
     @Transactional(rollbackOn = Exception.class)
-    public OrderResponse createOrder
-            (OrderRequest request) {
+    public OrderResponse createOrderVnPay
+            (OrderRequest request, HttpServletRequest serverletRequest) {
         User user = getUserByJwtHelper.getCurrentUser();
+
         List<UserAddress> userAddress = userAddressRepository.findByUser(user);
         UserAddress userAddr = new UserAddress();
-        for (UserAddress address : userAddress){
-            if(address.isDefault()==true){
-                userAddr=address;
+        for (UserAddress address : userAddress) {
+            if (address.isDefault() == true) {
+                userAddr = address;
             }
         }
         Order order = new Order();
         order.setUser(user);
-        Long code= snowflakeIdGenerator.nextId();
-        String orderCode = OrderCodePrefix+code;
+        Long code = snowflakeIdGenerator.nextId();
+        String orderCode = OrderCodePrefix + code;
         order.setNote(request.getNote());
         order.setOrderCode(orderCode);
         order.setUserAddress(userAddr);
         order.setCreatedAt(LocalDateTime.now());
-//        order.setOrderStatus(OrderStatus.PENDING);
-        order.setOrderStatus(OrderStatus.COMPLETED);
-        order.setPaymentStatus(PaymentStatus.UNPAID);
-        order.setPaymentMethod(PaymentMethodEnum.CASH_ON_DELIVERY);
+        order.setOrderStatus(OrderStatus.PENDING);
+//        order.setOrderStatus(OrderStatus.COMPLETED);
+
         List<OrderItem> orderItems = new ArrayList<>();
         for (OrderItemRequest orderItemRequest : request.getOrderItemRequests()) {
 
             Optional<ProductVariant> productVariantOpt =
                     productVariantRepository.findBysku(orderItemRequest.getSku());
-            if(productVariantOpt.isPresent()) {
+            if (productVariantOpt.isPresent()) {
                 ProductVariant item = productVariantOpt.get();
                 OrderItem orderItem = new OrderItem();
                 orderItem.setProductVariant(item);
@@ -164,7 +206,96 @@ public class OrderService {
             }
         }
         order.setItems(orderItems);
-        if(orderItems.isEmpty()){
+        if (orderItems.isEmpty()) {
+            throw new ApplicationException(ErrorCode.PRODUCT_NOT_AVAILABLE);
+        }
+        BigDecimal total = orderItems.stream()
+                .map(item -> item.getPrice()
+                        .multiply(BigDecimal
+                                .valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        Integer totalWeight = calculateTotalWeight(request.getOrderItemRequests());
+
+        Integer totalLength = orderItems.stream()
+                .mapToInt(i -> i.getLength() * i.getQuantity())
+                .sum();
+
+        Integer totalWidth = orderItems.stream()
+                .mapToInt(i -> i.getWidth() * i.getQuantity())
+                .sum();
+
+        Integer totalHeight = orderItems.stream()
+                .mapToInt(i -> i.getHeight() * i.getQuantity())
+                .sum();
+        order.setTotal_weight(totalWeight);
+        order.setTotal_height(totalHeight);
+        order.setTotal_width(totalWidth);
+        order.setTotal_length(totalLength);
+        order.setTotal_price(total);
+        VnPaymentRequest vnPaymentRequest = VnPaymentRequest.builder()
+                .amount(total.longValue())
+                .orderCode(order.getOrderCode())
+                .bankCode(request.getBankCode())
+                .build();
+        vnPayServices.createPaymentVNPAY(vnPaymentRequest, serverletRequest);
+        order.setServiceId(request.getServiceId());
+        OrderResponse response = orderMapper.toResponse(orderRepository.save(order));
+        response.setUserName(user.getUsername());
+        return response;
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public OrderResponse createOrder
+            (OrderRequest request) {
+        User user = getUserByJwtHelper.getCurrentUser();
+        List<UserAddress> userAddress = userAddressRepository.findByUser(user);
+        UserAddress userAddr = new UserAddress();
+        for (UserAddress address : userAddress) {
+            if (address.isDefault() == true) {
+                userAddr = address;
+            }
+        }
+        Order order = new Order();
+        order.setUser(user);
+        Long code = snowflakeIdGenerator.nextId();
+        String orderCode = OrderCodePrefix + code;
+        order.setNote(request.getNote());
+        order.setOrderCode(orderCode);
+        order.setUserAddress(userAddr);
+        order.setCreatedAt(LocalDateTime.now());
+        order.setOrderStatus(OrderStatus.PENDING);
+//        order.setOrderStatus(OrderStatus.COMPLETED);
+
+        List<OrderItem> orderItems = new ArrayList<>();
+        for (OrderItemRequest orderItemRequest : request.getOrderItemRequests()) {
+
+            Optional<ProductVariant> productVariantOpt =
+                    productVariantRepository.findBysku(orderItemRequest.getSku());
+            if (productVariantOpt.isPresent()) {
+                ProductVariant item = productVariantOpt.get();
+                OrderItem orderItem = new OrderItem();
+                orderItem.setProductVariant(item);
+                orderItem.setQuantity(orderItemRequest.getQuantity());
+                orderItem.setName(item.getProductColor().getProduct().getName());
+//                orderItem.setWeight(item.getWeight());
+//                orderItem.setHeight(item.getHeight());
+//                orderItem.setWidth(item.getWidth());
+//                orderItem.setLength(item.getLength());
+                orderItem.setWeight(request.getTotal_weight());
+                orderItem.setHeight(request.getTotal_height());
+                orderItem.setWidth(request.getTotal_width());
+                orderItem.setLength(request.getTotal_length());
+                orderItem.setCode(item.getSku());
+                orderItem.setProductVariant(item);
+                orderItem.setPrice(item.getPrice());
+                orderItem.setCreatedAt(LocalDateTime.now());
+                orderItem.setOrder(order);
+                orderItem.setRated(false);
+                orderItems.add(orderItem);
+            }
+        }
+        order.setItems(orderItems);
+        if (orderItems.isEmpty()) {
             throw new ApplicationException(ErrorCode.PRODUCT_NOT_AVAILABLE);
         }
         BigDecimal total = orderItems.stream()
@@ -192,23 +323,27 @@ public class OrderService {
         order.setTotal_width(totalWidth);
         order.setTotal_length(totalLength);
         order.setTotal_price(total);
+        order.setPaymentStatus(PaymentStatus.UNPAID);
+        order.setPaymentMethod(PaymentMethodEnum.CASH_ON_DELIVERY);
         order.setServiceId(request.getServiceId());
         OrderResponse response = orderMapper.toResponse(orderRepository.save(order));
         response.setUserName(user.getUsername());
         return response;
     }
-    public List<OrderResponse> getOrdersByStatus(String status)
-    {
+
+    public List<OrderResponse> getOrdersByStatus(String status) {
+        User user = getUserByJwtHelper.getCurrentUser();
         OrderStatus statusEnum;
         try {
             statusEnum = OrderStatus.valueOf(status.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new ApplicationException(ErrorCode.ORDER_STATUS_INVALID);
         }
-        List<Order> orders = orderRepository.findAllByOrderStatus(statusEnum);
+        List<Order> orders = orderRepository.findAllByOrderStatusAndUser(statusEnum,user);
         return orders.stream().map(orderMapper::toResponse)
                 .collect(Collectors.toList());
     }
+
     public List<OrderResponse> getOrdersByUser() {
         User user = getUserByJwtHelper.getCurrentUser();
         List<Order> orders = orderRepository.findByUser(user);
