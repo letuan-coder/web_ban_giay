@@ -14,13 +14,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class StockTransactionService {
+    private final ProductRepository productRepository;
 
     private final StockTransactionRepository transactionRepository;
     private final ProductVariantRepository variantRepository;
@@ -39,8 +42,15 @@ public class StockTransactionService {
     public static final String ADJUST              = "ADJ";    private final ProductVariantRepository productVariantRepository;
     @Transactional
     public void createTransaction(StockTransactionRequest request) {
+        LocalDate today = LocalDate.now();
+
+        if (!request.getExpectedReceivedDate().isAfter(today)) {
+            throw new ApplicationException(ErrorCode.INVALID_DATE);
+        }
+
         StockTransaction transaction = new StockTransaction();
         transaction.setType(request.getType());
+
         transaction.setStatus(TransactionStatus.PENDING);
         transaction.setItems(new ArrayList<>());
         StockTransaction savedTransaction=stockTransactionRepository.save(transaction);
@@ -48,6 +58,7 @@ public class StockTransactionService {
         switch (request.getType()) {
             case IMPORT_TO_STORE:
                 String typeCode = IMPORT_TO_STORE+code;
+
                 savedTransaction.setCode(typeCode);
                 ImportStoreTransactionRequest importStoreTransactionRequest =
                         ImportStoreTransactionRequest.builder()
@@ -62,6 +73,7 @@ public class StockTransactionService {
 
                 break;
             case IMPORT_TO_WAREHOUSE:
+                checkProductFromSupplier(request.getSupplierId(),request.getItems());
                 String typeWarehouseCode = IMPORT_TO_WAREHOUSE+code;
                 savedTransaction.setCode(typeWarehouseCode);
                 ImportWareHouseTransactionRequest importWareHouseTransactionRequest =
@@ -134,6 +146,19 @@ public class StockTransactionService {
         transactionRepository.save(savedTransaction);
     }
 
+    public Boolean checkProductFromSupplier(String supplierId,List<StockTransactionItemRequest> items){
+        UUID supplierUUID = UUID.fromString(supplierId);
+        Supplier supplier =supplierRepository.findById(supplierUUID)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.SUPPLIER_NOT_FOUND));
+        boolean flag = true;
+        for (StockTransactionItemRequest item: items){
+           flag = productRepository.existsBySupplier(supplier);
+           if(flag==false){
+               throw new ApplicationException(ErrorCode.PRODUCT_NOT_FROM_SUPPLIER);
+           }
+        }
+        return flag;
+    }
     private void handleReturnToSupplier(ReturnToSupplierTransactionRequest request,
                                         StockTransaction transaction) {
         if (request.getToSupplier() == null || (request.getFromWarehouse() == null)) {
@@ -324,9 +349,13 @@ public class StockTransactionService {
         return transactionRepository.findAll();
     }
 
-    @Transactional
-    public StockTransaction getTransactionById(Long id) {
+    public StockTransaction getTransactionById(UUID id) {
         return transactionRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND, "Transaction not found"));
+    }
+
+    public StockTransaction getTransactionByCode(String code) {
+        return transactionRepository.findByCode(code)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND, "Transaction not found"));
     }
 }

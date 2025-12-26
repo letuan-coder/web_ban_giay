@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/suppliers")
@@ -34,7 +33,7 @@ public class SupplierController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<SupplierResponse> getSupplierById(@PathVariable UUID id) {
+    public ApiResponse<SupplierResponse> getSupplierById(@PathVariable String id) {
         return ApiResponse.<SupplierResponse>builder()
                 .data(supplierService.getSupplierById(id))
                 .build();
@@ -42,7 +41,7 @@ public class SupplierController {
 
     @PutMapping("/{id}")
     public ApiResponse<SupplierResponse> updateSupplier
-            (@PathVariable UUID id, @RequestBody @Valid SupplierRequest request) {
+            (@PathVariable String id, @RequestBody @Valid SupplierRequest request) {
         return ApiResponse.<SupplierResponse>builder()
                 .data(supplierService.updateSupplier(id, request))
                 .build();
@@ -50,7 +49,7 @@ public class SupplierController {
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteSupplier
-            (@PathVariable UUID id) {
+            (@PathVariable String id) {
         supplierService.deleteSupplier(id);
         return ApiResponse.<Void>builder()
                 .message("Supplier deleted successfully")

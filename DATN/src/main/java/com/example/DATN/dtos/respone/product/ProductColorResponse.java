@@ -2,6 +2,7 @@ package com.example.DATN.dtos.respone.product;
 
 
 import com.example.DATN.constant.Is_Available;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +22,9 @@ public class ProductColorResponse {
     String colorCode;
     String colorName;
     String colorHexCode;
+    @JsonIgnore
     Is_Available isAvailable;
+    @JsonIgnore
     List<ImageProductResponse> images;
     List<ProductVariantResponse> variantResponses;
 }

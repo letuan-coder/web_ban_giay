@@ -8,6 +8,7 @@ import com.example.DATN.dtos.respone.product.ProductDetailReponse;
 import com.example.DATN.dtos.respone.product.ProductResponse;
 import com.example.DATN.dtos.respone.product.ProductSupplierResponse;
 import com.example.DATN.dtos.respone.product.SearchProductResponse;
+import com.example.DATN.repositories.projection.ProductSalesProjection;
 import com.example.DATN.services.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,6 @@ import java.util.UUID;
 public class ProductController {
 
     private final ProductService productService;
-
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<ProductResponse> createProduct(
@@ -114,6 +114,55 @@ public class ProductController {
             (@PathVariable UUID id) {
         return ApiResponse.<ProductResponse>builder()
                 .data(productService.getProductAdminById(id))
+                .build();
+    }
+    @GetMapping("/supplier/admin/{supplierId}")
+    public ApiResponse<List<ProductSupplierResponse>> getProductBySupplierIdAdmin
+            (@PathVariable UUID supplierId) {
+        return ApiResponse.<List<ProductSupplierResponse>>builder()
+                .data(productService.getAllProductBySupplier(supplierId))
+                .build();
+    }
+
+    @GetMapping("/best-sellers")
+    public ApiResponse<PageResponse<ProductSalesProjection>> getBestSellingProducts(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(name = "sort_by", required = false) String sortBy,
+            @RequestParam(name = "sort_order", defaultValue = "desc") String sortOrder
+    ) {
+        String sortField = (sortBy == null || sortBy.trim().isEmpty()) ? "createdAt" : sortBy.trim();
+
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortOrder)
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Sort sort = Sort.by(direction, sortField);
+        Pageable pageable = PageRequest.of(page - 1, limit, sort);
+        Page<ProductSalesProjection> productPage = productService.BestSellingProductSales(pageable);
+        PageResponse<ProductSalesProjection> pageResponse = PageResponse.<ProductSalesProjection>builder()
+                .page(productPage.getNumber() + 1)
+                .size(productPage.getSize())
+                .limit(limit)
+                .totalElements(productPage.getTotalElements())
+                .totalPages(productPage.getTotalPages())
+                .content(productPage.getContent())
+                .build();
+        return ApiResponse.<PageResponse<ProductSalesProjection>>builder()
+                .data(pageResponse)
+                .build();
+    }
+
+    @GetMapping("/worst-sellers")
+    public ApiResponse<List<ProductSalesProjection>> getWorstSellingProducts(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(name = "sort_by", required = false) String sortBy,
+            @RequestParam(name = "sort_order", defaultValue = "desc") String sortOrder
+    ) {
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        return ApiResponse.<List<ProductSalesProjection>>builder()
+                .data(productService.WorstSellingProductSales(pageable))
                 .build();
     }
     @PatchMapping("/{id}")

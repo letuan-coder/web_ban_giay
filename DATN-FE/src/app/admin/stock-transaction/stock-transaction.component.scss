@@ -74,7 +74,24 @@ button:disabled {
   border-radius: 0.375rem;
   min-height: 38px; // Match input height
   
-  span {
-    line-height: 1.2;
+    span {
+  
+      line-height: 1.2;
+  
+    }
+  
   }
-}
+  
+  
+  
+  .supplier-products-container {
+  
+    max-height: 400px;
+  
+    overflow-y: auto;
+  
+    background-color: #f9f9f9;
+  
+  }
+  
+  

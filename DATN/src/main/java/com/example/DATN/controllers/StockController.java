@@ -19,8 +19,9 @@ public class StockController {
     @PostMapping
     public ApiResponse<StockResponse> createStock(
             @RequestBody StockRequest request) {
+       StockResponse response=  stockService.createStock(request);
         return ApiResponse.<StockResponse>builder()
-                .data(stockService.createStock(request))
+                .data(response)
                 .build();
     }
 
@@ -38,6 +39,7 @@ public class StockController {
                 .data(stockService.getStockById(id))
                 .build();
     }
+
 
 
 //    @PatchMapping("/{id}")

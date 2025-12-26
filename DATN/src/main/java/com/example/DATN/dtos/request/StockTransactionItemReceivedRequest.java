@@ -15,6 +15,5 @@ import java.util.UUID;
 public class StockTransactionItemReceivedRequest {
     @NotNull(message = "Product Variant ID is required")
     private UUID stockTransactionId;
-
     private Integer receivedQuantity;
 }

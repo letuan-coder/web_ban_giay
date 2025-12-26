@@ -1,38 +1,41 @@
 package com.example.DATN.services;
 
 import com.example.DATN.config.VnPayConfig;
+import com.example.DATN.constant.PaymentStatus;
 import com.example.DATN.dtos.request.vnpay.VnPayRefundRequest;
 import com.example.DATN.dtos.request.vnpay.VnPaymentRequest;
 import com.example.DATN.dtos.respone.vnpay.VnPayResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
-import com.example.DATN.helper.GetUserByJwtHelper;
+import com.example.DATN.models.Order;
 import com.example.DATN.models.Vnpay;
 import com.example.DATN.repositories.OrderRepository;
 import com.example.DATN.repositories.VnpayRepository;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class VnPayServices {
     private final VnpayRepository vnpayRepository;
-    private final GetUserByJwtHelper getUserByJwtHelper;
     private final RestTemplate restTemplate;
     private final String vnp_TmnCode = VnPayConfig.vnp_TmnCode;
     private final String vnp_HashSecret = VnPayConfig.secretKey;
     private final String version = "2.1.0";
-    private final String commandRefund= "refund";
-    private final String commmandPay= "pay";
+    private final String commandRefund = "refund";
+    private final String commmandPay = "pay";
     private final String orderType = "other";
     private final OrderRepository orderRepository;
 
@@ -107,14 +110,106 @@ public class VnPayServices {
         }
     }
 
-    @Transactional(rollbackOn = Exception.class)
-    public ResponseEntity<?> createPaymentVNPAY
-            (VnPaymentRequest request, HttpServletRequest req)
-    {
+    public boolean verifyReturn(HttpServletRequest request)
+            throws UnsupportedEncodingException {
+
+        Map<String, String> fields = new HashMap<>();
+        request.getParameterMap().forEach((k, v) -> {
+            if (!k.equals("vnp_SecureHash") && !k.equals("vnp_SecureHashType")) {
+                fields.put(k, v[0]);
+            }
+        });
+
+        String secureHash = request.getParameter("vnp_SecureHash");
+        String signValue = VnPayConfig.hashAllFields(fields);
+
+        return signValue.equals(secureHash);
+    }
+    public Map<String, String> handleIpn(HttpServletRequest request) {
+        Map<String, String> response = new HashMap<>();
+
         try {
 
-//            Order order = orderRepository.findByOrderCode(request.getOrderCode())
-//                    .orElseThrow(()->new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
+            Map<String, String> fields = new HashMap<>();
+            Enumeration<String> params = request.getParameterNames();
+
+            while (params.hasMoreElements()) {
+                String fieldName = params.nextElement();
+                String fieldValue = request.getParameter(fieldName);
+                if (fieldValue != null && !fieldValue.isEmpty()) {
+                    fields.put(fieldName, fieldValue);
+                }
+            }
+
+            String vnpSecureHash = fields.get("vnp_SecureHash");
+            fields.remove("vnp_SecureHash");
+            fields.remove("vnp_SecureHashType");
+
+            // ===== 2. Check checksum =====
+            String signValue = VnPayConfig.hashAllFields(fields);
+
+            if (!signValue.equals(vnpSecureHash)) {
+                response.put("RspCode", "97");
+                response.put("Message", "Invalid Checksum");
+                return response;
+            }
+
+            // ===== 3. Lấy dữ liệu =====
+            String orderCode =request.getParameter("vnp_TxnRef");
+            long vnpAmount = Long.parseLong(request.getParameter("vnp_Amount")) / 100;
+            String responseCode = request.getParameter("vnp_ResponseCode");
+
+            // ===== 4. Check order =====
+            Order order = orderRepository.findByOrderCode(orderCode).orElse(null);
+            if (order == null) {
+                response.put("RspCode", "01");
+                response.put("Message", "Order not Found");
+                return response;
+            }
+
+            // ===== 5. Check amount =====
+            if (order.getTotal_price().longValue() != vnpAmount) {
+                response.put("RspCode", "04");
+                response.put("Message", "Invalid Amount");
+                return response;
+            }
+
+            // ===== 6. Check trạng thái cũ =====
+            if (order.getPaymentStatus() != PaymentStatus.PENDING) {
+                response.put("RspCode", "02");
+                response.put("Message", "Order already confirmed");
+                return response;
+            }
+
+            // ===== 7. Update DB =====
+            if ("00".equals(responseCode)) {
+                order.setPaymentStatus(PaymentStatus.SUCCESS);
+            } else {
+                order.setPaymentStatus(PaymentStatus.FAILED);
+            }
+
+            order.setUpdatedAt(LocalDateTime.now());
+            orderRepository.save(order);
+
+            // ===== 8. Trả kết quả =====
+            response.put("RspCode", "00");
+            response.put("Message", "Confirm Success");
+            return response;
+
+        } catch (Exception e) {
+            response.put("RspCode", "99");
+            response.put("Message", "Unknow error");
+            return response;
+        }
+    }
+
+    public String createPaymentVNPAY
+            (VnPaymentRequest request, HttpServletRequest req)
+    {
+
+        try {
+
+
 
             String vnp_Version = version;
             String vnp_Command= commmandPay;
@@ -124,7 +219,7 @@ public class VnPayServices {
             long amount = request.getAmount() * 100L;
             String bankCode = request.getBankCode();
 
-            String vnp_TxnRef = VnPayConfig.getRandomNumber(8);
+            String vnp_TxnRef = request.getOrderCode();
             String vnp_IpAddr = VnPayConfig.getIpAddress(req);
             String vnp_TmnCode = VnPayConfig.vnp_TmnCode;
 
@@ -186,12 +281,11 @@ public class VnPayServices {
             response.put("code", "00");
             response.put("message", "success");
             response.put("data", paymentUrl);
-            return ResponseEntity.ok(response);
+            return paymentUrl;
 
 
         } catch (Exception e) {
-              return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                      .body(Map.of("error", e.getMessage()));
+            throw new ApplicationException(ErrorCode.PAYMENT_VNPAY_FAIL);
         }
     }
 }

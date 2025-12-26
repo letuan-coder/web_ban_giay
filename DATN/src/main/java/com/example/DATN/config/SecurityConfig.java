@@ -64,8 +64,9 @@ public class SecurityConfig {
 //                org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class
 //        );
         httpSecurity.authorizeHttpRequests(request -> request
-
                         .requestMatchers(HttpMethod.GET, "/api/vnpay/return").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/vnpay/ipn").permitAll()
+
                         .requestMatchers(PUBLIC_API).permitAll()
 
 //                .requestMatchers(HttpMethod.GET, "/api/users")

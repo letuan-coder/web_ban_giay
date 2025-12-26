@@ -1,28 +1,26 @@
-package com.example.DATN.dtos.respone.product;
+package com.example.DATN.dtos.respone.order;
 
 import com.example.DATN.constant.Is_Available;
-import com.example.DATN.dtos.respone.SizeResponse;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.UUID;
-
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class ProductVariantResponse {
+public class CheckOutProductResponse {
     private UUID id;
-    private SizeResponse size;
-    @JsonIgnore
     private Is_Available isAvailable;
+    private Integer quantity;
+    private String productName;
+    private String sku;
+    private String colorName;
+    private Integer sizeName;
     private BigDecimal price;
     private Integer stock;
-    private String sku;
-    private LocalDate createdAt;
+    private String imageUrl;
 }

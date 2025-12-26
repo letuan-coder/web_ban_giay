@@ -25,6 +25,7 @@ public interface StockTransactionMapper {
     @Mapping(target = "fromWarehouseName", source = "fromWareHouse.name")
     @Mapping(target = "toWarehouseId", source = "toWareHouse.id")
     @Mapping(target = "toWarehouseName", source = "toWareHouse.name")
+    @Mapping(target = "createdDate",source = "createdAt")
     StockTransactionResponse toStockTransactionResponse(StockTransaction transaction);
 
 

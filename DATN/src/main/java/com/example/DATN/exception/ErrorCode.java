@@ -31,6 +31,7 @@ public enum ErrorCode {
     // Validation
     INVALID_VALIDATION(1016, "Invalid validation", HttpStatus.BAD_REQUEST),
 
+
     //PROMOTION
     INVALID_PROMOTION_DATES(1087, "Invalid promotion dates", HttpStatus.BAD_REQUEST),
     PROMOTION_NOT_FOUND(1088, "Promotion not found", HttpStatus.NOT_FOUND),
@@ -62,7 +63,7 @@ public enum ErrorCode {
     PRODUCT_COLOR_NOT_FOUND(1046, "Product color not found", HttpStatus.NOT_FOUND),
     PRODUCT_COLOR_EXISTED(1047, "Product color already exists", HttpStatus.BAD_REQUEST),
     INVALID_SIZE_FOR_TYPE(1048, "Invalid size for type", HttpStatus.BAD_REQUEST),
-
+    PRODUCT_NOT_FROM_SUPPLIER(1052, "Product does not belong to the supplier", HttpStatus.BAD_REQUEST),
 
     SIZE_NOT_ALLOW(1049, "size must be at least 20", HttpStatus.NOT_FOUND),
     TYPE_ALREADY_EXISTS(1050, "Type already exists", HttpStatus.BAD_REQUEST),
@@ -131,6 +132,9 @@ public enum ErrorCode {
     PAYMENT_VNPAY_FAIL(1125, "payment vnpay fail", HttpStatus.BAD_REQUEST),
     //refund
     REFUND_NOT_ALLOWDED(1128, "refund is not allowded", HttpStatus.BAD_REQUEST),
+
+    //STOCK-TRANSACTION
+    INVALID_DATE(1130, "Invalid date", HttpStatus.BAD_REQUEST),
 
     // Generic
     INVALID_INPUT(9998,"INVALID_INPUT",HttpStatus.BAD_REQUEST),

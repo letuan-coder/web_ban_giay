@@ -1,5 +1,6 @@
 package com.example.DATN.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -12,11 +13,18 @@ public class JacksonCofig {
     @Bean
     @Primary
     public ObjectMapper objectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        // Đăng ký module để Jackson hiểu các kiểu ngày giờ của Java 8 (LocalDateTime)
-        objectMapper.registerModule(new JavaTimeModule());
-        // Cấu hình để không ghi ngày giờ dưới dạng số (timestamp)
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        return objectMapper;
+        ObjectMapper mapper = new ObjectMapper();
+
+        mapper.registerModule(new JavaTimeModule());
+
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+        mapper.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
+
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+
+        return mapper;
     }
 }

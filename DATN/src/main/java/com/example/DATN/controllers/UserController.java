@@ -39,7 +39,7 @@ public class UserController {
                 .build();
     }
 
-    @GetMapping
+    @GetMapping("my-orders")
     ApiResponse<List<UserResponse>> getAllUsers() {
         return ApiResponse.<List<UserResponse>>builder()
                 .data(userService.getAllUsers())

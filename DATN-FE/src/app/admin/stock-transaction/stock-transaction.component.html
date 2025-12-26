@@ -17,13 +17,13 @@
             <select id="type" formControlName="type" class="form-select">
               <option value="" disabled>Chọn loại phiếu</option>
               <option *ngFor="let type of transactionTypes" [value]="type">
-                {{ 
-                  type === 'IMPORT_TO_WAREHOUSE' ? 'Nhập kho từ Nhà Cung Cấp' : 
-                  (type === 'EXPORT' ? 'Xuất kho' : 
-                  (type === 'TRANSFER' ? 'Chuyển kho' :
-                  (type === 'RETURN_SUPPLIER' ? 'Trả nhà cung cấp' :
-                  (type === 'RETURN_WAREHOUSE' ? 'Trả về kho tổng' :
-                  (type === 'ADJUST' ? 'Điều chỉnh' : type)))))
+                {{
+                type === 'IMPORT_TO_WAREHOUSE' ? 'Nhập kho từ Nhà Cung Cấp' :
+                (type === 'EXPORT' ? 'Xuất kho' :
+                (type === 'TRANSFER' ? 'Chuyển kho' :
+                (type === 'RETURN_SUPPLIER' ? 'Trả nhà cung cấp' :
+                (type === 'RETURN_WAREHOUSE' ? 'Trả về kho tổng' :
+                (type === 'ADJUST' ? 'Điều chỉnh' : type)))))
                 }}
               </option>
             </select>
@@ -33,21 +33,28 @@
             <label for="expectedReceivedDate" class="form-label">Ngày dự kiến giao hàng</label>
             <input type="date" id="expectedReceivedDate" formControlName="expectedReceivedDate" class="form-control">
           </div>
-          
+
           <!-- Fields for IMPORT -->
           <ng-container *ngIf="transactionForm.get('type')?.value === 'IMPORT_TO_WAREHOUSE'">
             <div class="col-md-4 mb-3">
               <label for="supplierId" class="form-label">Nhà Cung Cấp <span class="text-danger">*</span></label>
-              <select id="supplierId" formControlName="supplierId" class="form-select">
-                <option [ngValue]="null" disabled>Chọn nhà cung cấp</option>
-                <option *ngFor="let supplier of suppliers" [value]="supplier.taxCode">{{ supplier.name }}</option>
-              </select>
+              <div class="input-group">
+                <select id="supplierId" formControlName="supplierId" class="form-select">
+                  <option [ngValue]="null" disabled>Chọn nhà cung cấp</option>
+                  <option *ngFor="let supplier of suppliers" [value]="supplier.id">{{ supplier.name }}</option>
+                </select>
+                <button class="btn btn-outline-secondary" type="button" (click)="fetchSupplierProducts()"
+                  [disabled]="!transactionForm.get('supplierId')?.value">
+                  <i class="bi bi-list-ul"></i> Lấy sản phẩm
+                </button>
+              </div>
             </div>
             <div class="col-md-4 mb-3">
               <label for="toWarehouseIdIn" class="form-label">Nhập tới Kho <span class="text-danger">*</span></label>
               <select id="toWarehouseIdIn" formControlName="toWarehouseId" class="form-select">
                 <option [ngValue]="null" disabled>Chọn kho</option>
-                <option *ngFor="let warehouse of warehouses" [value]="warehouse.warehouseCode">{{ warehouse.name }}</option>
+                <option *ngFor="let warehouse of warehouses" [value]="warehouse.warehouseCode">{{ warehouse.name }}
+                </option>
               </select>
             </div>
           </ng-container>
@@ -65,7 +72,8 @@
               <label for="fromWarehouseIdOut" class="form-label">Xuất từ Kho</label>
               <select id="fromWarehouseIdOut" formControlName="fromWarehouseId" class="form-select">
                 <option [ngValue]="null" disabled>Chọn kho</option>
-                <option *ngFor="let warehouse of warehouses" [value]="warehouse.warehouseCode">{{ warehouse.name }}</option>
+                <option *ngFor="let warehouse of warehouses" [value]="warehouse.warehouseCode">{{ warehouse.name }}
+                </option>
               </select>
             </div>
           </ng-container>
@@ -83,7 +91,8 @@
               <label for="fromWarehouseIdTransfer" class="form-label">Từ Kho</label>
               <select id="fromWarehouseIdTransfer" formControlName="fromWarehouseId" class="form-select">
                 <option [ngValue]="null" disabled>Chọn kho</option>
-                <option *ngFor="let warehouse of warehouses" [value]="warehouse.warehouseCode">{{ warehouse.name }}</option>
+                <option *ngFor="let warehouse of warehouses" [value]="warehouse.warehouseCode">{{ warehouse.name }}
+                </option>
               </select>
             </div>
             <div class="col-md-3 mb-3">
@@ -97,7 +106,8 @@
               <label for="toWarehouseIdTransfer" class="form-label">Tới Kho</label>
               <select id="toWarehouseIdTransfer" formControlName="toWarehouseId" class="form-select">
                 <option [ngValue]="null" disabled>Chọn kho</option>
-                <option *ngFor="let warehouse of warehouses" [value]="warehouse.warehouseCode">{{ warehouse.name }}</option>
+                <option *ngFor="let warehouse of warehouses" [value]="warehouse.warehouseCode">{{ warehouse.name }}
+                </option>
               </select>
             </div>
           </ng-container>
@@ -105,7 +115,8 @@
           <!-- Fields for RETURN_SUPPLIER -->
           <ng-container *ngIf="transactionForm.get('type')?.value === 'RETURN_SUPPLIER'">
             <div class="col-md-4 mb-3">
-              <label for="fromStoreIdReturn" class="form-label">Trả từ Cửa Hàng <span class="text-danger">*</span></label>
+              <label for="fromStoreIdReturn" class="form-label">Trả từ Cửa Hàng <span
+                  class="text-danger">*</span></label>
               <select id="fromStoreIdReturn" formControlName="fromStoreId" class="form-select">
                 <option [ngValue]="null" disabled>Chọn cửa hàng</option>
                 <option *ngFor="let store of stores" [value]="store.id">{{ store.name }}</option>
@@ -113,17 +124,24 @@
             </div>
             <div class="col-md-4 mb-3">
               <label for="supplierIdReturn" class="form-label">Nhà Cung Cấp <span class="text-danger">*</span></label>
-              <select id="supplierIdReturn" formControlName="supplierId" class="form-select">
-                <option [ngValue]="null" disabled>Chọn nhà cung cấp</option>
-                <option *ngFor="let supplier of suppliers" [value]="supplier.taxCode">{{ supplier.name }}</option>
-              </select>
+              <div class="input-group">
+                <select id="supplierIdReturn" formControlName="supplierId" class="form-select">
+                  <option [ngValue]="null" disabled>Chọn nhà cung cấp</option>
+                  <option *ngFor="let supplier of suppliers" [value]="supplier.id">{{ supplier.name }}</option>
+                </select>
+                <button class="btn btn-outline-secondary" type="button" (click)="fetchSupplierProducts()"
+                  [disabled]="!transactionForm.get('supplierId')?.value">
+                  <i class="bi bi-list-ul"></i> Lấy sản phẩm
+                </button>
+              </div>
             </div>
           </ng-container>
-          
+
           <!-- Fields for RETURN_WAREHOUSE -->
           <ng-container *ngIf="transactionForm.get('type')?.value === 'RETURN_WAREHOUSE'">
             <div class="col-md-4 mb-3">
-              <label for="fromStoreIdReturnWh" class="form-label">Trả từ Cửa Hàng <span class="text-danger">*</span></label>
+              <label for="fromStoreIdReturnWh" class="form-label">Trả từ Cửa Hàng <span
+                  class="text-danger">*</span></label>
               <select id="fromStoreIdReturnWh" formControlName="fromStoreId" class="form-select">
                 <option [ngValue]="null" disabled>Chọn cửa hàng</option>
                 <option *ngFor="let store of stores" [value]="store.id">{{ store.name }}</option>
@@ -133,7 +151,8 @@
               <label for="toWarehouseIdReturnWh" class="form-label">Tới Kho <span class="text-danger">*</span></label>
               <select id="toWarehouseIdReturnWh" formControlName="toWarehouseId" class="form-select">
                 <option [ngValue]="null" disabled>Chọn kho</option>
-                <option *ngFor="let warehouse of warehouses" [value]="warehouse.warehouseCode">{{ warehouse.name }}</option>
+                <option *ngFor="let warehouse of warehouses" [value]="warehouse.warehouseCode">{{ warehouse.name }}
+                </option>
               </select>
             </div>
           </ng-container>
@@ -153,13 +172,14 @@
         <!-- New Search by Product Code -->
         <div class="row mb-3 p-2 border rounded">
           <div class="col-md-6">
-              <label class="form-label">Tìm tất cả biến thể theo mã sản phẩm</label>
-              <div class="input-group">
-                  <input type="text" class="form-control" placeholder="Nhập mã sản phẩm..." #productCodeInput>
-                  <button class="btn btn-outline-primary" type="button" (click)="searchByProductCode(productCodeInput.value)">
-                    <i class="bi bi-search"></i> Tìm
-                  </button>
-              </div>
+            <label class="form-label">Tìm tất cả biến thể theo mã sản phẩm</label>
+            <div class="input-group">
+              <input type="text" class="form-control" placeholder="Nhập mã sản phẩm..." #productCodeInput>
+              <button class="btn btn-outline-primary" type="button"
+                (click)="searchByProductCode(productCodeInput.value)">
+                <i class="bi bi-search"></i> Tìm
+              </button>
+            </div>
           </div>
         </div>
 
@@ -167,12 +187,29 @@
         <div *ngIf="productCodeSearchLoading" class="text-center">Đang tìm...</div>
         <div *ngIf="productCodeSearchError" class="alert alert-danger">{{ productCodeSearchError }}</div>
         <div *ngIf="productCodeSearchResults.length > 0" class="mb-3">
-            <div *ngFor="let product of productCodeSearchResults" class="card mb-2">
-                <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <strong>{{ product.name }}</strong>
+          <div *ngFor="let product of productCodeSearchResults" class="card mb-2">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+              <strong>{{ product.name }}</strong>
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="toggleVariants(product)">
+                  <i class="bi" [ngClass]="product.variantsVisible ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+                  {{ product.variantsVisible ? 'Ẩn' : 'Hiện' }} biến thể
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-info" (click)="addAllVariantsToItems(product)">
+                  <i class="bi bi-plus-circle-fill"></i> Thêm tất cả
+                </button>
+              </div>
+            </div>
+            <ul *ngIf="product.variantsVisible" class="list-group list-group-flush">
+                <div *ngIf="product.variantsLoading" class="list-group-item text-center">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Đang tải biến thể...
                 </div>
-                <ul class="list-group list-group-flush">
-                    <li *ngFor="let variant of product.variantDetailResponses" class="list-group-item d-flex justify-content-between align-items-center">
+                <li *ngIf="!product.variantsLoading && product.variantsFetched && product.variantDetailResponses.length === 0" class="list-group-item text-muted text-center">
+                    Không tìm thấy biến thể nào.
+                </li>
+                <ng-container *ngFor="let variant of product.variantDetailResponses">
+                    <li *ngIf="!isVariantInItems(variant.id)" class="list-group-item d-flex justify-content-between align-items-center">
                         <div>
                             Màu: <strong>{{ variant.colorName }}</strong> - Size: <strong>{{ variant.size }}</strong>
                             <br>
@@ -182,43 +219,95 @@
                           <i class="bi bi-plus-circle"></i> Thêm
                         </button>
                     </li>
-                </ul>
+                </ng-container>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Products from selected supplier -->
+        <div *ngIf="transactionForm.get('supplierId')?.value && !productCodeSearchResults.length">
+          <div *ngIf="supplierProductsLoading" class="text-center mt-3">Đang tải sản phẩm của nhà cung cấp...</div>
+          <div *ngIf="supplierProductsError" class="alert alert-warning mt-3">{{ supplierProductsError }}</div>
+          <div *ngIf="supplierProducts.length > 0 && !supplierProductsLoading"
+            class="mt-3 p-2 border rounded supplier-products-container">
+            <h6 class="text-muted">Sản phẩm từ Nhà Cung Cấp đã chọn</h6>
+            <div *ngFor="let product of supplierProducts" class="card mb-2 shadow-sm">
+              <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <strong>{{ product.name }}</strong>
+                <strong>{{ product.productCode }}</strong>
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-outline-secondary" (click)="toggleVariants(product)">
+                    <i class="bi" [ngClass]="product.variantsVisible ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+                    {{ product.variantsVisible ? 'Ẩn' : 'Hiện' }} biến thể
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-info" (click)="addAllVariantsToItems(product)">
+                    <i class="bi bi-plus-circle-fill"></i> Thêm tất cả
+                  </button>
+                </div>
+              </div>
+              <ul *ngIf="product.variantsVisible" class="list-group list-group-flush">
+                <div *ngIf="product.variantsLoading" class="list-group-item text-center">
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  Đang tải biến thể...
+                </div>
+                <li
+                  *ngIf="!product.variantsLoading && product.variantsFetched && product.variantDetailResponses.length === 0"
+                  class="list-group-item text-muted text-center">
+                  Không tìm thấy biến thể nào.
+                </li>
+                <ng-container *ngFor="let variant of product.variantDetailResponses">
+                  <li *ngIf="!isVariantInItems(variant.id)"
+                    class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                      Màu: <strong>{{ variant.colorName }}</strong> - Size: <strong>{{ variant.size }}</strong>
+                      <br>
+                      <small class="text-muted">SKU: {{ variant.sku }} | Giá: {{ variant.price | number }}đ</small>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary"
+                      (click)="addVariantToItems(variant, product.name)">
+                      <i class="bi bi-plus-circle"></i> Thêm
+                    </button>
+                  </li>
+                </ng-container>
+              </ul>
             </div>
+          </div>
         </div>
 
         <div formArrayName="items">
           <div *ngFor="let item of items.controls;
-           let i = index" [formGroupName]="i" 
-           class="row align-items-start mb-3 p-2 border rounded item-row">
-            
+           let i = index" [formGroupName]="i" class="row align-items-start mb-3 p-2 border rounded item-row">
+
             <!-- Product Selection Column -->
             <div class="col-md-6">
               <label class="form-label">Sản phẩm <span class="text-danger">*</span></label>
-              
+
               <!-- Display selected variant info -->
-              <div *ngIf="item.value.variantDetails" 
-              class="selected-variant d-flex justify-content-between align-items-center">
+              <div *ngIf="item.value.variantDetails"
+                class="selected-variant d-flex justify-content-between align-items-center">
                 <span>
                   <strong>{{ item.value.variantDetails.productName }}</strong>
-                   - {{ item.value.variantDetails.colorName }}
-                    - Size {{ item.value.variantDetails.size }}
+                  - {{ item.value.variantDetails.colorName }}
+                  - Size {{ item.value.variantDetails.size }}
                   <br>
                   <small class="text-muted">SKU: {{ item.value.variantDetails.sku }}</small>
                 </span>
-                <button type="button" class="btn btn-sm btn-outline-secondary" 
-                (click)="item.get('variantDetails')?.setValue(null);
+                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="item.get('variantDetails')?.setValue(null);
                  item.get('variantId')?.setValue('')">Đổi</button>
               </div>
 
               <div *ngIf="!item.value.variantDetails" class="search-container position-relative">
-                <input type="text" class="form-control" placeholder="Tìm SKU hoặc Tên sản phẩm..." (keyup)="search($event, i)" (focus)="activeItemIndex = i">
-                <div *ngIf="activeItemIndex === i && (searchResults.length > 0 || searchLoading)" class="autocomplete-list">
+                <input type="text" class="form-control" placeholder="Tìm SKU hoặc Tên sản phẩm..."
+                  (keyup)="search($event, i)" (focus)="activeItemIndex = i">
+                <div *ngIf="activeItemIndex === i && (searchResults.length > 0 || searchLoading)"
+                  class="autocomplete-list">
                   <div *ngIf="searchLoading" class="list-group-item">Đang tìm...</div>
-                  <button type="button" *ngFor="let variant of searchResults" class="list-group-item list-group-item-action" (click)="selectVariant(variant)">
+                  <button type="button" *ngFor="let variant of searchResults"
+                    class="list-group-item list-group-item-action" (click)="selectVariant(variant)">
                     <div>
-                        <strong>{{ variant.productName }}</strong> - {{ variant.colorName }} - Size: {{ variant.size }}
-                        <br>
-                        <small class="text-muted">SKU: {{ variant.sku }} | Giá: {{ variant.price | number }}đ</small>
+                      <strong>{{ variant.productName }}</strong> - {{ variant.colorName }} - Size: {{ variant.size }}
+                      <br>
+                      <small class="text-muted">SKU: {{ variant.sku }} | Giá: {{ variant.price | number }}đ</small>
                     </div>
                   </button>
                 </div>
@@ -281,7 +370,8 @@
               <td>{{ transaction.transactionStatus }}</td>
               <td>{{ transaction.supplierName || 'N/A' }}</td>
               <td>
-                <ng-container *ngIf="transaction.fromWarehouseName">{{ transaction.fromWarehouseName }} (Kho)</ng-container>
+                <ng-container *ngIf="transaction.fromWarehouseName">{{ transaction.fromWarehouseName }}
+                  (Kho)</ng-container>
                 <ng-container *ngIf="transaction.fromStoreName">{{ transaction.fromStoreName }} (CH)</ng-container>
                 <ng-container *ngIf="!transaction.fromWarehouseName && !transaction.fromStoreName">N/A</ng-container>
               </td>
@@ -290,7 +380,7 @@
                 <ng-container *ngIf="transaction.toStoreName">{{ transaction.toStoreName }} (CH)</ng-container>
                 <ng-container *ngIf="!transaction.toWarehouseName && !transaction.toStoreName">N/A</ng-container>
               </td>
-              <td>{{ transaction.createdDate | date:'short' }}</td>
+              <td>{{ transaction.createdDate | date:'dd/MM/yyyy' }}</td>
             </tr>
           </tbody>
         </table>

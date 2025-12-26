@@ -29,7 +29,7 @@ public class OrderItemService {
 
     @Transactional
     public OrderItemResponse addOrderItemToOrder
-            (Long orderId, OrderItemRequest itemRequest) {
+            (UUID orderId, OrderItemRequest itemRequest) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
         ProductVariant variant= productVariantRepository.findBysku(itemRequest.getSku())

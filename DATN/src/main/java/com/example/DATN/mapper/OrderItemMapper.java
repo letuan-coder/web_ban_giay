@@ -2,6 +2,7 @@ package com.example.DATN.mapper;
 
 import com.example.DATN.dtos.request.order.OrderItemRequest;
 import com.example.DATN.dtos.respone.order.OrderItemResponse;
+import com.example.DATN.dtos.respone.order.PendingOrderItem;
 import com.example.DATN.models.ImageProduct;
 import com.example.DATN.models.OrderItem;
 import org.mapstruct.Mapper;
@@ -15,6 +16,10 @@ import java.util.List;
          ProductMapper.class})
 public interface OrderItemMapper {
     OrderItem toEntity(OrderItemResponse response);
+
+    @Mapping(target = "sku", source = "productVariant.sku")
+    @Mapping(target = "quantity", source = "quantity")
+    PendingOrderItem toPendingOrderItem(OrderItem item);
 
     @Mapping(target = "productVariant.sku",source = "sku")
     OrderItem toOrderItem(OrderItemRequest request);

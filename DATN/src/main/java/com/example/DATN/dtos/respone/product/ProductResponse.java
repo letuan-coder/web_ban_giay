@@ -25,7 +25,6 @@ public class ProductResponse {
     private List<ProductColorResponse> colorResponses;
     private String ThumbnailUrl;
     private String altText;
-    private BigDecimal importPrice;
     private BigDecimal price;
     private Long brandId;
     private String brandName;

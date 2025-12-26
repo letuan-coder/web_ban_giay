@@ -18,6 +18,7 @@ public class OrderResponse {
     private String paymentMethodName;
     private OrderStatus orderStatus;
     private BigDecimal totalPrice;
+    private String response;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDateTime created_At;
     private List<OrderItemResponse> items;

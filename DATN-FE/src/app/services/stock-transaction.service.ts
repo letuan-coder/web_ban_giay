@@ -31,11 +31,11 @@ export interface CreateMissingItemsInvoiceRequest {
 
 // Define the StockTransactionItemResponse interface based on backend DTO
 export interface StockTransactionItemResponse {
-  id: number;
-  variantId: number;
+  id: string;
+  variantId: string;
   variantSku: string;
   quantity: number;
-  variant: {
+  variant?: {
     id: number;
     sku: string;
     product: { name: string };
@@ -50,7 +50,7 @@ export interface StockTransactionResponse {
   code:string;
   type:['IMPORT', 'EXPORT', 'TRANSFER', 'RETURN_SUPPLIER', 'RETURN_WAREHOUSE', 'ADJUST'];
   transactionStatus: 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'PENDING_COMPLETION';
-  supplierId?: number;
+  supplierId?: string;
   supplierName?: string;
   fromWarehouseId?: number;
   fromWarehouseName?: string;
@@ -79,7 +79,7 @@ export class StockTransactionService {
 
 getTransactionById(id: string): Observable<any> {
   // id là string, không convert sang Number
-  return this.http.get(`${this.apiUrl}/${id}`);
+  return this.http.get(`${this.apiUrl}/code/${id}`);
 }
 
   createMissingItemsInvoice(request: CreateMissingItemsInvoiceRequest): Observable<any> {

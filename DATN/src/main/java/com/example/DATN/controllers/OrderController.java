@@ -1,34 +1,37 @@
 package com.example.DATN.controllers;
 
 import com.example.DATN.constant.PaymentMethodEnum;
+import com.example.DATN.dtos.request.order.CheckOutRequest;
 import com.example.DATN.dtos.request.order.OrderRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
+import com.example.DATN.dtos.respone.order.CheckOutResponse;
 import com.example.DATN.dtos.respone.order.OrderItemResponse;
 import com.example.DATN.dtos.respone.order.OrderResponse;
 import com.example.DATN.services.OrderService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
 public class OrderController {
-
     private final OrderService orderService;
+
 
     @PostMapping
     public ApiResponse<OrderResponse> createOrder(
             @RequestBody @Valid OrderRequest request
-            , HttpServletRequest servletRequest) {
-        OrderResponse response;
+            , HttpServletRequest servletRequest) throws JsonProcessingException {
+        OrderResponse response = new OrderResponse();
         if (request.getType() == PaymentMethodEnum.CASH_ON_DELIVERY) {
-             response = orderService.createOrder(request);
+            response = orderService.createOrder(request);
         } else {
-
             response = orderService.createOrderVnPay(request, servletRequest);
         }
         return ApiResponse.<OrderResponse>builder()
@@ -36,9 +39,21 @@ public class OrderController {
                 .build();
     }
 
+    @PostMapping("/check-out")
+    public ApiResponse<CheckOutResponse> checkOutOrder(
+            @RequestBody @Valid List<CheckOutRequest> request
+    ) {
+        CheckOutResponse response = orderService.checkOutOrder(request);
+        return ApiResponse.<CheckOutResponse>builder()
+                .data(response)
+                .build();
+
+
+    }
+
     @PatchMapping("/{orderId}")
     public ApiResponse<OrderResponse> updateOrderId(
-            @PathVariable Long orderId,
+            @PathVariable UUID orderId,
             @RequestBody String newStatus
     ) {
         orderService.updateOrderStatus(orderId, newStatus);

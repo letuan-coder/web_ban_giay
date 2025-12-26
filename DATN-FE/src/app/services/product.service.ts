@@ -101,8 +101,8 @@ export class ProductService {
   search(keyword: string): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/search?keyword=${keyword}`);
   }
-  getProductsBySupplier(id: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/supplier/${id}`);
+  getProductsBySupplier(id: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/supplier/admin/${id}`);
   }
 
   getProductByCode(code: string): Observable<any> {

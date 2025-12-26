@@ -13,7 +13,8 @@ export interface SupplierRequest {
 }
 
 export interface SupplierResponse {
-  id: number;
+  id: string;
+  supplierCode: string;
   name: string;
   taxCode: string;
   email: string;
@@ -38,15 +39,15 @@ export class SupplierService {
     return this.http.get<any>(this.apiUrl);
   }
 
-  getSupplierById(id: number): Observable<SupplierResponse> {
+  getSupplierById(id: string): Observable<SupplierResponse> {
     return this.http.get<SupplierResponse>(`${this.apiUrl}/${id}`);
   }
 
-  updateSupplier(id: number, request: SupplierRequest): Observable<SupplierResponse> {
+  updateSupplier(id: String, request: SupplierRequest): Observable<SupplierResponse> {
     return this.http.put<SupplierResponse>(`${this.apiUrl}/${id}`, request);
   }
 
-  deleteSupplier(id: number): Observable<void> {
+  deleteSupplier(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

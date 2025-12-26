@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -93,7 +94,7 @@ public class OrderReturnService {
         return response;
     }
 
-    public Boolean checkReturnRequestExists(Long orderId) {
+    public Boolean checkReturnRequestExists(UUID orderId) {
         User currentUser = getUserByJwtHelper.getCurrentUser();
 
         Order order = orderRepository.findById(orderId)

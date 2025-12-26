@@ -17,6 +17,7 @@ import com.example.DATN.mapper.ProductColorMapper;
 import com.example.DATN.mapper.ProductMapper;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
+import com.example.DATN.repositories.projection.ProductSalesProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -61,16 +62,32 @@ public class ProductService {
 //                .map(productMapper::toProductResponse)
 //                .collect(Collectors.toList());
 //    }
-    public List<String> getImageByProductColorId(UUID productColorId){
-            ProductColor productColor = productColorRepository.findById(productColorId)
-                    .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
+    public List<String> getImageByProductColorId(UUID productColorId) {
+        ProductColor productColor = productColorRepository.findById(productColorId)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
 
-            return imageProductRepository.findAllByProductColor(productColor)
-                    .stream()
-                    .map(ImageProduct::getImageUrl)
-                    .toList();
+        return imageProductRepository.findAllByProductColor(productColor)
+                .stream()
+                .map(ImageProduct::getImageUrl)
+                .toList();
     }
 
+    public List<ProductSupplierResponse> getAllProductBySupplier(UUID UUID) {
+//        UUID id = java.util.UUID.fromString(UUID);
+        Supplier supplier = supplierRepository.findById(UUID)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.SUPPLIER_NOT_FOUND));
+        List<Product> products = productRepository.findAllBySupplier(supplier);
+        return products.stream().map(productMapper::toSupplierDetail)
+                .collect(Collectors.toList());
+    }
+
+    public Page<ProductSalesProjection> BestSellingProductSales(Pageable pageable) {
+       return productRepository.findBestSellingProductsDetail(pageable);
+
+    }
+    public List<ProductSalesProjection> WorstSellingProductSales(Pageable page){
+        return productRepository.findWorstSellingProducts(page);
+    }
 
     public static String generate(String prefix, Long index) {
         return prefix + index;
@@ -82,8 +99,8 @@ public class ProductService {
                 .orElseThrow(() -> new ApplicationException(ErrorCode.BRAND_NOT_FOUND));
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.CATEGORY_NOT_FOUND));
-        Supplier supplier =null;
-        if(request.getSupplierId()!=null) {
+        Supplier supplier = null;
+        if (request.getSupplierId() != null) {
             supplier = supplierRepository.findById(request.getSupplierId())
                     .orElseThrow(() -> new ApplicationException(ErrorCode.SUPPLIER_NOT_FOUND));
         }
@@ -91,7 +108,8 @@ public class ProductService {
             throw new ApplicationException(ErrorCode.INVALID_PRICE);
         }
         String formatProductName = formatInputString.formatInputString(request.getName().trim());
-        Long snowCode= snowflakeIdGenerator.nextId();;
+        Long snowCode = snowflakeIdGenerator.nextId();
+        ;
         String productCode = (generate(PREFIX, snowCode));
 //        String formatDescription = formatInputString.formatInputString(request.getDescription());
         String rawDesc = request.getDescription();
@@ -108,9 +126,9 @@ public class ProductService {
         product.setThumbnailUrl("");
         product.setSupplier(supplier);
         Product savedProduct = productRepository.save(product);
-        for(String colorCode :request.getColorCodes()) {
+        for (String colorCode : request.getColorCodes()) {
             Color color = colorRepository.findByCode(colorCode)
-                    .orElseThrow(()->new ApplicationException(ErrorCode.COLOR_NOT_FOUND));
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.COLOR_NOT_FOUND));
             ProductVariantRequest productVariantRequest = ProductVariantRequest.builder()
                     .sizeCodes(request.getSizeCodes())
                     .price(request.getPrice())
@@ -143,6 +161,7 @@ public class ProductService {
         imageProductService.uploadImage(uploadImageRequest);
         return productMapper.toProductResponse(savedProduct);
     }
+
     private String toSlug(String input) {
         if (input == null || input.isBlank()) return "";
 
@@ -159,9 +178,9 @@ public class ProductService {
 
     public Page<ProductResponse> getAllProducts(
             String productName, Double priceMin, Double priceMax,
-            ProductStatus status,Long brandId,Long categoryId, String sizeCode,String colorCode,Pageable pageable) {
+            ProductStatus status, Long brandId, Long categoryId, String sizeCode, String colorCode, Pageable pageable) {
         Page<Product> productsPage = productRepository.findAll(filterProducts(productName,
-                priceMin, priceMax, status,brandId,categoryId,colorCode,sizeCode),pageable);
+                priceMin, priceMax, status, brandId, categoryId, colorCode, sizeCode), pageable);
         return productsPage.map(this::mapProductToProductResponse);
     }
 
@@ -170,6 +189,7 @@ public class ProductService {
                 .stream().map(productMapper::toSearchDetail)
                 .collect(Collectors.toList());
     }
+
     public List<ProductSupplierResponse> getProductBySupplierId(UUID supplierId) {
         Supplier supplier = supplierRepository.findById(supplierId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.SUPPLIER_NOT_FOUND));
@@ -190,7 +210,7 @@ public class ProductService {
         return productMapper.toDetail(product);
     }
 
-    public ProductResponse getProductAdminById(UUID id){
+    public ProductResponse getProductAdminById(UUID id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
         return productMapper.toProductResponse(product);
@@ -221,7 +241,6 @@ public class ProductService {
     @Transactional
     public ProductResponse updateProductWithImage(UUID id, ProductRequest request, MultipartFile file) {
         ProductResponse updatedProductResponse = updateProduct(id, request);
-
         Product productWithImage = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
         UploadImageRequest uploadImageRequest = UploadImageRequest.builder()

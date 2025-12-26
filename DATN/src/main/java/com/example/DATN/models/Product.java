@@ -53,7 +53,7 @@ public class Product extends BaseEntity {
 
     @NotNull
     @Column(name = "thumbnail_url")
-    String ThumbnailUrl;
+    String thumbnailUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplier_id", nullable = true)

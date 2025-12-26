@@ -18,7 +18,7 @@ public class OrderItemController {
 
     @PostMapping("/order/{orderId}")
     public ApiResponse<OrderItemResponse> addOrderItemToOrder(
-            @PathVariable Long orderId,
+            @PathVariable UUID orderId,
             @RequestBody OrderItemRequest itemRequest) {
         return ApiResponse.<OrderItemResponse>builder()
                 .data(orderItemService.addOrderItemToOrder(orderId, itemRequest))

@@ -6,27 +6,33 @@ import com.example.DATN.constant.PaymentMethodEnum;
 import com.example.DATN.constant.PaymentStatus;
 import com.example.DATN.dtos.request.ghtk.GhnOrderInfo;
 import com.example.DATN.dtos.request.ghtk.GhnProduct;
+import com.example.DATN.dtos.request.order.CheckOutRequest;
 import com.example.DATN.dtos.request.order.OrderItemRequest;
 import com.example.DATN.dtos.request.order.OrderRequest;
 import com.example.DATN.dtos.request.vnpay.VnPaymentRequest;
-import com.example.DATN.dtos.respone.order.OrderResponse;
+import com.example.DATN.dtos.respone.order.*;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.GetUserByJwtHelper;
 import com.example.DATN.mapper.OrderMapper;
+import com.example.DATN.mapper.ProductVariantMapper;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.OrderItemRepository;
 import com.example.DATN.repositories.OrderRepository;
 import com.example.DATN.repositories.ProductVariantRepository;
 import com.example.DATN.repositories.UserAddressRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +41,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
+    private final ProductVariantMapper productVariantMapper;
     private final GetUserByJwtHelper getUserByJwtHelper;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
     private final ProductVariantRepository productVariantRepository;
@@ -42,9 +49,46 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final String OrderCodePrefix = "OD";
     private final VnPayServices vnPayServices;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final ObjectMapper objectMapper;
+    public CheckOutResponse checkOutOrder (List<CheckOutRequest> request){
+        User user = getUserByJwtHelper.getCurrentUser();
+        CheckOutResponse response = new CheckOutResponse();
+        List<UserAddress> userAddress = userAddressRepository.findByUser(user);
+        List<CheckOutProductResponse> checkOutProductResponses = new ArrayList<>();
+        for(CheckOutRequest checkOutRequest: request){
+            ProductVariant productVariant = productVariantRepository.findById(checkOutRequest.getId())
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
 
+
+            CheckOutProductResponse checkOutResponse = CheckOutProductResponse.builder()
+                    .id(productVariant.getId())
+                    .isAvailable(productVariant.getIsAvailable())
+                    .quantity(checkOutRequest.getQuantity())
+                    .sizeName(productVariant.getSize().getName())
+                    .colorName(productVariant.getProductColor().getColor().getName())
+                    .sku(productVariant.getSku())
+                    .productName(productVariant.getProductColor().getProduct().getName())
+                    .price(productVariant.getPrice())
+                    .stock(100)
+                    .imageUrl(productVariant.getProductColor().getImages().isEmpty() ? null :
+                            productVariant.getProductColor().getImages().get(0).getImageUrl())
+                    .build();
+            checkOutProductResponses.add(checkOutResponse);
+        }
+        UserAddress userAddr = new UserAddress();
+        for (UserAddress address : userAddress) {
+            if (address.isDefault() == true) {
+                userAddr = address;
+            }
+        }
+
+        response.setUserAddressId(userAddr.getId());
+        response.setProducts(checkOutProductResponses);
+        return response;
+    }
     @Transactional
-    public void confirmOrder(Long orderId, OrderStatus status) {
+    public void confirmOrder(UUID orderId, OrderStatus status) {
         if (status == OrderStatus.CONFIRMED) {
             List<Integer> pickingShift = List.of(1, 2, 3);
 
@@ -115,6 +159,21 @@ public class OrderService {
 
     }
 
+    public BigDecimal calculateTotalPrice(List<OrderItemRequest> orderItemRequests) {
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        for (OrderItemRequest itemRequest : orderItemRequests) {
+            Optional<ProductVariant> productVariantOpt =
+                    productVariantRepository.findBysku(itemRequest.getSku());
+            if (productVariantOpt.isPresent()) {
+                ProductVariant item = productVariantOpt.get();
+                BigDecimal itemTotal = item.getPrice()
+                        .multiply(BigDecimal.valueOf(itemRequest.getQuantity()));
+                totalPrice.add(itemTotal);
+            }
+        }
+        return totalPrice;
+    }
+
     public Integer calculateTotalWeight(List<OrderItemRequest> orderItemRequests) {
         Integer totalWeight = 0;
         for (OrderItemRequest itemRequest : orderItemRequests) {
@@ -129,34 +188,47 @@ public class OrderService {
     }
 
     public Integer calculateTotalHeight(List<OrderItemRequest> orderItemRequests) {
-        Integer totalWeight = 0;
+        Integer totalHeight = 0;
         for (OrderItemRequest itemRequest : orderItemRequests) {
             Optional<ProductVariant> productVariantOpt =
                     productVariantRepository.findBysku(itemRequest.getSku());
             if (productVariantOpt.isPresent()) {
                 ProductVariant item = productVariantOpt.get();
-                totalWeight += item.getWeight() * itemRequest.getQuantity();
+                totalHeight += item.getHeight() * itemRequest.getQuantity();
             }
         }
-        return totalWeight;
+        return totalHeight;
     }
 
     public Integer calculateTotalLength(List<OrderItemRequest> orderItemRequests) {
-        Integer totalWeight = 0;
+        Integer totalLength = 0;
         for (OrderItemRequest itemRequest : orderItemRequests) {
             Optional<ProductVariant> productVariantOpt =
                     productVariantRepository.findBysku(itemRequest.getSku());
             if (productVariantOpt.isPresent()) {
                 ProductVariant item = productVariantOpt.get();
-                totalWeight += item.getWeight() * itemRequest.getQuantity();
+                totalLength += item.getLength() * itemRequest.getQuantity();
             }
         }
-        return totalWeight;
+        return totalLength;
+    }
+
+    public Integer calculateTotalWidth(List<OrderItemRequest> orderItemRequests) {
+        Integer totalWidth = 0;
+        for (OrderItemRequest itemRequest : orderItemRequests) {
+            Optional<ProductVariant> productVariantOpt =
+                    productVariantRepository.findBysku(itemRequest.getSku());
+            if (productVariantOpt.isPresent()) {
+                ProductVariant item = productVariantOpt.get();
+                totalWidth += item.getWidth() * itemRequest.getQuantity();
+            }
+        }
+        return totalWidth;
     }
 
     @Transactional(rollbackOn = Exception.class)
     public OrderResponse createOrderVnPay
-            (OrderRequest request, HttpServletRequest serverletRequest) {
+            (OrderRequest request, HttpServletRequest Serverletrequest) throws JsonProcessingException {
         User user = getUserByJwtHelper.getCurrentUser();
 
         List<UserAddress> userAddress = userAddressRepository.findByUser(user);
@@ -174,7 +246,9 @@ public class OrderService {
         order.setOrderCode(orderCode);
         order.setUserAddress(userAddr);
         order.setCreatedAt(LocalDateTime.now());
-        order.setOrderStatus(OrderStatus.PENDING);
+        order.setOrderStatus(OrderStatus.PROCESSCING);
+        order.setPaymentStatus(PaymentStatus.UNPAID);
+        order.setPaymentMethod(PaymentMethodEnum.VNPAY);
 //        order.setOrderStatus(OrderStatus.COMPLETED);
 
         List<OrderItem> orderItems = new ArrayList<>();
@@ -214,19 +288,16 @@ public class OrderService {
                         .multiply(BigDecimal
                                 .valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        Integer totalWeight = calculateTotalWeight(request.getOrderItemRequests());
-
-        Integer totalLength = orderItems.stream()
-                .mapToInt(i -> i.getLength() * i.getQuantity())
-                .sum();
-
-        Integer totalWidth = orderItems.stream()
-                .mapToInt(i -> i.getWidth() * i.getQuantity())
-                .sum();
-
-        Integer totalHeight = orderItems.stream()
-                .mapToInt(i -> i.getHeight() * i.getQuantity())
-                .sum();
+//        Integer totalWeight = calculateTotalWeight(request.getOrderItemRequests());
+        Integer totalWeight = request.getTotal_weight();
+        Integer totalHeight = request.getTotal_height();
+        Integer totalWidth = request.getTotal_width();
+        Integer totalLength = request.getTotal_length();
+//        Integer totalLength = calculateTotalLength(request.getOrderItemRequests());
+//
+//        Integer totalWidth = calculateTotalWidth(request.getOrderItemRequests());
+//
+//        Integer totalHeight = calculateTotalHeight(request.getOrderItemRequests());
         order.setTotal_weight(totalWeight);
         order.setTotal_height(totalHeight);
         order.setTotal_width(totalWidth);
@@ -237,11 +308,44 @@ public class OrderService {
                 .orderCode(order.getOrderCode())
                 .bankCode(request.getBankCode())
                 .build();
-        vnPayServices.createPaymentVNPAY(vnPaymentRequest, serverletRequest);
         order.setServiceId(request.getServiceId());
-        OrderResponse response = orderMapper.toResponse(orderRepository.save(order));
+        OrderResponse response = orderMapper.toResponse(order);
         response.setUserName(user.getUsername());
+        createPendingOrderInRedis(order);
+        String url =  vnPayServices.createPaymentVNPAY(vnPaymentRequest,Serverletrequest);
+        response.setResponse(url);
+
         return response;
+
+    }
+    public PendingOrderRedis mapFromOrder(Order order){
+        PendingOrderRedis pending = new PendingOrderRedis();
+        pending.setOrderCode(order.getOrderCode());
+        pending.setUserId(order.getUser().getId());
+        List<PendingOrderItem> pendingItems = new ArrayList<>();
+        for (OrderItem item : order.getItems()) {
+            PendingOrderItem pendingItem = new PendingOrderItem();
+            pendingItem.setSku(item.getProductVariant().getSku());
+            pendingItem.setQuantity(item.getQuantity());
+            pendingItems.add(pendingItem);
+        }
+        pending.setItems(pendingItems);
+        pending.setTotalPrice(order.getTotal_price());
+        pending.setTotalWeight(order.getTotal_weight());
+        pending.setTotalHeight(order.getTotal_height());
+        pending.setTotalWidth(order.getTotal_width());
+        pending.setTotalLength(order.getTotal_length());
+        return pending;
+    }
+    public void createPendingOrderInRedis(Order order) throws JsonProcessingException {
+        PendingOrderRedis pending = mapFromOrder(order);
+        redisTemplate.opsForValue().set(
+                "ORDER_PENDING:" + order.getOrderCode(),
+                objectMapper.writeValueAsString(pending),
+                15,
+                TimeUnit.MINUTES
+        );
+
     }
 
     @Transactional(rollbackOn = Exception.class)
@@ -339,7 +443,7 @@ public class OrderService {
         } catch (IllegalArgumentException e) {
             throw new ApplicationException(ErrorCode.ORDER_STATUS_INVALID);
         }
-        List<Order> orders = orderRepository.findAllByOrderStatusAndUser(statusEnum,user);
+        List<Order> orders = orderRepository.findAllByOrderStatusAndUser(statusEnum, user);
         return orders.stream().map(orderMapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -358,15 +462,16 @@ public class OrderService {
         return orderMapper.toResponse(order);
     }
 
-    public Order findOrderById(Long orderId) {
+    public Order findOrderById(UUID orderId) {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
     }
 
     @Transactional
-    public void updateOrderStatus(Long orderId,
+    public void updateOrderStatus(UUID orderId,
                                   String newStatus) {
-        Order order = findOrderById(orderId);
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
         OrderStatus newStatusEnum = OrderStatus.valueOf(newStatus.toUpperCase());
         if (order.getOrderStatus() != newStatusEnum) {
             order.setOrderStatus(newStatusEnum);

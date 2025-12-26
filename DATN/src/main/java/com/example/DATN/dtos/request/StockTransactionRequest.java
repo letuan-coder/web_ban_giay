@@ -1,12 +1,12 @@
 package com.example.DATN.dtos.request;
 
 import com.example.DATN.constant.TransactionType;
-import com.google.api.client.util.DateTime;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -20,7 +20,7 @@ public class StockTransactionRequest {
     private String fromStoreId;
     private String toWarehouseId;
     private String toStoreId;
-    private DateTime expectedReceivedDate;
+    private LocalDate expectedReceivedDate;
 
     @NotNull(message = "Items list cannot be null")
     @Size(min = 1, message = "Transaction must have at least one item")

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,6 +29,6 @@ public class StockTransactionResponse {
     private String toWarehouseName;
     private UUID toStoreId;
     private String toStoreName;
-    private LocalDateTime createdDate;
+    private LocalDate createdDate;
     private List<StockTransactionItemResponse> items;
 }

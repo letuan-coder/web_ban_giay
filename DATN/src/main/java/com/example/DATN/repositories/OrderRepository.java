@@ -8,12 +8,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository thao tác dữ liệu đơn hàng
  */
 @Repository
-public interface OrderRepository extends JpaRepository<Order, Long> {
+public interface OrderRepository extends JpaRepository<Order, UUID> {
    Optional<Order> findByOrderCode(String orderCode);
    List<Order> findAllByOrderStatus(OrderStatus status);
    List<Order> findAllByOrderStatusAndUser(OrderStatus status, User user);

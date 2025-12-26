@@ -1,47 +1,67 @@
 package com.example.DATN.controllers;
 
 import com.example.DATN.config.VnPayConfig;
+import com.example.DATN.constant.OrderStatus;
 import com.example.DATN.constant.PaymentMethodEnum;
 import com.example.DATN.constant.PaymentStatus;
 import com.example.DATN.dtos.request.vnpay.VnPayRefundRequest;
 import com.example.DATN.dtos.request.vnpay.VnPaymentRequest;
 import com.example.DATN.dtos.request.vnpay.VnQueryRequest;
+import com.example.DATN.dtos.respone.order.PendingOrderRedis;
 import com.example.DATN.dtos.respone.vnpay.VnPayResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
+import com.example.DATN.mapper.OrderMapper;
 import com.example.DATN.models.Order;
-import com.example.DATN.models.Vnpay;
+import com.example.DATN.models.User;
 import com.example.DATN.repositories.OrderRepository;
+import com.example.DATN.repositories.UserRepository;
 import com.example.DATN.repositories.VnpayRepository;
+import com.example.DATN.services.OrderService;
 import com.example.DATN.services.VnPayServices;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
 
 @Controller
-
 @RequestMapping("/api/vnpay")
 public class VnPayController {
 
     @Autowired
     private VnPayServices vnpayServices;
-    private final RestTemplate restTemplate;
+    @Autowired
+    private OrderMapper orderMapper;
 
+    private final RestTemplate restTemplate;
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private VnpayRepository vnpayRepository;
     private final String vnp_TmnCode = VnPayConfig.vnp_TmnCode;
     @Autowired
     private OrderRepository orderRepository;
+    @Autowired
+    private OrderService orderService;
+    @Autowired
+    private UserRepository userRepository;
 
     public VnPayController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -53,8 +73,8 @@ public class VnPayController {
             @RequestBody VnPaymentRequest request,
             HttpServletRequest req) {
         request.setOrderCode(orderCode);
-       ResponseEntity response= vnpayServices.createPaymentVNPAY(request,req);
-       return ResponseEntity.ok(response);
+        String response = vnpayServices.createPaymentVNPAY(request, req);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/query-payment")
@@ -84,13 +104,17 @@ public class VnPayController {
             vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
             vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
             vnp_Params.put("vnp_OrderInfo", vnp_OrderInfo);
-            String hash_Data = String.join("|", vnp_RequestId, vnp_Version, vnp_Command, vnp_TmnCode, vnp_TxnRef, vnp_TransDate, vnp_CreateDate, vnp_IpAddr, vnp_OrderInfo);
+            String hash_Data = String.join("|",
+                    vnp_RequestId, vnp_Version, vnp_Command,
+                    vnp_TmnCode, vnp_TxnRef, vnp_TransDate,
+                    vnp_CreateDate, vnp_IpAddr, vnp_OrderInfo);
             String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.secretKey, hash_Data);
             vnp_Params.put("vnp_SecureHash", vnp_SecureHash);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Map<String, String>> entity = new HttpEntity<>(vnp_Params, headers);
-            ResponseEntity<VnPayResponse> response = restTemplate.postForEntity(VnPayConfig.vnp_ApiUrl, entity, VnPayResponse.class);
+            ResponseEntity<VnPayResponse> response =
+                    restTemplate.postForEntity(VnPayConfig.vnp_ApiUrl, entity, VnPayResponse.class);
 
             return ResponseEntity.ok(response);
 
@@ -107,98 +131,93 @@ public class VnPayController {
         return vnpayServices.processRefund(refundRequest, req);
     }
 
-    @GetMapping("/return/{orderCode}")
+    @GetMapping("/return")
     public String vnpayReturn(
-            @PathVariable String orderCode,
             Model model,
-            HttpServletRequest request) {
-        // Lấy tham số từ VNPAY trả về
-        Map<String, String[]> parameterMap = request.getParameterMap();
-        // Đưa tất cả params sang giao diện Thymeleaf
-        Map<String, String> param = new HashMap<>();
-        parameterMap.forEach((k, v) -> param.put(k, v[0]));
-        model.addAttribute("params", param);
-        try {
-        /*  IPN URL: Record payment results from VNPAY
-        Implementation steps:
-        Check checksum
-        Find transactions (vnp_TxnRef) in the database (checkOrderId)
-        Check the payment status of transactions before updating (checkOrderStatus)
-        Check the amount (vnp_Amount) of transactions before updating (checkAmount)
-        Update results to Database
-        Return recorded results to VNPAY
-        */
+            HttpServletRequest request) throws UnsupportedEncodingException, JsonProcessingException {
+        Map<String, String> params = new HashMap<>();
+        request.getParameterMap()
+                .forEach((k, v) -> params.put(k, v[0]));
 
-            // ex:  	PaymnentStatus = 0; pending
-            //              PaymnentStatus = 1; success
-            //              PaymnentStatus = 2; Faile
+        // verify checksum
+        boolean valid = vnpayServices.verifyReturn(request);
 
-            //Begin process return from VNPAY
-            Map fields = new HashMap();
-            for (Enumeration params = request.getParameterNames(); params.hasMoreElements(); ) {
-                String fieldName = URLEncoder.encode((String) params.nextElement(), StandardCharsets.US_ASCII.toString());
-                String fieldValue = URLEncoder.encode(request.getParameter(fieldName), StandardCharsets.US_ASCII.toString());
-                if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                    fields.put(fieldName, fieldValue);
-                }
-            }
+        String orderCode = request.getParameter("vnp_TxnRef");
+        String responseCode = request.getParameter("vnp_ResponseCode");
 
-            String vnp_SecureHash = request.getParameter("vnp_SecureHash");
-            if (fields.containsKey("vnp_SecureHashType")) {
-                fields.remove("vnp_SecureHashType");
-            }
-            if (fields.containsKey("vnp_SecureHash")) {
-                fields.remove("vnp_SecureHash");
-            }
+        model.addAttribute("params", params);
+        model.addAttribute("orderCode", orderCode);
+        model.addAttribute("success", valid && "00".equals(responseCode));
+        String key = "ORDER_PENDING:" + orderCode;
+        String json = (String) redisTemplate.opsForValue().get(key);
 
-
-            String signValue = VnPayConfig.hashAllFields(fields);
-            if (signValue.equals(vnp_SecureHash)) {
-
-                boolean checkOrderId = true; // vnp_TxnRef exists in your database
-                boolean checkAmount = true;
-                boolean checkOrderStatus = true; // PaymnentStatus = 0 (pending)
-                if (checkOrderId) {
-                    if (checkAmount) {
-                        if (checkOrderStatus) {
-                            if ("00".equals(request.getParameter("vnp_ResponseCode"))) {
-                                BigDecimal vnpAmount = new BigDecimal(request.getParameter("vnp_Amount")).divide(new BigDecimal(100));
-                                Vnpay savedPayment = Vnpay.builder()
-                                        .vnp_PayDate(request.getParameter("vnp_PayDate"))
-                                        .vnp_TransactionNo(request.getParameter("vnp_TransactionNo"))
-                                        .vnp_BankCode(request.getParameter("vnp_BankCode"))
-                                        .vnp_Amount(vnpAmount.toString())
-                                        .vnp_OrderInfo(request.getParameter("vnp_OrderInfo"))
-                                        .vnp_ResponseCode(request.getParameter("vnp_ResponseCode"))
-                                        .vnpTxnRef(request.getParameter("vnp_TxnRef"))
-                                        .build();
-                                vnpayRepository.save(savedPayment);
-                                Order order = orderRepository.findByOrderCode(orderCode)
-                                        .orElseThrow(()->new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
-                                order.setPaymentMethod(PaymentMethodEnum.VNPAY);
-                                order.setPaymentStatus(PaymentStatus.PAID);
-                                orderRepository.save(order);
-                                //Here Code update PaymnentStatus = 1 into your Database
-                            } else {
-                                // Here Code update PaymnentStatus = 2 into your Database
-                            }
-                            System.out.print("{\"RspCode\":\"00\",\"Message\":\"Confirm Success\"}");
-                        } else {
-                            System.out.print("{\"RspCode\":\"02\",\"Message\":\"Order already confirmed\"}");
-                        }
-                    } else {
-                        System.out.print("{\"RspCode\":\"04\",\"Message\":\"Invalid Amount\"}");
-                    }
-                } else {
-                    System.out.print("{\"RspCode\":\"01\",\"Message\":\"Order not Found\"}");
-                }
-            } else {
-                System.out.print("{\"RspCode\":\"97\",\"Message\":\"Invalid Checksum\"}");
-            }
-        } catch (Exception e) {
-            System.out.print("{\"RspCode\":\"99\",\"Message\":\"Unknow error\"}");
+        if (json == null) {
+            throw new ApplicationException(ErrorCode.ORDER_NOT_FOUND);
         }
-        return "vnpay_return";
+        else {
+            PendingOrderRedis pending =
+                    objectMapper.readValue(json, PendingOrderRedis.class);
+            Order order = orderMapper.toOrder(pending);
+
+            User user = userRepository.findById(pending.getUserId())
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
+            order.setUser(user);
+
+            order.setOrderStatus(OrderStatus.PENDING);
+            order.setPaymentStatus(PaymentStatus.PAID);
+            order.setPaymentMethod(PaymentMethodEnum.VNPAY);
+            order.setCreatedAt(LocalDateTime.now());
+            order.getItems().forEach(i -> i.setOrder(order));
+            orderRepository.save(order);
+
+            // 5. Xoá Redis
+            redisTemplate.delete(key);
+            return "vnpay_return";
+
+        }
+    }
+
+    @GetMapping("/ipn")
+    public ResponseEntity<Map<String, String>> ipn(HttpServletRequest request) {
+
+        // Lấy tất cả tham số từ VNPAY
+        Map<String, String> params = new HashMap<>();
+        request.getParameterMap().forEach((k, v) -> params.put(k, v[0]));
+
+        String vnp_TxnRef = params.get("vnp_TxnRef");
+        String vnp_ResponseCode = params.get("vnp_ResponseCode");
+        String vnp_SecureHash = params.get("vnp_SecureHash");
+
+        Map<String, String> response = new HashMap<>();
+
+        try {
+            // Verify checksum
+            boolean valid = vnpayServices.verifyReturn(request);
+            if (!valid) {
+                response.put("RspCode", "97"); // Sai checksum → retry
+                response.put("Message", "Invalid checksum");
+                return ResponseEntity.ok(response);
+            }
+
+            // Xử lý thanh toán
+            if ("00".equals(vnp_ResponseCode)) {
+                // Thanh toán thành công → update DB và Redis
+
+                response.put("RspCode", "00"); // Thanh toán thành công
+                response.put("Message", "Transaction completed successfully");
+            } else {
+                // Thanh toán thất bại
+                response.put("RspCode", "02"); // Đã xử lý thất bại
+                response.put("Message", "Transaction failed");
+            }
+
+        } catch (Exception e) {
+            // Lỗi trong quá trình xử lý → VNPAY retry
+            response.put("RspCode", "01");
+            response.put("Message", "Processing error");
+        }
+
+        return ResponseEntity.ok(response);
     }
 }
 

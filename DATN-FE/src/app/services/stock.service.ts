@@ -5,15 +5,16 @@ import { Stock } from '../model/stock.model';
 import { ApiResponse } from './sale.service'; // Assuming ApiResponse is shared
 import { environment } from '../../enviroment/enviroment';
 
-// New interfaces for the stock receipt workflow
-export interface StockReceiveItem {
-  variantId: number;
-  quantity: number;
+// Interfaces for stock receipt based on backend DTOs
+export interface StockTransactionItemReceived {
+  stockTransactionId: string; // This is the VARIANT ID (as UUID string)
+  receivedQuantity: number;
 }
 
-export interface StockReceiveRequest {
-  stockTransactionId: number;
-  items: StockReceiveItem[];
+export interface StockReceiptRequest {
+  transactionCode: string;
+  stockTransactionItemId: StockTransactionItemReceived[];
+  stockTransactionId?: string; // Transaction ID as UUID string, if available
 }
 
 
@@ -26,8 +27,8 @@ export class StockService {
   constructor(private http: HttpClient) { }
 
   // New method for receiving stock based on a transaction
-  receiveStock(request: StockReceiveRequest): Observable<any> {
-    return this.http.post(`${this.apiUrl}/receive`, request);
+  receiveStock(request: StockReceiptRequest): Observable<any> {
+    return this.http.post(`${this.apiUrl}`, request);
   }
 
   getAll(): Observable<ApiResponse<Stock[]>> {

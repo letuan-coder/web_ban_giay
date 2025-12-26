@@ -17,7 +17,7 @@ export class SupplierListComponent implements OnInit {
   loading = false;
   error: string | null = null;
 
-  selectedSupplierIdForProducts: number | null = null;
+  selectedSupplierIdForProducts: String | null = null;
   productsForSelectedSupplier: Product[] = [];
   loadingProducts = false;
   productsError: string | null = null;
@@ -48,7 +48,7 @@ export class SupplierListComponent implements OnInit {
     });
   }
 
-  toggleProductsForSupplier(supplierId: number): void {
+  toggleProductsForSupplier(supplierId: string): void {
     if (this.selectedSupplierIdForProducts === supplierId) {
       this.selectedSupplierIdForProducts = null; // Hide products if already showing
       this.productsForSelectedSupplier = [];
@@ -58,7 +58,7 @@ export class SupplierListComponent implements OnInit {
     }
   }
 
-  loadProductsForSupplier(supplierId: number): void {
+  loadProductsForSupplier(supplierId: string): void {
     this.loadingProducts = true;
     this.productsError = null;
     this.productService.getProductsBySupplier(supplierId).subscribe({
@@ -74,7 +74,7 @@ export class SupplierListComponent implements OnInit {
     });
   }
 
-  importStock(supplierId: number): void {
+  importStock(supplierId: String): void {
     this.router.navigate(['/admin/stock-transaction'], {
       queryParams: {
         type: 'IMPORT_TO_WAREHOUSE',
@@ -84,7 +84,7 @@ export class SupplierListComponent implements OnInit {
   }
 
   // Placeholder for delete functionality (to be implemented later if needed)
-  deleteSupplier(id: number): void {
+  deleteSupplier(id: string): void {
     if (confirm('Bạn có chắc chắn muốn xóa nhà cung cấp này?')) {
       this.supplierService.deleteSupplier(id).subscribe({
         next: () => {

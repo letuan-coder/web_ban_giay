@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
-import { StockService } from '../../services/stock.service';
+import { StockService, StockReceiptRequest } from '../../services/stock.service';
 import { StockTransactionService, StockTransactionResponse, StockTransactionItemResponse } from '../../services/stock-transaction.service';
 
 @Component({
@@ -12,12 +12,12 @@ import { StockTransactionService, StockTransactionResponse, StockTransactionItem
   styleUrls: ['./stocks.component.scss']
 })
 export class StocksComponent implements OnInit {
-  
+
   // State for the new workflow
   transactionIdToSearch: string | null = null;
   transaction: StockTransactionResponse | null = null;
   receiptForm: FormGroup;
-  
+
   loading = false; // For finding transaction
   submitting = false; // For submitting receipt
   message = '';
@@ -49,14 +49,14 @@ export class StocksComponent implements OnInit {
     this.message = '';
     this.isError = false;
     this.transaction = null;
-    
+
     this.stockTransactionService.getTransactionById(this.transactionIdToSearch).subscribe({
       next: (response) => {
         this.loading = false;
         if (response.data.transactionStatus !== 'PENDING') {
-            this.message = `Phiếu kho #${response.data.id} đã ở trạng thái ${response.data.transactionStatus} và không thể nhập kho.`;
-            this.isError = true;
-            return;
+          this.message = `Phiếu kho #${response.data.id} đã ở trạng thái ${response.data.transactionStatus} và không thể nhập kho.`;
+          this.isError = true;
+          return;
         }
         this.transaction = response.data;
         this.buildReceiptForm(this.transaction?.items || []);
@@ -74,11 +74,18 @@ export class StocksComponent implements OnInit {
     this.receiptItems.clear();
     items.forEach(item => {
       const itemGroup = this.fb.group({
-        variantId: [item.variant.id, Validators.required],
+        variantId: [item.variantId, Validators.required], // FIX: Use item.variantId which is present
         expectedQuantity: [item.quantity],
         actualQuantity: [item.quantity, [Validators.required, Validators.min(0)]],
         // Store variant details for display purposes
-        variant: [item.variant]
+        // FIX: Provide a fallback object if item.variant is null/undefined
+        variant: [item.variant || {
+          id: item.variantId,
+          sku: item.variantSku,
+          product: { name: 'Sản phẩm không có chi tiết' },
+          color: { name: '' },
+          size: { name: '' }
+        }]
       });
       this.receiptItems.push(itemGroup);
     });
@@ -97,11 +104,11 @@ export class StocksComponent implements OnInit {
     this.isError = false;
 
     const formValue = this.receiptForm.getRawValue();
-    const request = {
-      stockTransactionId: this.transaction.id,
-      items: formValue.items.map((item: any) => ({
-        variantId: item.variantId,
-        quantity: item.actualQuantity
+    const request: StockReceiptRequest = {
+      transactionCode: this.transaction.code,
+      stockTransactionItemId: formValue.items.map((item: any) => ({
+        stockTransactionId: String(item.variantId),
+        receivedQuantity: Number(item.actualQuantity)
       }))
     };
 
@@ -110,7 +117,6 @@ export class StocksComponent implements OnInit {
         this.submitting = false;
         this.message = 'Xác nhận nhập kho thành công!';
         this.isError = false;
-        // Reset state
         this.transaction = null;
         this.transactionIdToSearch = null;
         this.receiptItems.clear();

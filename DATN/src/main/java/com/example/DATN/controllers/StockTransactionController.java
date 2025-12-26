@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -49,9 +50,19 @@ public class StockTransactionController {
 
     @GetMapping("/{id}")
     public ApiResponse<StockTransactionResponse> getTransactionById(
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         StockTransactionResponse response = transactionMapper.toStockTransactionResponse(
                 transactionService.getTransactionById(id)
+        );
+        return ApiResponse.<StockTransactionResponse>builder()
+                .data(response)
+                .build();
+    }
+    @GetMapping("/code/{code}")
+    public ApiResponse<StockTransactionResponse> getTransactionByCode(
+            @PathVariable String code) {
+        StockTransactionResponse response = transactionMapper.toStockTransactionResponse(
+                transactionService.getTransactionByCode(code)
         );
         return ApiResponse.<StockTransactionResponse>builder()
                 .data(response)

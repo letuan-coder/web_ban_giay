@@ -10,7 +10,7 @@ import { ProductService } from '../../services/product.service';
 import { Store } from '../../model/store.model';
 import { Warehouse } from '../../model/warehouse.model';
 import { VariantResponse } from '../../model/variant.response.model';
-import { Subject, Subscription, forkJoin } from 'rxjs';
+import { Subject, Subscription, forkJoin, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, take } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
 
@@ -48,6 +48,7 @@ export class StockTransactionComponent implements OnInit, OnDestroy {
   activeItemIndex: number | null = null;
 
   private searchSubscription: Subscription;
+  private supplierSubscription!: Subscription;
 
   loading = false;
   message = '';
@@ -56,6 +57,11 @@ export class StockTransactionComponent implements OnInit, OnDestroy {
   productCodeSearchResults: any[] = [];
   productCodeSearchLoading = false;
   productCodeSearchError: string | null = null;
+
+  // New properties for supplier products
+  supplierProducts: any[] = [];
+  supplierProductsLoading = false;
+  supplierProductsError: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -108,6 +114,7 @@ export class StockTransactionComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadAllTransactions();
     this.onTypeChange();
+    this.onSupplierChange();
 
     const initialData$ = {
       stores: this.storeService.getAll(),
@@ -131,10 +138,10 @@ export class StockTransactionComponent implements OnInit, OnDestroy {
           }
 
           if (supplierIdParam) {
-            const numericSupplierId = Number(supplierIdParam);
-            const supplier = this.suppliers.find(s => s.id === numericSupplierId);
+            const supplierId = String(supplierIdParam);
+            const supplier = this.suppliers.find(s => String(s.id) === supplierId);
             if (supplier) {
-              this.transactionForm.patchValue({ supplierId: supplier.taxCode });
+              this.transactionForm.patchValue({ supplierId: supplier.id });
             }
           }
         });
@@ -148,6 +155,9 @@ export class StockTransactionComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.searchSubscription.unsubscribe();
+    if (this.supplierSubscription) {
+      this.supplierSubscription.unsubscribe();
+    }
   }
 
   loadAllTransactions(): void {
@@ -192,6 +202,52 @@ export class StockTransactionComponent implements OnInit, OnDestroy {
     });
   }
 
+  onSupplierChange(): void {
+    this.supplierSubscription = this.transactionForm.get('supplierId')!.valueChanges.pipe(
+      distinctUntilChanged()
+    ).subscribe(() => {
+      // When supplier changes, just clear the old product list
+      this.supplierProducts = [];
+      this.supplierProductsError = null;
+    });
+  }
+
+  fetchSupplierProducts(): void {
+    const supplierId = this.transactionForm.get('supplierId')?.value;
+    if (!supplierId) {
+      this.supplierProductsError = "Vui lòng chọn một nhà cung cấp trước.";
+      return;
+    }
+
+    this.supplierProducts = [];
+    this.supplierProductsError = null;
+    this.supplierProductsLoading = true;
+    
+    this.productCodeSearchResults = [];
+    this.productCodeSearchError = null;
+    
+    this.productService.getProductsBySupplier(supplierId).subscribe({
+      next: (response: any) => {
+        this.supplierProducts = response.data || [];
+        this.supplierProducts.forEach(p => {
+          p.variantsVisible = false;
+          p.variantsFetched = false;
+          p.variantsLoading = false;
+          p.variantDetailResponses = []; // Initialize as empty
+        });
+        if (this.supplierProducts.length === 0) {
+          this.supplierProductsError = "Nhà cung cấp này không có sản phẩm nào.";
+        }
+        this.supplierProductsLoading = false;
+      },
+      error: (err) => {
+        this.supplierProductsLoading = false;
+        this.supplierProductsError = 'Lỗi khi tải sản phẩm từ nhà cung cấp.';
+        console.error(err);
+      }
+    });
+  }
+
   get items(): FormArray {
     return this.transactionForm.get('items') as FormArray;
   }
@@ -219,10 +275,7 @@ export class StockTransactionComponent implements OnInit, OnDestroy {
   selectVariant(variant: VariantResponse): void {
     if (this.activeItemIndex !== null) {
       const item = this.items.at(this.activeItemIndex);
-      const existingItem = this.items.controls.find(
-        (control, i) => i !== this.activeItemIndex && control.get('variantId')?.value === variant.id
-      );
-      if(existingItem) {
+      if (this.isVariantInItems(variant.id)) {
         alert('Sản phẩm này đã được thêm vào phiếu.');
         return;
       }
@@ -244,10 +297,19 @@ export class StockTransactionComponent implements OnInit, OnDestroy {
     this.productCodeSearchLoading = true;
     this.productCodeSearchError = null;
     this.productCodeSearchResults = [];
+    this.supplierProducts = []; // Clear supplier products
+    this.supplierProductsError = null;
+
 
     this.productService.getProductByCode(code.trim()).subscribe({
         next: (response: any) => {
             this.productCodeSearchResults = response.data; // Store raw hierarchical data
+            this.productCodeSearchResults.forEach(p => {
+              p.variantsVisible = false;
+              p.variantsFetched = false;
+              p.variantsLoading = false;
+              p.variantDetailResponses = []; // Initialize as empty
+            });
             this.productCodeSearchLoading = false;
             if (!this.productCodeSearchResults || this.productCodeSearchResults.length === 0) {
                 this.productCodeSearchError = "Không tìm thấy sản phẩm với mã này.";
@@ -262,14 +324,10 @@ export class StockTransactionComponent implements OnInit, OnDestroy {
   }
 
   addVariantToItems(variant: any, productName: string): void {
-      const existingItem = this.items.controls.find(
-          control => control.get('variantId')?.value === variant.id
-      );
-
-      if (existingItem) {
-          alert('Sản phẩm này đã được thêm vào phiếu.');
-          return;
-      }
+    if (this.isVariantInItems(variant.id)) {
+      alert('Sản phẩm này đã được thêm vào phiếu.');
+      return;
+    }
 
       // Construct the object that the UI expects for `variantDetails`
       const variantDetails: VariantDisplay = {
@@ -285,6 +343,61 @@ export class StockTransactionComponent implements OnInit, OnDestroy {
       this.items.push(newItem);
   }
 
+  isVariantInItems(variantId: string): boolean {
+    return this.items.controls.some(control => control.get('variantId')?.value === variantId);
+  }
+
+  toggleVariants(product: any): void {
+    // Just hide if already visible
+    if (product.variantsVisible) {
+      product.variantsVisible = false;
+      return;
+    }
+
+    // Show the list
+    product.variantsVisible = true;
+
+    // Fetch if not already fetched
+    if (!product.variantsFetched) {
+      product.variantsLoading = true;
+      this.productService.getById(product.id).subscribe({
+        next: (response: any) => {
+          product.variantDetailResponses = response.data?.variantDetailResponses || [];
+          product.variantsFetched = true;
+          product.variantsLoading = false;
+        },
+        error: (err) => {
+          console.error('Error fetching variants for product ' + product.id, err);
+          // Optionally add an error message property to the product
+          product.variantsLoading = false;
+        }
+      });
+    }
+  }
+
+  addAllVariantsToItems(product: any): void {
+    let addedCount = 0;
+    for (const variant of product.variantDetailResponses) {
+      if (!this.isVariantInItems(variant.id)) {
+        const variantDetails: VariantDisplay = {
+          id: variant.id,
+          sku: variant.sku,
+          productName: product.name, // Use product.name as productName
+          colorName: variant.colorName,
+          size: variant.size,
+          price: variant.price
+        };
+        const newItem = this.createItem(variantDetails);
+        this.items.push(newItem);
+        addedCount++;
+      }
+    }
+    if (addedCount > 0) {
+      alert(`Đã thêm ${addedCount} biến thể của sản phẩm '${product.name}' vào phiếu.`);
+    } else {
+      alert(`Tất cả biến thể của sản phẩm '${product.name}' đã có trong phiếu.`);
+    }
+  }
 
   onSubmit(): void {
     if (this.transactionForm.invalid) {
@@ -311,6 +424,7 @@ export class StockTransactionComponent implements OnInit, OnDestroy {
         this.transactionForm.reset({ type: '' });
         this.items.clear();
         this.productCodeSearchResults = [];
+        this.supplierProducts = [];
         this.loadAllTransactions();
       },
       error: (err) => {
