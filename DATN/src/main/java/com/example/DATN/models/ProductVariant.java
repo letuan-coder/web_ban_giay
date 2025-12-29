@@ -55,9 +55,7 @@ public class ProductVariant extends BaseEntity {
     @Column(nullable = false, unique = true)
     String sku;
 
-
     @Enumerated(EnumType.STRING)
     @Builder.Default
     Is_Available isAvailable = Is_Available.AVAILABLE;
-
 }

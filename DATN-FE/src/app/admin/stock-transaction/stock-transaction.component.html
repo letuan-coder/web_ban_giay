@@ -18,12 +18,13 @@
               <option value="" disabled>Chọn loại phiếu</option>
               <option *ngFor="let type of transactionTypes" [value]="type">
                 {{
-                type === 'IMPORT_TO_WAREHOUSE' ? 'Nhập kho từ Nhà Cung Cấp' :
-                (type === 'EXPORT' ? 'Xuất kho' :
-                (type === 'TRANSFER' ? 'Chuyển kho' :
-                (type === 'RETURN_SUPPLIER' ? 'Trả nhà cung cấp' :
-                (type === 'RETURN_WAREHOUSE' ? 'Trả về kho tổng' :
-                (type === 'ADJUST' ? 'Điều chỉnh' : type)))))
+                type === 'IMPORT_TO_WAREHOUSE' ? 'Nhập kho tổng từ Nhà Cung Cấp' :
+                (type === 'IMPORT_TO_STORE' ? 'Nhập hàng vào cửa hàng' :
+                (type === 'EXPORT_TO_STORE' ? 'Xuất hàng từ kho tổng về cửa hàng' :
+                (type === 'TRANSFER' ? 'Chuyển kho/cửa hàng' :
+                (type === 'RETURN_TO_SUPPLIER' ? 'Trả hàng về nhà cung cấp' :
+                (type === 'RETURN_TO_WAREHOUSE' ? 'Trả hàng về kho tổng' :
+                (type === 'ADJUST' ? 'Điều chỉnh tồn kho' : type))))))
                 }}
               </option>
             </select>
@@ -34,7 +35,7 @@
             <input type="date" id="expectedReceivedDate" formControlName="expectedReceivedDate" class="form-control">
           </div>
 
-          <!-- Fields for IMPORT -->
+          <!-- Fields for IMPORT_TO_WAREHOUSE -->
           <ng-container *ngIf="transactionForm.get('type')?.value === 'IMPORT_TO_WAREHOUSE'">
             <div class="col-md-4 mb-3">
               <label for="supplierId" class="form-label">Nhà Cung Cấp <span class="text-danger">*</span></label>
@@ -50,30 +51,53 @@
               </div>
             </div>
             <div class="col-md-4 mb-3">
-              <label for="toWarehouseIdIn" class="form-label">Nhập tới Kho <span class="text-danger">*</span></label>
+              <label for="toWarehouseIdIn" class="form-label">Nhập tới Kho Tổng <span class="text-danger">*</span></label>
               <select id="toWarehouseIdIn" formControlName="toWarehouseId" class="form-select">
                 <option [ngValue]="null" disabled>Chọn kho</option>
-                <option *ngFor="let warehouse of warehouses" [value]="warehouse.warehouseCode">{{ warehouse.name }}
+                <option *ngFor="let warehouse of warehouses" [value]="warehouse.id">{{ warehouse.name }}
                 </option>
               </select>
             </div>
           </ng-container>
 
-          <!-- Fields for EXPORT -->
-          <ng-container *ngIf="transactionForm.get('type')?.value === 'EXPORT'">
+          <!-- Fields for IMPORT_TO_STORE -->
+          <ng-container *ngIf="transactionForm.get('type')?.value === 'IMPORT_TO_STORE'">
             <div class="col-md-4 mb-3">
-              <label for="fromStoreIdOut" class="form-label">Xuất từ Cửa Hàng</label>
-              <select id="fromStoreIdOut" formControlName="fromStoreId" class="form-select">
+              <label for="supplierIdImportStore" class="form-label">Nhà Cung Cấp</label>
+              <div class="input-group">
+                <select id="supplierIdImportStore" formControlName="supplierId" class="form-select">
+                  <option [ngValue]="null">Chọn nhà cung cấp</option>
+                  <option *ngFor="let supplier of suppliers" [value]="supplier.id">{{ supplier.name }}</option>
+                </select>
+                <button class="btn btn-outline-secondary" type="button" (click)="fetchSupplierProducts()"
+                  [disabled]="!transactionForm.get('supplierId')?.value">
+                  <i class="bi bi-list-ul"></i> Lấy sản phẩm
+                </button>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="toStoreIdImportStore" class="form-label">Nhập tới Cửa Hàng <span class="text-danger">*</span></label>
+              <select id="toStoreIdImportStore" formControlName="toStoreId" class="form-select">
                 <option [ngValue]="null" disabled>Chọn cửa hàng</option>
                 <option *ngFor="let store of stores" [value]="store.id">{{ store.name }}</option>
               </select>
             </div>
+          </ng-container>
+
+          <!-- Fields for EXPORT_TO_STORE -->
+          <ng-container *ngIf="transactionForm.get('type')?.value === 'EXPORT_TO_STORE'">
             <div class="col-md-4 mb-3">
-              <label for="fromWarehouseIdOut" class="form-label">Xuất từ Kho</label>
-              <select id="fromWarehouseIdOut" formControlName="fromWarehouseId" class="form-select">
+              <label for="fromWarehouseIdExportStore" class="form-label">Xuất từ Kho Tổng <span class="text-danger">*</span></label>
+              <select id="fromWarehouseIdExportStore" formControlName="fromWarehouseId" class="form-select">
                 <option [ngValue]="null" disabled>Chọn kho</option>
-                <option *ngFor="let warehouse of warehouses" [value]="warehouse.warehouseCode">{{ warehouse.name }}
-                </option>
+                <option *ngFor="let warehouse of warehouses" [value]="warehouse.id">{{ warehouse.name }}</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="toStoreIdExportStore" class="form-label">Tới Cửa Hàng <span class="text-danger">*</span></label>
+              <select id="toStoreIdExportStore" formControlName="toStoreId" class="form-select">
+                <option [ngValue]="null" disabled>Chọn cửa hàng</option>
+                <option *ngFor="let store of stores" [value]="store.id">{{ store.name }}</option>
               </select>
             </div>
           </ng-container>
@@ -91,7 +115,7 @@
               <label for="fromWarehouseIdTransfer" class="form-label">Từ Kho</label>
               <select id="fromWarehouseIdTransfer" formControlName="fromWarehouseId" class="form-select">
                 <option [ngValue]="null" disabled>Chọn kho</option>
-                <option *ngFor="let warehouse of warehouses" [value]="warehouse.warehouseCode">{{ warehouse.name }}
+                <option *ngFor="let warehouse of warehouses" [value]="warehouse.id">{{ warehouse.name }}
                 </option>
               </select>
             </div>
@@ -106,14 +130,14 @@
               <label for="toWarehouseIdTransfer" class="form-label">Tới Kho</label>
               <select id="toWarehouseIdTransfer" formControlName="toWarehouseId" class="form-select">
                 <option [ngValue]="null" disabled>Chọn kho</option>
-                <option *ngFor="let warehouse of warehouses" [value]="warehouse.warehouseCode">{{ warehouse.name }}
+                <option *ngFor="let warehouse of warehouses" [value]="warehouse.id">{{ warehouse.name }}
                 </option>
               </select>
             </div>
           </ng-container>
 
-          <!-- Fields for RETURN_SUPPLIER -->
-          <ng-container *ngIf="transactionForm.get('type')?.value === 'RETURN_SUPPLIER'">
+          <!-- Fields for RETURN_TO_SUPPLIER -->
+          <ng-container *ngIf="transactionForm.get('type')?.value === 'RETURN_TO_SUPPLIER'">
             <div class="col-md-4 mb-3">
               <label for="fromStoreIdReturn" class="form-label">Trả từ Cửa Hàng <span
                   class="text-danger">*</span></label>
@@ -137,8 +161,8 @@
             </div>
           </ng-container>
 
-          <!-- Fields for RETURN_WAREHOUSE -->
-          <ng-container *ngIf="transactionForm.get('type')?.value === 'RETURN_WAREHOUSE'">
+          <!-- Fields for RETURN_TO_WAREHOUSE -->
+          <ng-container *ngIf="transactionForm.get('type')?.value === 'RETURN_TO_WAREHOUSE'">
             <div class="col-md-4 mb-3">
               <label for="fromStoreIdReturnWh" class="form-label">Trả từ Cửa Hàng <span
                   class="text-danger">*</span></label>
@@ -148,10 +172,10 @@
               </select>
             </div>
             <div class="col-md-4 mb-3">
-              <label for="toWarehouseIdReturnWh" class="form-label">Tới Kho <span class="text-danger">*</span></label>
+              <label for="toWarehouseIdReturnWh" class="form-label">Tới Kho Tổng <span class="text-danger">*</span></label>
               <select id="toWarehouseIdReturnWh" formControlName="toWarehouseId" class="form-select">
                 <option [ngValue]="null" disabled>Chọn kho</option>
-                <option *ngFor="let warehouse of warehouses" [value]="warehouse.warehouseCode">{{ warehouse.name }}
+                <option *ngFor="let warehouse of warehouses" [value]="warehouse.id">{{ warehouse.name }}
                 </option>
               </select>
             </div>

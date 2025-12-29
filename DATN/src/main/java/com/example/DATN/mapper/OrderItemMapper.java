@@ -19,6 +19,7 @@ public interface OrderItemMapper {
 
     @Mapping(target = "sku", source = "productVariant.sku")
     @Mapping(target = "quantity", source = "quantity")
+    @Mapping(target = "ID", source = "id")
     PendingOrderItem toPendingOrderItem(OrderItem item);
 
     @Mapping(target = "productVariant.sku",source = "sku")

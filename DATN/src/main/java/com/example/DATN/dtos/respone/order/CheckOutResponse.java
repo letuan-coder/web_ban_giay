@@ -13,8 +13,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CheckOutResponse {
-
-
     private List<CheckOutProductResponse> products;
     private UUID userAddressId;
     private Integer ExpectedFee;

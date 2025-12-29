@@ -29,5 +29,6 @@ public class Vnpay {
     String vnp_ResponseCode;
     String vnp_TransactionNo;
     String vnp_BankCode;
+    String vnp_CardType;
     String vnp_PayDate;
 }

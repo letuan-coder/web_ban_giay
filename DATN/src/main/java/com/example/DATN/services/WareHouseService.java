@@ -21,6 +21,7 @@ public class WareHouseService {
 
     private final WareHouseRepository wareHouseRepository;
     private final WareHouseMapper wareHouseMapper;
+    private final StockService stockService;
     private final String wareHousePrefix = "WH";
     private final SnowflakeIdGenerator snowflakeIdGenerator;
     public WareHouseResponse createWareHouse(WareHouseRequest request) {
@@ -39,6 +40,7 @@ public class WareHouseService {
                 .deleted(false)
                 .build();
         wareHouse = wareHouseRepository.save(wareHouse);
+        stockService.createStockForWarehouse(wareHouse.getId(),wareHouse.getCapacity());
         return wareHouseMapper.toWareHouseResponse(wareHouse);
     }
 

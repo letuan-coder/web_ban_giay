@@ -36,7 +36,6 @@ public class Stock extends BaseEntity {
     private Store store;
 
     private Integer minQuantity;
-    private Integer receivedQuantity;
     private Integer quantity = 0;
 }
 

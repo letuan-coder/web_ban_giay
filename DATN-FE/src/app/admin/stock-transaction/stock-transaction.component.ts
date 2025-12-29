@@ -32,10 +32,15 @@ interface VariantDisplay {
 })
 export class StockTransactionComponent implements OnInit, OnDestroy {
   transactionForm: FormGroup;
-  transactionTypes =
-   ['IMPORT_TO_WAREHOUSE', 'EXPORT', 
-    'TRANSFER', 'RETURN_SUPPLIER',
-     'RETURN_WAREHOUSE', 'ADJUST'];
+  transactionTypes = [
+    'IMPORT_TO_WAREHOUSE',
+    'IMPORT_TO_STORE',
+    'EXPORT_TO_STORE',
+    'TRANSFER',
+    'RETURN_TO_SUPPLIER',
+    'RETURN_TO_WAREHOUSE',
+    'ADJUST'
+  ];
 
   suppliers: SupplierResponse[] = []; 
   stores: Store[] = [];
@@ -183,15 +188,28 @@ export class StockTransactionComponent implements OnInit, OnDestroy {
       if (type === 'IMPORT_TO_WAREHOUSE') {
         this.transactionForm.get('supplierId')?.setValidators(Validators.required);
         this.transactionForm.get('toWarehouseId')?.setValidators(Validators.required);
-      } else if (type === 'EXPORT') {
-        this.transactionForm.get('fromStoreId')?.setValidators(Validators.required);
+      } else if (type === 'IMPORT_TO_STORE') {
+        this.transactionForm.get('toStoreId')?.setValidators(Validators.required);
+        // supplierId can be optional for IMPORT_TO_STORE if it's an internal transfer from another store/warehouse,
+        // but if it's from an external supplier directly to store, it should be required.
+        // For now, let's assume it's like IMPORT_TO_WAREHOUSE for supplier product fetching.
+        // If no supplier is selected, the product list will be empty, prompting manual search.
+      } else if (type === 'EXPORT_TO_STORE') {
+        this.transactionForm.get('fromWarehouseId')?.setValidators(Validators.required); // Export from Warehouse to Store
+        this.transactionForm.get('toStoreId')?.setValidators(Validators.required);
       } else if (type === 'TRANSFER') {
+        // Transfer logic implies moving between store/warehouse locations.
+        // The current implementation allows selecting both 'from' and 'to' for stores/warehouses.
+        // This needs careful consideration based on exact business rules for transfers.
+        // Assuming general transfer from a source to a destination.
+        // This validation might need to be more complex (e.g., at least one 'from' and one 'to' required,
+        // and 'from' != 'to' of same type). For simplicity, keeping existing as basic example for store-to-store.
         this.transactionForm.get('fromStoreId')?.setValidators(Validators.required);
         this.transactionForm.get('toStoreId')?.setValidators(Validators.required);
-      } else if (type === 'RETURN_SUPPLIER') {
+      } else if (type === 'RETURN_TO_SUPPLIER') {
         this.transactionForm.get('fromStoreId')?.setValidators(Validators.required);
         this.transactionForm.get('supplierId')?.setValidators(Validators.required);
-      } else if (type === 'RETURN_WAREHOUSE') {
+      } else if (type === 'RETURN_TO_WAREHOUSE') {
         this.transactionForm.get('fromStoreId')?.setValidators(Validators.required);
         this.transactionForm.get('toWarehouseId')?.setValidators(Validators.required);
       }

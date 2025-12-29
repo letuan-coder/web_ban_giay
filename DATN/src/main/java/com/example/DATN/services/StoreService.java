@@ -1,5 +1,6 @@
 package com.example.DATN.services;
 
+import cn.ipokerface.snowflake.SnowflakeIdGenerator;
 import com.example.DATN.dtos.request.StoreRequest;
 import com.example.DATN.dtos.respone.StoreResponse;
 import com.example.DATN.exception.ApplicationException;
@@ -23,11 +24,12 @@ public class StoreService {
     private final StoreRepository storeRepository;
     private final StoreMapper storeMapper;
     private final String storeCode="CN";
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
     public StoreResponse createStore(StoreRequest request) {
-        Long totalStore=storeRepository.count();
-        String code = storeCode + (totalStore + 1);
+        Long code = snowflakeIdGenerator.nextId();
+        String storeId = storeCode + code;
         Store store = storeMapper.toStore(request);
-        store.setCode(code);
+        store.setCode(storeId);
         store = storeRepository.save(store);
         return storeMapper.toStoreResponse(store);
     }
@@ -56,7 +58,8 @@ public class StoreService {
         return storeMapper.toStoreResponse(store);
     }
 
-    public void deleteStore(UUID id) {
+    public void deleteStore(String storeid) {
+        UUID id = UUID.fromString(storeid);
         Store store = storeRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
         storeRepository.delete(store);

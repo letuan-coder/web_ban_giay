@@ -9,14 +9,19 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring" ,uses = {RoleMapper.class})
+@Mapper(componentModel = "spring",
+        uses = {RoleMapper.class
+                , UserAddressMapper.class})
 public interface UserMapper {
-    @Mapping(target = "roles",ignore = true)
+    @Mapping(target = "roles", ignore = true)
     User Register(RegisterRequest registerRequest);
-    @Mapping(target = "roles",ignore = true)
+
+    @Mapping(target = "roles", ignore = true)
     void updateUser(@MappingTarget User user, UpdateUserRequest request);
-    @Mapping(target = "orders",ignore = true)
-    @Mapping(target = "roles",source = "roles")
+
+    @Mapping(target = "orders", ignore = true)
+    @Mapping(target = "roles", source = "roles")
+    @Mapping(target = "userAddress", source = "userAddress")
     UserResponse toUserResponse(User user);
 
     UserDetailResponse toUserDetailResponse(User user);

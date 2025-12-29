@@ -23,13 +23,12 @@ public class OrderItem extends BaseEntity {
     @Id
     @UuidGenerator
     UUID id;
-
     String name;
     String code;
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "order_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("order_items")
     Order order;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)

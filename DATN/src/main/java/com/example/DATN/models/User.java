@@ -52,20 +52,20 @@ public class User extends BaseEntity {
     @Column(length = 50)
     AuthProvider provider;
 
-
     @ManyToMany
     Set<Role> roles;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference("user-carts")
     private Cart cart;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonManagedReference("user-orders")
     List<Order> orders;
 
     @OneToMany(mappedBy = "user"
             , fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @JsonManagedReference("user-address")
     List<UserAddress> userAddress;
 
 }

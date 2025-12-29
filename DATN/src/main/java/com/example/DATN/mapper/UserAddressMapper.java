@@ -1,6 +1,6 @@
 package com.example.DATN.mapper;
 
-import com.example.DATN.dtos.request.user_address.UserAddressRequest;
+import com.example.DATN.dtos.request.user_address.UpdateUserAddressesRequest;
 import com.example.DATN.dtos.respone.user_address.UserAddressResponse;
 import com.example.DATN.models.UserAddress;
 import org.mapstruct.Mapper;
@@ -18,5 +18,5 @@ public interface UserAddressMapper {
     @Mapping(target = "wardCode", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "id", ignore = true)
-    void updateUserAddress(@MappingTarget UserAddress userAddress, UserAddressRequest request);
+    void updateUserAddress(@MappingTarget UserAddress userAddress, UpdateUserAddressesRequest request);
 }

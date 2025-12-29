@@ -74,18 +74,17 @@ export class StocksComponent implements OnInit {
     this.receiptItems.clear();
     items.forEach(item => {
       const itemGroup = this.fb.group({
-        variantId: [item.variantId, Validators.required], // FIX: Use item.variantId which is present
-        expectedQuantity: [item.quantity],
+        // Data for display
+        name: [item.name],
+        colorName: [item.colorName],
+        sizeName: [item.sizeName],
+        variantSku: [item.variantSku],
+        quantity: [item.quantity],
+
+        // Data for submission
+        id: [item.id, Validators.required],
+        variantId: [item.variantId, Validators.required],
         actualQuantity: [item.quantity, [Validators.required, Validators.min(0)]],
-        // Store variant details for display purposes
-        // FIX: Provide a fallback object if item.variant is null/undefined
-        variant: [item.variant || {
-          id: item.variantId,
-          sku: item.variantSku,
-          product: { name: 'Sản phẩm không có chi tiết' },
-          color: { name: '' },
-          size: { name: '' }
-        }]
       });
       this.receiptItems.push(itemGroup);
     });

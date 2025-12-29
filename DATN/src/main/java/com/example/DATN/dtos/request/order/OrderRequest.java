@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -19,6 +20,7 @@ import java.util.List;
 public class OrderRequest {
     private String Note;
     private Integer serviceId;
+    private UUID userAddressesId;
     private Integer total_weight;
     private Integer total_height;
     private Integer total_width;

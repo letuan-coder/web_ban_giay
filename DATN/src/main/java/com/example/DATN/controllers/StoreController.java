@@ -17,6 +17,7 @@ public class StoreController {
 
     private final StoreService storeService;
 
+
     @PostMapping
     public ApiResponse<StoreResponse> createStore(
             @RequestBody StoreRequest request) {
@@ -24,6 +25,7 @@ public class StoreController {
                 .data(storeService.createStore(request))
                 .build();
     }
+
 
     @GetMapping
     public ApiResponse<List<StoreResponse>> getAllStores() {
@@ -49,7 +51,8 @@ public class StoreController {
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<String> deleteStore(@PathVariable UUID id) {
+    public ApiResponse<String> deleteStore(
+            @PathVariable String id) {
         storeService.deleteStore(id);
         return ApiResponse.<String>builder()
                 .data("Store deleted successfully")

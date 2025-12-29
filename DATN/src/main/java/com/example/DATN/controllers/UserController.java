@@ -39,12 +39,14 @@ public class UserController {
                 .build();
     }
 
-    @GetMapping("my-orders")
+    @GetMapping("/admin/all")
     ApiResponse<List<UserResponse>> getAllUsers() {
         return ApiResponse.<List<UserResponse>>builder()
                 .data(userService.getAllUsers())
                 .build();
     }
+
+
 
     @GetMapping("/myinfo")
     ApiResponse<UserDetailResponse> myinfo() {
@@ -94,7 +96,8 @@ public class UserController {
                 .build();
     }
 
-    @GetMapping("/{id}")
+
+    @GetMapping("/admin/{id}")
     public ApiResponse<UserResponse> getUser(@PathVariable Long id) {
         return ApiResponse.<UserResponse>builder()
                 .data(userService.getUserById(id))

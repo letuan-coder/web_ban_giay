@@ -27,6 +27,9 @@ public class ProductColor extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.AUTO)
     UUID id;
 
+
+
+
     @ManyToOne
     @JoinColumn(name = "color_code")
     Color color;

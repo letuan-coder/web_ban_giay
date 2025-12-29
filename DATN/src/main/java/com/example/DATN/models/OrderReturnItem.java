@@ -1,5 +1,6 @@
 package com.example.DATN.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,7 +27,7 @@ public class OrderReturnItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_return_id", nullable = false)
-    @JsonManagedReference
+    @JsonBackReference("order-return-items")
     private OrderReturn orderReturn;
 
     @ManyToOne(fetch = FetchType.LAZY)

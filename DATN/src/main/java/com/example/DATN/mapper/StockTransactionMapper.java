@@ -12,6 +12,9 @@ public interface StockTransactionMapper {
 
     @Mapping(target = "variantSku", source = "variant.sku")
     @Mapping(target = "variantId",source = "variant.id")
+    @Mapping(target = "name",source = "variant.productColor.product.name")
+    @Mapping(target = "colorName",source = "variant.productColor.color.name")
+    @Mapping(target = "sizeName",source = "variant.size.name")
     StockTransactionItemResponse toStockTransactionItemResponse(StockTransactionItem item);
 
     @Mapping(target = "supplierId", source = "supplier.id")

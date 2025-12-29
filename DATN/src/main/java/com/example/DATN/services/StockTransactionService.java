@@ -57,8 +57,7 @@ public class StockTransactionService {
         long code = snowflakeIdGenerator.nextId();
         switch (request.getType()) {
             case IMPORT_TO_STORE:
-                String typeCode = IMPORT_TO_STORE+code;
-
+                String typeCode = IMPORT_TO_STORE + code;
                 savedTransaction.setCode(typeCode);
                 ImportStoreTransactionRequest importStoreTransactionRequest =
                         ImportStoreTransactionRequest.builder()
@@ -68,9 +67,7 @@ public class StockTransactionService {
                                 .items(request.getItems())
                                 .expectedReceivedDate(request.getExpectedReceivedDate())
                                 .build();
-
                 handleImportToStore(importStoreTransactionRequest, savedTransaction);
-
                 break;
             case IMPORT_TO_WAREHOUSE:
                 checkProductFromSupplier(request.getSupplierId(),request.getItems());
@@ -90,6 +87,8 @@ public class StockTransactionService {
                 handleTransfer(request, savedTransaction);
                 break;
             case EXPORT_TO_STORE:
+                String exportCode = EXPORT_TO_STORE + code;
+                savedTransaction.setCode(exportCode);
                 ImportStoreTransactionRequest exportWarehouseTransactionRequest =
                         ImportStoreTransactionRequest.builder()
                                 .type(TransactionType.IMPORT_TO_STORE)
@@ -99,7 +98,7 @@ public class StockTransactionService {
                                 .expectedReceivedDate(request.getExpectedReceivedDate())
                                 .build();
                 handleExportFromWareHouse(exportWarehouseTransactionRequest, savedTransaction);
-                throw new ApplicationException(ErrorCode.INVALID_VALIDATION, "INVALID EXPORT");
+                break;
             case RETURN_TO_WAREHOUSE:
                 ReturnWareHouseTransactionRequest returnWareHouseTransactionRequest =
                         ReturnWareHouseTransactionRequest.builder()
@@ -189,10 +188,11 @@ public class StockTransactionService {
 
     private void handleExportFromWareHouse(ImportStoreTransactionRequest request
             , StockTransaction transaction) {
-
-        Store store = storeRepository.findByCode(request.getToStoreId())
-                .orElseThrow(() -> new ApplicationException(ErrorCode.SUPPLIER_NOT_FOUND));
-        WareHouse wareHouse = wareHouseRepository.findBywarehouseCode(request.getFromWareHouse())
+        UUID storeId = UUID.fromString(request.getToStoreId());
+        UUID warehouseId = UUID.fromString(request.getFromWareHouse());
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
+        WareHouse wareHouse = wareHouseRepository.findById(warehouseId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.WAREHOUSE_NOT_FOUND));
         transaction.setFromWareHouse(wareHouse);
         transaction.setToStore(store);

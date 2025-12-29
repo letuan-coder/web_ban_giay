@@ -1,5 +1,6 @@
 package com.example.DATN.services;
 
+import com.example.DATN.dtos.request.user_address.UpdateUserAddressesRequest;
 import com.example.DATN.dtos.request.user_address.UserAddressRequest;
 import com.example.DATN.dtos.respone.user_address.UserAddressResponse;
 import com.example.DATN.exception.ApplicationException;
@@ -58,6 +59,9 @@ public class UserAddressService {
                 .user(user)
                 .receiverName(request.getReceiverName())
                 .phoneNumber(request.getPhoneNumber())
+                .provinceName(request.getProvinceName())
+                .districtName(request.getDistrictName())
+                .wardName(request.getWardName())
                 .wardCode(request.getWardId())
                 .districtCode(request.getDistrictId())
                 .provinceCode(request.getProvinceId())
@@ -78,7 +82,7 @@ public class UserAddressService {
     }
 
     @Transactional
-    public UserAddressResponse updateUserAddress(UUID addressId, UserAddressRequest request) {
+    public UserAddressResponse updateUserAddress(UUID addressId, UpdateUserAddressesRequest request) {
         UserAddress existingAddress = userAddressRepository.findById(addressId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND));
 

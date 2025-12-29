@@ -31,7 +31,6 @@ public class AuthenticationController {
     ApiResponse <AuthenticationResponse> login(
             @RequestBody AuthenticationRequest request ){
         AuthenticationResponse authResponse = authenticationService.authenticate(request);
-
         return ApiResponse.<AuthenticationResponse>builder()
                 .data(authResponse)
                 .build();

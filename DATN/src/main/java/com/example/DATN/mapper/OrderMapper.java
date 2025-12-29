@@ -26,6 +26,7 @@ public interface OrderMapper {
 
     @Mapping(target = "orderCode", source = "orderCode")
     @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "userAddressesId",source = "userAddress")
     @Mapping(target = "totalPrice", source = "total_price")
     @Mapping(target = "totalWeight", source = "total_weight")
     @Mapping(target = "totalHeight", source = "total_height")
@@ -33,9 +34,9 @@ public interface OrderMapper {
     @Mapping(target = "totalLength", source = "total_length")
     @Mapping(target = "items", source = "items")
     PendingOrderRedis toPendingOrderRedis(Order order);
+
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "orderCode", source = "orderCode")
-
     @Mapping(target = "total_price", source = "totalPrice")
     @Mapping(target = "total_weight", source = "totalWeight")
     @Mapping(target = "total_height", source = "totalHeight")

@@ -1,4 +1,5 @@
 export interface Warehouse {
+  id:string;
   warehouseCode:string;
   name: string;
   location?: string;

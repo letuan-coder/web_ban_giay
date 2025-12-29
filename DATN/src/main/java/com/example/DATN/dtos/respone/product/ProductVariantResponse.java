@@ -22,6 +22,7 @@ public class ProductVariantResponse {
     @JsonIgnore
     private Is_Available isAvailable;
     private BigDecimal price;
+
     private Integer stock;
     private String sku;
     private LocalDate createdAt;

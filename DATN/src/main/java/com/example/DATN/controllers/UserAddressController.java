@@ -1,5 +1,6 @@
 package com.example.DATN.controllers;
 
+import com.example.DATN.dtos.request.user_address.UpdateUserAddressesRequest;
 import com.example.DATN.dtos.request.user_address.UserAddressRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.user_address.UserAddressResponse;
@@ -36,7 +37,8 @@ public class UserAddressController {
 
     @PutMapping("/{id}")
     public ApiResponse<UserAddressResponse> updateAddress
-            (@PathVariable UUID id, @RequestBody @Valid UserAddressRequest request) {
+            (@PathVariable UUID id,
+             @RequestBody @Valid UpdateUserAddressesRequest request) {
         return ApiResponse.<UserAddressResponse>builder()
                 .data(userAddressService.updateUserAddress(id, request))
                 .build();

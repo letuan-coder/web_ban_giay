@@ -24,6 +24,16 @@ public class OrderController {
     private final OrderService orderService;
 
 
+    @PostMapping("/admin/confirm-orders")
+    public ApiResponse<OrderResponse> confirmOrder(
+            @RequestBody @Valid UUID orderId){
+        orderService.confirmOrder(orderId);
+        return ApiResponse.<OrderResponse>builder()
+                .data(null)
+                .message("confirm order !!!")
+                .build();
+    }
+
     @PostMapping
     public ApiResponse<OrderResponse> createOrder(
             @RequestBody @Valid OrderRequest request
@@ -47,8 +57,6 @@ public class OrderController {
         return ApiResponse.<CheckOutResponse>builder()
                 .data(response)
                 .build();
-
-
     }
 
     @PatchMapping("/{orderId}")
@@ -70,7 +78,6 @@ public class OrderController {
                 .data(response)
                 .build();
     }
-
 
     @GetMapping
     public ApiResponse<List<OrderResponse>> getOrdersByUser() {

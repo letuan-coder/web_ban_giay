@@ -1,6 +1,7 @@
 package com.example.DATN.models;
 
 import com.example.DATN.constant.OrderReturnStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -30,17 +31,19 @@ public class OrderReturn {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id"
             , nullable = false)
+    @JsonBackReference("orders-return")
     Order order;
 
     @OneToMany(mappedBy = "orderReturn"
             , cascade = CascadeType.ALL
             , orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference("order-return-items")
     List<OrderReturnItem> returnItems;
 
 }

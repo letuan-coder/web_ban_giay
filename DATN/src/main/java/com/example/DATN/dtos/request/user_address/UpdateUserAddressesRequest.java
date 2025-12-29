@@ -12,8 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserAddressRequest {
-
+public class UpdateUserAddressesRequest {
     @NotBlank(message = "Receiver name is required")
     private String receiverName;
 
@@ -25,8 +24,8 @@ public class UserAddressRequest {
     private String provinceId;
     private String provinceName;
 
-    private Integer districtId;
     @NotBlank(message = "District ID is required")
+    private String districtId;
     private String districtName;
 
     @NotBlank(message = "Ward ID is required")

@@ -24,13 +24,13 @@
   <form *ngIf="transaction" [formGroup]="receiptForm" (ngSubmit)="confirmReceipt()">
     <div class="card my-4">
       <div class="card-header">
-        <h5 class="mb-0">Chi tiết Phiếu Giao Dịch #{{ transaction.id }}</h5>
+        <h5 class="mb-0">Chi tiết Phiếu Giao Dịch #{{ transaction.code }}</h5>
       </div>
       <div class="card-body">
         <div class="row">
           <div class="col-md-4"><strong>Loại:</strong> {{ transaction.type }}</div>
           <div class="col-md-4"><strong>Trạng thái:</strong> {{ transaction.transactionStatus }}</div>
-          <div class="col-md-4"><strong>Ngày tạo:</strong> {{ transaction.createdDate | date:'short' }}</div>
+          <div class="col-md-4"><strong>Ngày tạo:</strong> {{ transaction.createdDate | date:'dd/MM/yyyy' }}</div>
           <div class="col-md-4 mt-2"><strong>Từ:</strong> {{ transaction.fromWarehouseName || transaction.fromStoreName || transaction.supplierName || 'N/A' }}</div>
           <div class="col-md-4 mt-2"><strong>Tới:</strong> {{ transaction.toWarehouseName || transaction.toStoreName || 'N/A' }}</div>
         </div>
@@ -50,11 +50,11 @@
             <tbody formArrayName="items">
               <tr *ngFor="let item of receiptItems.controls; let i = index" [formGroupName]="i">
                 <td>
-                  {{ item.value.variant.product.name }}
-                  <small class="d-block text-muted">{{ item.value.variant.color.name }} - {{ item.value.variant.size.name }}</small>
+                  {{ item.value.name }}
+                  <small class="d-block text-muted">{{ item.value.colorName }} - {{ item.value.sizeName }}</small>
                 </td>
-                <td>{{ item.value.variant.sku }}</td>
-                <td class="text-center">{{ item.value.expectedQuantity }}</td>
+                <td>{{ item.value.variantSku }}</td>
+                <td class="text-center">{{ item.value.quantity }}</td>
                 <td>
                   <input type="number" class="form-control" formControlName="actualQuantity" min="0">
                 </td>

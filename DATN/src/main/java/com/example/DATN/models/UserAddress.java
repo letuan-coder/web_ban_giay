@@ -1,6 +1,7 @@
 
 package com.example.DATN.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +24,7 @@ public class UserAddress extends BaseEntity{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference("user-address")
     private User user;
 
     @Column(nullable = false, length = 255)
@@ -36,7 +38,11 @@ public class UserAddress extends BaseEntity{
     private Integer districtCode;
 
     private String wardCode;
+    private String provinceName;
 
+    private String districtName;
+
+    private String wardName;
     @Column(nullable = false, length = 500)
     private String streetDetail;
 

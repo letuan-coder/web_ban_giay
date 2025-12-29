@@ -33,32 +33,28 @@ export interface CreateMissingItemsInvoiceRequest {
 export interface StockTransactionItemResponse {
   id: string;
   variantId: string;
+  name: string;
+  colorName: string;
+  sizeName: number;
   variantSku: string;
   quantity: number;
-  variant?: {
-    id: number;
-    sku: string;
-    product: { name: string };
-    color: { name: string };
-    size: { name: string };
-  };
 }
 
 // Define the StockTransactionResponse interface based on backend DTO
 export interface StockTransactionResponse {
-  id: number;
-  code:string;
-  type:['IMPORT', 'EXPORT', 'TRANSFER', 'RETURN_SUPPLIER', 'RETURN_WAREHOUSE', 'ADJUST'];
+  id: string;
+  code: string;
+  type: string;
   transactionStatus: 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'PENDING_COMPLETION';
   supplierId?: string;
   supplierName?: string;
-  fromWarehouseId?: number;
+  fromWarehouseId?: string;
   fromWarehouseName?: string;
-  fromStoreId?: number;
+  fromStoreId?: string;
   fromStoreName?: string;
-  toWarehouseId?: number;
+  toWarehouseId?: string;
   toWarehouseName?: string;
-  toStoreId?: number;
+  toStoreId?: string;
   toStoreName?: string;
   createdDate: string;
   items: StockTransactionItemResponse[];

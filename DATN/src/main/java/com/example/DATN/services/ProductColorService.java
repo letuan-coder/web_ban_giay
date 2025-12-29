@@ -1,6 +1,7 @@
 package com.example.DATN.services;
 
 import com.example.DATN.constant.Is_Available;
+import com.example.DATN.constant.Util.FileUtil;
 import com.example.DATN.dtos.request.UploadImageRequest;
 import com.example.DATN.dtos.request.product.ProductColorRequest;
 import com.example.DATN.dtos.request.product.ProductVariantRequest;
@@ -42,6 +43,7 @@ public class ProductColorService {
     private final ProductVariantRepository productVariantRepository;
 
     private final PromotionRepository promotionRepository;
+    private final ImageProductRepository imageProductRepository;
 
     @Transactional(rollbackOn = Exception.class)
     public ProductColorResponse createProductColor(ProductColorRequest request) {
@@ -85,12 +87,24 @@ public class ProductColorService {
         return response;
 
     }
+    @Transactional(rollbackOn = Exception.class)
     public void UploadColorImage(ProductColorRequest request){
+
+
         ProductColor productColor = productColorRepository.findById(request.getProductId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
+        List<ImageProduct> image = imageProductRepository.findAllByProductColor(productColor);
 
-
+        int totalFiles =
+                (image != null ? image.size() : 0)
+                        + (request.getFiles() != null ? request.getFiles().size() : 0);
+        if (totalFiles > FileUtil.FILE_LIMIT) {
+            throw new ApplicationException(ErrorCode.FILE_COUNT_EXCEEDED);
+        }
         for(MultipartFile file : request.getFiles()) {
+            if (file.getSize()>= FileUtil.MAX_FILE_SIZE_MB){
+                throw new ApplicationException(ErrorCode.FILE_SIZE_EXCEEDED);
+            }
             ImageProduct imageProduct = ImageProduct.builder()
                     .imageUrl(productColor.getId().toString())
                     .altText(productColor.getProduct().getSlug()+"-"+productColor.getColor().getName())

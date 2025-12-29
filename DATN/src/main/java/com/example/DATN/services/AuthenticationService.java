@@ -247,9 +247,7 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-
         Optional<User> user = userRepository.findByUsername(request.getUsername());
-
         boolean isPasswordMatch = passwordEncoder.matches(request.getPassword(), user.get().getPassword());
         if (!isPasswordMatch) {
             throw new ApplicationException(ErrorCode.INVALID_PASSWORD);

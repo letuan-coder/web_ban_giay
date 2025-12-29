@@ -12,7 +12,7 @@ export class ProductVariantService {
   constructor(private http: HttpClient) { }
 
   getAllVariants(): Observable<any> {
-    return this.http.get(this.apiUrl);
+    return this.http.get(`${this.apiUrl}/get-all-variants`);
   }
   
   deleteVariant(id: string): Observable<any> {

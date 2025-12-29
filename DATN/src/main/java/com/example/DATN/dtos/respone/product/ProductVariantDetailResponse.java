@@ -1,7 +1,6 @@
 package com.example.DATN.dtos.respone.product;
 
 import com.example.DATN.constant.Is_Available;
-import com.example.DATN.dtos.respone.ProductReviewResponse;
 import com.example.DATN.dtos.respone.StockResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,17 +23,21 @@ public class ProductVariantDetailResponse {
     private String colorHex;
     private Is_Available isAvailable;
     private BigDecimal price;
+    private BigDecimal finalPrice;
     private Integer total_stock;
     private List<StockResponse> stocks;
     // Helper method to calculate and set total_stock from the 'stocks' list
     public void calculateAndSetTotalStock() {
         if (this.stocks != null) {
             this.total_stock = this.stocks.stream()
-                                  .mapToInt(StockResponse::getQuantity) // Assumes StockResponse has getQuantity()
+                                  .mapToInt(StockResponse::getQuantity)
                                   .sum();
         } else {
             this.total_stock = 0;
         }
+    }
+    public void calculateFinalPrice(){
+
     }
 }
 

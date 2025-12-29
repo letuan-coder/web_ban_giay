@@ -1,5 +1,6 @@
 package com.example.DATN.controllers;
 
+import com.example.DATN.constant.Util.FileUtil;
 import com.example.DATN.dtos.request.product.ProductColorRequest;
 import com.example.DATN.dtos.request.product.UpdateProductColorRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
@@ -37,6 +38,7 @@ public class ProductColorController {
             (@PathVariable UUID productColorId,
              @RequestPart(name = "files") List<MultipartFile> files,
              @ModelAttribute @Valid ProductColorRequest request) {
+
         request.setFiles(files);
         request.setProductId(productColorId);
         productColorService.UploadColorImage(request);
