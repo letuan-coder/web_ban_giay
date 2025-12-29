@@ -13,7 +13,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class ImageProductResponse {
-
     private UUID id;
     private String imageUrl;
     private String altText;

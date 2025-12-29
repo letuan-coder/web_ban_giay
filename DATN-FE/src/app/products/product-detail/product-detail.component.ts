@@ -30,6 +30,7 @@ export class ProductDetailComponent implements OnInit {
   error = '';
   selectedProductIds = new Set<string>();
   selectedImageIds = new Set<number>();
+  selectedFiles = new Map<string, File[]>();
   showAddVariantForm = false;
   isNewColor: boolean = false;
   availableColors: Color[] = [];
@@ -82,44 +83,25 @@ export class ProductDetailComponent implements OnInit {
   loadProductDetails(id: string): void {
     this.loading = true;
     this.error = '';
-    this.productService.getById(id).subscribe({
+    this.productService.getAdminById(id).subscribe({
       next: (res: any) => {
         const productData = res.data;
-        // Restructure data: Group variants under their respective colors
-        if (productData && productData.colorResponses && productData.variantDetailResponses) {
-          const variantsByColorName = new Map<string, VariantResponse[]>();
 
-          // Group variantDetailResponses by colorName
-          for (const variant of productData.variantDetailResponses) {
-            // Transform size from string to SizeResponse object
-            if (typeof variant.size === 'string') {
-              variant.size = { name: variant.size, code: variant.size };
-            }
-            
-            const colorName = variant.colorName; // Using colorName for grouping
-            if (!variantsByColorName.has(colorName)) {
-              variantsByColorName.set(colorName, []);
-            }
-            variantsByColorName.get(colorName)!.push(variant);
-          }
-
-          // Map backend colorResponses to frontend ColorVariantResponse structure
+        if (productData && productData.colorResponses) {
           const mappedColorResponses: ColorVariantResponse[] = productData.colorResponses.map((colorRes: any) => {
             const colorVariant: ColorVariantResponse = {
-              id: colorRes.productColorId, // Map productColorId to id
+              id: colorRes.id,
               color: {
-                code: colorRes.hexCode, // Using hexCode as color code
+                code: colorRes.colorCode,
                 name: colorRes.colorName,
-                hexCode: colorRes.hexCode
+                hexCode: colorRes.colorHexCode,
               },
-              isAvailable: productData.available, // Assuming product available status for color initially
-              variantResponses: variantsByColorName.get(colorRes.colorName) || [], // Assign grouped variants
-              images: [] // Assuming images are loaded separately or are part of another structure
+              isAvailable: productData.available, // This might need to be adjusted if availability is per-color
+              variantResponses: colorRes.variantResponses || [],
+              images: colorRes.images || [],
             };
             return colorVariant;
           });
-
-          // Update productData with the new structure
           productData.colorResponses = mappedColorResponses;
         }
 
@@ -175,6 +157,37 @@ export class ProductDetailComponent implements OnInit {
       this.selectedImageIds.delete(imageId);
     }
   }
+
+  onImageFilesSelected(event: any, productColorId: string): void {
+    if (event.target.files && event.target.files.length > 0) {
+      this.selectedFiles.set(productColorId, Array.from(event.target.files));
+    }
+  }
+
+  uploadImages(productColorId: string): void {
+    const files = this.selectedFiles.get(productColorId);
+    if (!files || files.length === 0) {
+      return;
+    }
+  
+    this.loading = true;
+    this.productColorService.uploadImages(productColorId, files).subscribe({
+      next: () => {
+        this.loading = false;
+        this.selectedFiles.delete(productColorId);
+        const productId = this.route.snapshot.paramMap.get('id');
+        if (productId) {
+          this.loadProductDetails(productId);
+        }
+      },
+      error: (err) => {
+        this.loading = false;
+        this.error = 'Lỗi khi tải ảnh lên.';
+        console.error(err);
+      }
+    });
+  }
+
   openBulkEdit() {
     this.dialog.open(BulkEditComponent, {
       data: Array.from(this.selectedProductIds)

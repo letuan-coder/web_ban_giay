@@ -112,8 +112,9 @@ public class ProductController {
     @GetMapping("/admin/{id}")
     public ApiResponse<ProductResponse> getProductAdminById
             (@PathVariable UUID id) {
+        ProductResponse response = productService.getProductAdminById(id);
         return ApiResponse.<ProductResponse>builder()
-                .data(productService.getProductAdminById(id))
+                .data(response)
                 .build();
     }
     @GetMapping("/supplier/admin/{supplierId}")
@@ -136,7 +137,6 @@ public class ProductController {
         Sort.Direction direction = "asc".equalsIgnoreCase(sortOrder)
                 ? Sort.Direction.ASC
                 : Sort.Direction.DESC;
-
         Sort sort = Sort.by(direction, sortField);
         Pageable pageable = PageRequest.of(page - 1, limit, sort);
         Page<ProductSalesProjection> productPage = productService.BestSellingProductSales(pageable);

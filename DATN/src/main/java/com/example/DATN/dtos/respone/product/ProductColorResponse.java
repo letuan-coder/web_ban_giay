@@ -24,7 +24,6 @@ public class ProductColorResponse {
     String colorHexCode;
     @JsonIgnore
     Is_Available isAvailable;
-    @JsonIgnore
     List<ImageProductResponse> images;
     List<ProductVariantResponse> variantResponses;
 }

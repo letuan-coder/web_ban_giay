@@ -30,7 +30,7 @@ export interface updateProductRequest {
 export class ProductService {
   private baseUrl = environment.apiBaseUrl + '/api/products';
   private deleteUrl = environment.apiBaseUrl + '/api/images'
-  private adminUrl = environment.apiBaseUrl + '/api/products/admim'
+  private adminUrl = environment.apiBaseUrl + '/api/products/admin'
   constructor(private http: HttpClient) { }
 
 

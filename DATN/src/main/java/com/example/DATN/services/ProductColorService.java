@@ -8,10 +8,12 @@ import com.example.DATN.dtos.request.product.ProductVariantRequest;
 import com.example.DATN.dtos.request.product.UpdateProductColorRequest;
 import com.example.DATN.dtos.request.product.UpdateProductVariantRequest;
 import com.example.DATN.dtos.respone.ColorResponse;
+import com.example.DATN.dtos.respone.product.ImageProductResponse;
 import com.example.DATN.dtos.respone.product.ProductColorResponse;
 import com.example.DATN.dtos.respone.product.ProductVariantResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
+import com.example.DATN.mapper.ImageProductMapper;
 import com.example.DATN.mapper.ProductColorMapper;
 import com.example.DATN.mapper.ProductVariantMapper;
 import com.example.DATN.models.*;
@@ -38,7 +40,7 @@ public class ProductColorService {
     private final ProductVariantService productVariantService;
     private final ImageProductService imageProductService;
     private final ProductVariantMapper productVariantMapper;
-
+    private final ImageProductMapper imageProductMapper;
     private final ColorService colorService;
     private final ProductVariantRepository productVariantRepository;
 
@@ -89,8 +91,6 @@ public class ProductColorService {
     }
     @Transactional(rollbackOn = Exception.class)
     public void UploadColorImage(ProductColorRequest request){
-
-
         ProductColor productColor = productColorRepository.findById(request.getProductId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
         List<ImageProduct> image = imageProductRepository.findAllByProductColor(productColor);
@@ -119,9 +119,15 @@ public class ProductColorService {
             imageProductService.uploadImage(uploadImageRequest);
         }
     }
-    public ProductColorResponse getProductColorById(UUID id) {
+    public List<ImageProductResponse> getImageById(UUID id) {
+        List<ImageProduct> imageProduct = imageProductRepository.findAllByProductColorId(id);
+        return imageProduct.stream()
+                .map(imageProductMapper::toImageProductResponse).collect(Collectors.toList());
+
+    }
+    public ProductColorResponse getProductColorById(UUID id){
         ProductColor productColor = productColorRepository.findById(id)
-                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
+                .orElseThrow(()->new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
         return productColorMapper.toProductColorResponse(productColor);
     }
 

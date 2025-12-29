@@ -17,5 +17,13 @@ export class ProductColorService {
   create(productId: string, formData: FormData): Observable<any> {
     return this.http.post(`${this.baseUrl}/${productId}`, formData);
   }
+
+  uploadImages(productColorId: string, files: File[]): Observable<any> {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+    return this.http.post(`${this.baseUrl}/upload/${productColorId}`, formData);
+  }
   
 }

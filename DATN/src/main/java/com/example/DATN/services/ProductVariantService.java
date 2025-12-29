@@ -1,6 +1,7 @@
 package com.example.DATN.services;
 
 
+import com.example.DATN.constant.Is_Available;
 import com.example.DATN.dtos.request.product.ProductVariantRequest;
 import com.example.DATN.dtos.request.product.UpdateProductVariantRequest;
 import com.example.DATN.dtos.respone.product.ProductVariantResponse;
@@ -55,6 +56,7 @@ public class ProductVariantService {
                         .stocks(null)
                         .size(size)
                         .sku(skugenerate)
+                        .isAvailable(Is_Available.NOT_AVAILABLE)
                         .price(productColor.getProduct().getPrice())
                         .build();
                 productVariants.add(productVariant);

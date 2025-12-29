@@ -40,6 +40,7 @@ public class StockController {
     }
 
 
+
     @GetMapping
     public ApiResponse<List<StockResponse>> getAllStocks() {
         return ApiResponse.<List<StockResponse>>builder()

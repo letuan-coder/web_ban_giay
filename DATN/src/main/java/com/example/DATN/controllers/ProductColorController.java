@@ -1,9 +1,9 @@
 package com.example.DATN.controllers;
 
-import com.example.DATN.constant.Util.FileUtil;
 import com.example.DATN.dtos.request.product.ProductColorRequest;
 import com.example.DATN.dtos.request.product.UpdateProductColorRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
+import com.example.DATN.dtos.respone.product.ImageProductResponse;
 import com.example.DATN.dtos.respone.product.ProductColorResponse;
 import com.example.DATN.services.ProductColorService;
 import jakarta.validation.Valid;
@@ -33,6 +33,16 @@ public class ProductColorController {
                 .data(productColorService.createProductColor(request))
                 .build();
     }
+
+    @GetMapping(value = "/images/{productColorId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<List<ImageProductResponse>> getImageColor
+            (@PathVariable UUID productColorId) {
+       List<ImageProductResponse> response = productColorService.getImageById(productColorId);
+        return ApiResponse.<List<ImageProductResponse>>builder()
+                .data(response)
+                .build();
+    }
     @PostMapping(value = "/upload/{productColorId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<ProductColorResponse> UplpadProductColor
             (@PathVariable UUID productColorId,
@@ -55,15 +65,19 @@ public class ProductColorController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<ProductColorResponse> getProductColorById(@PathVariable UUID id) {
+    public ApiResponse<ProductColorResponse> getProductColorById
+            (@PathVariable UUID id) {
+        ProductColorResponse response = productColorService.getProductColorById(id);
         return ApiResponse.<ProductColorResponse>builder()
-                .data(productColorService.getProductColorById(id))
+                .data(response)
                 .build();
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<ProductColorResponse> updateProductColor(@PathVariable UUID id, @RequestBody @Valid UpdateProductColorRequest request) {
+    public ApiResponse<ProductColorResponse> updateProductColor(
+            @PathVariable UUID id,
+            @RequestBody @Valid UpdateProductColorRequest request) {
         return ApiResponse.<ProductColorResponse>builder()
                 .data(productColorService.updateProductColor(id, request))
                 .build();
