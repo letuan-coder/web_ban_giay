@@ -14,6 +14,7 @@ public class OrderItemResponse {
     private UUID id;
     private String productName;
     private String sku;
+    private Boolean Rated;
     private String colorName;
     private String sizeName;
     private Integer quantity;

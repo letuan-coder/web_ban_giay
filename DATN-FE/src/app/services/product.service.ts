@@ -12,6 +12,10 @@ export interface ProductCreateRequest {
   supplierId: number;
   price?: number;
   importPrice?: number;
+  Weight?: number
+  Length?: number,
+  Width?: number,
+  Height?: number,
   file?: File;
   colorCodes?: string[];
   sizeCodes?: string[];
@@ -19,7 +23,7 @@ export interface ProductCreateRequest {
 
 export interface updateProductRequest {
   name: string;
-  description:string;
+  description: string;
   brandId: number;
   categoryId: number;
   price?: number;
@@ -67,7 +71,18 @@ export class ProductService {
     }
     if (product.importPrice) {
       formData.append('importPrice', product.importPrice.toString());
-
+    }
+    if (product.Weight) {
+      formData.append('Weight', product.Weight.toString());
+    }
+    if (product.Length) {
+      formData.append('Length', product.Length.toString());
+    }
+    if (product.Width) {
+      formData.append('Width', product.Width.toString());
+    }
+    if (product.Height) {
+      formData.append('Height', product.Height.toString());
     }
     return this.http.post(this.baseUrl, formData);
   }

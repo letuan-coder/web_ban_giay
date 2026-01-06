@@ -26,7 +26,6 @@ public class StoreController {
                 .build();
     }
 
-
     @GetMapping
     public ApiResponse<List<StoreResponse>> getAllStores() {
         return ApiResponse.<List<StoreResponse>>builder()

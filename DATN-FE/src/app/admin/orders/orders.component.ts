@@ -97,17 +97,17 @@ export class OrdersComponent implements OnInit {
     this.selectedOrderForDetail = null;
   }
 
-  onStatusChange(orderId: number, event: Event): void {
+  onStatusChange(orderId: string, event: Event): void {
     const newStatus = (event.target as HTMLSelectElement).value as OrderStatus;
     this.updateOrderStatus(orderId, newStatus);
   }
 
-  // onShippingStatusChange(orderId: number, event: Event): void {
-  //   const newStatus = (event.target as HTMLSelectElement).value as ShippingStatus;
-  //   this.updateShippingStatus(orderId, newStatus);
-  // }
+  onShippingStatusChange(orderId: string, event: Event): void {
+    const newStatus = (event.target as HTMLSelectElement).value as ShippingStatus;
+    this.updateShippingStatus(orderId, newStatus);
+  }
 
-  updateOrderStatus(orderId: number, newStatus: OrderStatus): void {
+  updateOrderStatus(orderId: string, newStatus: OrderStatus): void {
     const order = this.orders.find(o => o.id === orderId);
     if (order) {
       const oldStatus = order.orderStatus;
@@ -117,6 +117,22 @@ export class OrdersComponent implements OnInit {
         error: (err) => {
           order.orderStatus = oldStatus; // Revert on error
           this.errorMessage = `Cập nhật trạng thái cho đơn hàng #${orderId} thất bại.`;
+          console.error(err);
+        }
+      });
+    }
+  }
+
+  updateShippingStatus(orderId: string, newStatus: ShippingStatus): void {
+    const order = this.orders.find(o => o.id === orderId);
+    if (order) {
+      const oldStatus = order.shippingStatus;
+      order.shippingStatus = newStatus; // Optimistic update
+
+      this.orderService.updateShippingStatus(orderId, newStatus).subscribe({
+        error: (err) => {
+          order.shippingStatus = oldStatus; // Revert on error
+          this.errorMessage = `Cập nhật trạng thái giao hàng cho đơn hàng #${orderId} thất bại.`;
           console.error(err);
         }
       });

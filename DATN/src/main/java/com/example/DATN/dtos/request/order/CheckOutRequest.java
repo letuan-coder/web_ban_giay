@@ -5,13 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CheckOutRequest {
-    private UUID id;
-    private Integer quantity;
+    List<CheckOutItemRequest> item;
+    String voucherCode;
 }

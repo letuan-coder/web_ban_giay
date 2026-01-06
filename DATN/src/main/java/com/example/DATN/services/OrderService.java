@@ -2,11 +2,14 @@ package com.example.DATN.services;
 
 import cn.ipokerface.snowflake.SnowflakeIdGenerator;
 import com.example.DATN.constant.*;
+import com.example.DATN.constant.Util.CheckSumUtil;
 import com.example.DATN.dtos.request.ghtk.GhnOrderInfo;
 import com.example.DATN.dtos.request.ghtk.GhnProduct;
+import com.example.DATN.dtos.request.order.CheckOutItemRequest;
 import com.example.DATN.dtos.request.order.CheckOutRequest;
 import com.example.DATN.dtos.request.order.OrderItemRequest;
 import com.example.DATN.dtos.request.order.OrderRequest;
+import com.example.DATN.dtos.request.vnpay.VnPayRefundRequest;
 import com.example.DATN.dtos.request.vnpay.VnPaymentRequest;
 import com.example.DATN.dtos.respone.order.*;
 import com.example.DATN.exception.ApplicationException;
@@ -14,6 +17,7 @@ import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.GetUserByJwtHelper;
 import com.example.DATN.mapper.OrderMapper;
 import com.example.DATN.mapper.ProductVariantMapper;
+import com.example.DATN.models.Embeddable.ShippingAddress;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -31,10 +36,13 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-
+    private final VoucherRepository voucherRepository;
+    private final VnpayRepository vnpayRepository;
+    private final CheckSumUtil checkSumUtil;
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final ProductVariantMapper productVariantMapper;
@@ -50,62 +58,148 @@ public class OrderService {
     private final StoreRepository storeRepository;
     private final StockTransactionItemRepository stockTransactionItemRepository;
     private final StockRepository stockRepository;
+    private final WareHouseRepository wareHouseRepository;
+    private final BigDecimal ORDER_PRICE_2_MILION = BigDecimal.valueOf(2000000);
+    private final BigDecimal ORDER_PRICE_5_MILION = BigDecimal.valueOf(5000000);
 
     @Cacheable(value = "shipping_fee", key = "#address.wardCode")
     public Integer CalculateShippingFee(UserAddress userAddr, ProductVariant variant) {
-        if (WeightTier.UP_TO_1KG.getMaxKg() == variant.getWeight() ){
-            return 0 ;
+        if (WeightTier.UP_TO_2KG.getMaxKg() == variant.getWeight()) {
+            return 0;
         }
+
         return 1;
     }
-//    public UUID FindStore (UserAddress userAddr){
-//        Integer ward = Integer.parseInt(userAddr.getWardCode().trim());
-//        List<Store> storeWards = storeRepository.findAllByWardCode(ward);
-//        if (storeWards.isEmpty()) {
-//            List<Store> storeDistrict = storeRepository.findAllByDistrictCode(userAddr.getDistrictCode());
-//            if (storeDistrict.isEmpty()) {
-//                Integer provinceId = Integer.parseInt(userAddr.getProvinceCode().trim());
-//                List<Store> storeProvinces = storeRepository.findAllByProvinceCode(provinceId);
-//
-//            } else {
-//                throw new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND, "chuyển qua kho tổng");
-//            }
-//        }
-//        return storeWards.getLast().getId();
-//    }
-    public Integer calculateTotalStock (UUID storeId,ProductVariant variant){
-        Integer quantity =0 ;
-        List<Stock> stocks = stockRepository.findByVariant(variant);
-        for(Stock stock : stocks){
-           if (stock.getStockType() == StockType.STORE) {
-               Stock storeStock = stockRepository.findByStoreId(storeId)
-                       .orElseThrow(()-> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
-               quantity += stock.getQuantity();
-           }
-        }
-         return quantity;
-    }
-    public CheckOutResponse checkOutOrder(List<CheckOutRequest> request) {
+
+    public void cancelOrder(UUID orderId, HttpServletRequest req) {
         User user = getUserByJwtHelper.getCurrentUser();
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
+
+        if (order.getPaymentStatus() == PaymentStatus.PAID) {
+            Vnpay vnpay = vnpayRepository.findByVnpTxnRef(order.getOrderCode())
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.PAYMENT_VNPAY_FAIL));
+            VnPayRefundRequest refundRequest = VnPayRefundRequest.builder()
+                    .txnRef(order.getOrderCode())
+                    .orderInfo(vnpay.getVnp_OrderInfo())
+                    .CreateBy(user.getUsername())
+                    .transactionDate(order.getCreatedAt().toString())
+                    .amount(Long.parseLong(vnpay.getVnp_Amount()))
+                    .transactionType("02")
+                    .build();
+            vnPayServices.processRefund(refundRequest, req);
+
+        }
+        if (order.getOrderStatus() != OrderStatus.PENDING) {
+            throw new ApplicationException(ErrorCode.ORDER_NOT_CANCEABLE);
+        } else {
+            order.setOrderStatus(OrderStatus.CANCELLED);
+            orderRepository.save(order);
+        }
+    }
+
+    public Integer calculateTotalStock(UUID storeId, ProductVariant variant) {
+        Integer quantity = 0;
+        List<Stock> stocks = stockRepository.findByVariant(variant);
+        for (Stock stock : stocks) {
+            if (stock.getStockType() == StockType.STORE) {
+                Stock storeStock = stockRepository.findByStore_Id(storeId)
+                        .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
+                quantity += stock.getQuantity();
+            }
+        }
+        return quantity;
+    }
+
+    private Store findStoreHasStock(
+            ProductVariant variant,
+            Integer quantity,
+            List<Store> stores
+    ) {
+        for (Store store : stores) {
+            Optional<Stock> stockOpt =
+                    stockRepository.findByVariantAndStore(variant, store);
+
+            if (stockOpt.isPresent()
+                    && stockOpt.get().getQuantity() >= quantity) {
+                return store;
+            }
+        }
+        return null;
+    }
+
+    public Store FindStore(ProductVariant variant, Integer quantity, UserAddress addr) {
+        Integer wardCode = Integer.parseInt(addr.getWardCode().trim());
+
+        List<Store> stores = storeRepository.findAllByWardCode(wardCode);
+        Store store = findStoreHasStock(variant, quantity, stores);
+        if (store != null) return store;
+
+        stores = storeRepository.findAllByDistrictCode(addr.getDistrictCode());
+        store = findStoreHasStock(variant, quantity, stores);
+        if (store != null) return store;
+
+        Integer provinceCode = Integer.parseInt(addr.getProvinceCode().trim());
+        stores = storeRepository.findAllByProvinceCode(provinceCode);
+        return findStoreHasStock(variant, quantity, stores);
+    }
+
+    public WareHouse findWarehouse(UserAddress userAddress) {
+        Integer province = Integer.parseInt(userAddress.getProvinceCode());
+        WareHouse wareHouse = wareHouseRepository.findByProvinceCodeAndIsCentralTrue(province)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.WAREHOUSE_NOT_FOUND));
+        return wareHouse;
+
+    }
+
+
+    public CheckOutResponse checkOutOrder(CheckOutRequest request) {
+        User user = getUserByJwtHelper.getCurrentUser();
+
         CheckOutResponse response = new CheckOutResponse();
         List<UserAddress> userAddress = userAddressRepository.findByUser(user);
         List<CheckOutProductResponse> checkOutProductResponses = new ArrayList<>();
-        UserAddress userAddr = new UserAddress();
-        for (UserAddress address : userAddress) {
-            if (address.isDefault() == true) {
-                userAddr = address;
-            }
-        }
-        for (CheckOutRequest checkOutRequest : request) {
-            ProductVariant productVariant = productVariantRepository.findById(checkOutRequest.getId())
+//        UserAddress userAddr = new UserAddress();
+//        for (UserAddress address : userAddress) {
+//            if (address.isDefault() == true) {
+//                userAddr = address;
+//            }
+//        }
+
+        for (CheckOutItemRequest checkOutRequest : request.getItem()) {
+            ProductVariant productVariant = productVariantRepository.findBysku(checkOutRequest.getSku())
                     .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
-            Integer ward = Integer.parseInt(userAddr.getWardCode());
-            List<Store> storeWards = storeRepository.findAllByWardCode(ward);
-            for(Store store : storeWards) {
-                Integer stock = calculateTotalStock(store.getId(), productVariant);
-            }
-            Integer shippingFee = CalculateShippingFee(userAddr,productVariant);
-            response.setExpectedFee(shippingFee);
+//            Store store = FindStore(productVariant,checkOutRequest.getQuantity(),userAddr);
+//            if (store == null) {
+//                WareHouse wareHouse = findWarehouse(userAddr);
+//            }
+//            WareHouse wareHouse = findWarehouse(userAddr);
+//
+//            List<String> skus = request.stream()
+//                    .map(CheckOutRequest::getSku)
+//                    .distinct()
+//                    .toList();
+//            NearestStoreProjection store = storeRepository
+//                    .findNearestStoreWithAllSku(skus, skus.size(), userAddr.getLatitude(), userAddr.getLongitude())
+//                    .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
+//            log.info(
+//                    "Nearest store: {} - distance: {} km",
+//                    store.getName(),
+//                    String.format("%.2f", store.getDistanceKm())
+//            );
+//            log.info(
+//                    "Nearest store - id: {}, name: {}, distance: {} km",
+//                    store.getId(),
+//                    store.getName(),
+//                    String.format("%.2f", store.getDistanceKm())
+//            );
+//            Store nearestStore = storeRepository.findById(store.getId())
+//                    .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
+            Integer shippingFee = 0;
+//          shippingFee = CalculateShippingFee(userAddr, productVariant);
+            response.setShippingFee(shippingFee);
+
+
             CheckOutProductResponse checkOutResponse = CheckOutProductResponse.builder()
                     .id(productVariant.getId())
                     .isAvailable(productVariant.getIsAvailable())
@@ -115,20 +209,102 @@ public class OrderService {
                     .sku(productVariant.getSku())
                     .productName(productVariant.getProductColor().getProduct().getName())
                     .price(productVariant.getPrice())
+                    .finaPrice(productVariant.getPrice().multiply(BigDecimal.valueOf(checkOutRequest.getQuantity())))
                     .stock(100)
                     .imageUrl(productVariant.getProductColor().getImages().isEmpty() ? null :
                             productVariant.getProductColor().getImages().get(0).getImageUrl())
                     .build();
-
             checkOutProductResponses.add(checkOutResponse);
+
+        }
+        response.setProducts(checkOutProductResponses);
+        BigDecimal sum = response.getProducts().stream()
+                .map(CheckOutProductResponse::getFinaPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        if(request.getVoucherCode()!=null) {
+            if (!checkSumUtil.verify(request.getVoucherCode().trim())) {
+                throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
+            }
+            sum = CheckVoucher(response,request.getVoucherCode());
         }
 
-
-        response.setUserAddressId(userAddr.getId());
-        response.setProducts(checkOutProductResponses);
+        response.setFinalPrice(sum);
         return response;
     }
 
+    public BigDecimal CheckVoucher (CheckOutResponse response,String voucherCode){
+        BigDecimal sum = BigDecimal.ZERO;
+        Voucher voucher = voucherRepository.findByVoucherCode(voucherCode.trim())
+                .orElseThrow(() -> new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND));
+        switch (voucher.getType()) {
+            case PERCENT_DISCOUNT:
+                BigDecimal discountAmount = sum
+                        .multiply(voucher.getDiscountValue())
+                        .divide(BigDecimal.valueOf(100));
+                sum = sum.subtract(discountAmount);
+                break;
+
+            case FIXED_AMOUNT:
+                sum = sum.compareTo(voucher.getMinOrderValue()) >= 0 ?
+                        sum.subtract(voucher.getDiscountValue()) : sum;
+
+                break;
+
+            case FREE_SHIPPING:
+                if( response.getShippingFee()!=0)
+                {
+                    response.setShippingFee(0);
+                }else {
+                    throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
+                }
+                break;
+            case CASHBACK:
+                if (sum.compareTo(voucher.getDiscountValue())>0){
+                    sum = sum.subtract(voucher.getDiscountValue());
+                }
+                else if(sum.compareTo(voucher.getDiscountValue())<0){
+                    sum= BigDecimal.ZERO;
+                }
+                else {
+                    throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
+                }
+                break;
+
+            default:
+                throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
+        }
+        return  sum;
+    }
+    //    Store findBestStore(
+//            List<CheckOutRequest> requests,
+//            UserAddress address
+//    ){
+//        Store bestStore = null;
+//        double minDistance = Double.MAX_VALUE;
+//
+//        for (Store store : allCandidateStores) {
+//            boolean đủHàng = true;
+//
+//            for (CheckOutRequest req : requests) {
+//                ProductVariant pv = findBySku(req.getSku());
+//                Stock stock = findByStoreAndVariant(store, pv);
+//
+//                if (stock == null || stock.getQuantity() < req.getQuantity()) {
+//                    đủHàng = false;
+//                    break;
+//                }
+//            }
+//
+//            if (đủHàng) {
+//                double distance = calcDistance(address, store);
+//                if (distance < minDistance) {
+//                    minDistance = distance;
+//                    bestStore = store;
+//                }
+//            }
+//        }
+//
+//    }
     @Transactional
     public void confirmOrder(UUID orderId) {
         Optional<Order> orderOpt = orderRepository.findById(orderId);
@@ -173,11 +349,11 @@ public class OrderService {
                     .return_district_id(null)
                     .return_ward_code("")
                     .client_order_code("")
-                    .to_name(order.getUserAddress().getReceiverName())
-                    .to_phone(order.getUserAddress().getPhoneNumber())
-                    .to_address(order.getUserAddress().getUserAddress())
-                    .to_ward_code(order.getUserAddress().getWardCode())
-                    .to_district_id(order.getUserAddress().getDistrictCode())
+                    .to_name(order.getUserAddresses().getDistrictName())
+                    .to_phone(order.getUserAddresses().getPhoneNumber())
+                    .to_address(order.getUserAddresses().getFullDetail())
+                    .to_ward_code(order.getUserAddresses().getWardCode())
+                    .to_district_id(order.getUserAddresses().getDistrict_Id())
                     .cod_amount(codAmountLong)
                     .content("Giay dép sản phẩm ")
                     .weight(order.getTotal_weight())
@@ -272,18 +448,42 @@ public class OrderService {
             (OrderRequest request, HttpServletRequest Serverletrequest)
             throws JsonProcessingException {
         User user = getUserByJwtHelper.getCurrentUser();
-        if (request.getUserAddressesId() == null) {
+        ShippingAddress shippingAddress = new ShippingAddress();
+        if(request.getUserAddressId()!=null) {
+            UserAddress userAddress = userAddressRepository.findById(request.getUserAddressId())
+                    .orElseThrow(()->new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND));
+            shippingAddress = ShippingAddress.builder()
+                    .receiverName(userAddress.getReceiverName())
+                    .phoneNumber(userAddress.getPhoneNumber())
+                    .provinceName(userAddress.getProvinceName())
+                    .districtName(userAddress.getDistrictName())
+                    .wardName(userAddress.getWardName())
+                    .streetDetail(userAddress.getStreetDetail())
+                    .fullDetail(userAddress.getUserAddress())
+                    .build();
+
+        }else if(request.getUserAddress() != null){
+            shippingAddress = ShippingAddress.builder()
+                    .receiverName(request.getUserAddress().getReceiverName())
+                    .phoneNumber(request.getUserAddress().getPhoneNumber())
+                    .provinceName(request.getUserAddress().getProvinceName())
+                    .districtName(request.getUserAddress().getDistrictName())
+                    .wardName(request.getUserAddress().getWardName())
+                    .streetDetail(request.getUserAddress().getStreetDetail())
+                    .fullDetail(request.getUserAddress().getFullDetail())
+                    .build();
+
+        }else {
             throw new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND);
         }
-        UserAddress userAddress = userAddressRepository.findById(request.getUserAddressesId())
-                .orElseThrow(() -> new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND));
+
         Order order = new Order();
         order.setUser(user);
         Long code = snowflakeIdGenerator.nextId();
         String orderCode = OrderCodePrefix + code;
         order.setNote(request.getNote());
         order.setOrderCode(orderCode);
-        order.setUserAddress(userAddress);
+        order.setUserAddresses(shippingAddress);
         order.setCreatedAt(LocalDateTime.now());
         order.setOrderStatus(OrderStatus.PROCESSCING);
         order.setPaymentStatus(PaymentStatus.UNPAID);
@@ -357,7 +557,8 @@ public class OrderService {
         PendingOrderRedis pending = new PendingOrderRedis();
         pending.setOrderCode(order.getOrderCode());
         pending.setNote(order.getNote());
-        pending.setUserAddressesId(order.getUserAddress());
+        ShippingAddressRedis redis = orderMapper.toAddress(order.getUserAddresses());
+        pending.setUserAddresses(redis);
 
         pending.setUserId(order.getUser().getId());
         List<PendingOrderItem> pendingItems = new ArrayList<>();
@@ -399,29 +600,43 @@ public class OrderService {
     public OrderResponse createOrder
             (OrderRequest request) {
         User user = getUserByJwtHelper.getCurrentUser();
-        if (request.getUserAddressesId() == null) {
+        ShippingAddress shippingAddress = new ShippingAddress();
+        if(request.getUserAddressId()!=null) {
+            UserAddress userAddress = userAddressRepository.findById(request.getUserAddressId())
+                    .orElseThrow(()->new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND));
+            shippingAddress = ShippingAddress.builder()
+                    .receiverName(userAddress.getReceiverName())
+                    .phoneNumber(userAddress.getPhoneNumber())
+                    .provinceName(userAddress.getProvinceName())
+                    .districtName(userAddress.getDistrictName())
+                    .wardName(userAddress.getWardName())
+                    .streetDetail(userAddress.getStreetDetail())
+                    .fullDetail(userAddress.getUserAddress())
+                    .build();
+
+        }else if(request.getUserAddress() != null){
+            shippingAddress = ShippingAddress.builder()
+                    .receiverName(request.getUserAddress().getReceiverName())
+                    .phoneNumber(request.getUserAddress().getPhoneNumber())
+                    .provinceName(request.getUserAddress().getProvinceName())
+                    .districtName(request.getUserAddress().getDistrictName())
+                    .wardName(request.getUserAddress().getWardName())
+                    .streetDetail(request.getUserAddress().getStreetDetail())
+                    .fullDetail(request.getUserAddress().getFullDetail())
+                    .build();
+
+        }else {
             throw new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND);
         }
-        UserAddress userAddress = userAddressRepository.findById(request.getUserAddressesId())
-                .orElseThrow(() -> new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND));
-//        List<UserAddress> userAddress = userAddressRepository.findByUser(user);
-//        UserAddress userAddr = new UserAddress();
-//        for (UserAddress address : userAddress) {
-//            if (address.isDefault() == true) {
-//                userAddr = address;
-//            }
-//        }
         Order order = new Order();
         order.setUser(user);
         Long code = snowflakeIdGenerator.nextId();
         String orderCode = OrderCodePrefix + code;
         order.setNote(request.getNote());
         order.setOrderCode(orderCode);
-        order.setUserAddress(userAddress);
+        order.setUserAddresses(shippingAddress);
         order.setCreatedAt(LocalDateTime.now());
         order.setOrderStatus(OrderStatus.PENDING);
-//        order.setOrderStatus(OrderStatus.COMPLETED);
-
         List<OrderItem> orderItems = new ArrayList<>();
         for (OrderItemRequest orderItemRequest : request.getOrderItemRequests()) {
 
@@ -429,6 +644,7 @@ public class OrderService {
                     productVariantRepository.findBysku(orderItemRequest.getSku());
             if (productVariantOpt.isPresent()) {
                 ProductVariant item = productVariantOpt.get();
+//                List<Stock> stock = stockRepository.findByVariantAndStore(item,);
                 OrderItem orderItem = new OrderItem();
                 orderItem.setProductVariant(item);
                 orderItem.setQuantity(orderItemRequest.getQuantity());
@@ -448,6 +664,7 @@ public class OrderService {
                 orderItem.setOrder(order);
                 orderItem.setRated(false);
                 orderItems.add(orderItem);
+
             }
         }
         order.setItems(orderItems);
@@ -459,6 +676,7 @@ public class OrderService {
                         .multiply(BigDecimal
                                 .valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         Integer totalWeight = orderItems.stream()
                 .mapToInt(i -> i.getWeight() * i.getQuantity())
                 .sum();
@@ -495,7 +713,7 @@ public class OrderService {
         } catch (IllegalArgumentException e) {
             throw new ApplicationException(ErrorCode.ORDER_STATUS_INVALID);
         }
-        List<Order> orders = orderRepository.findAllByOrderStatusAndUser(statusEnum, user);
+        List<Order> orders = orderRepository.findAllByOrderStatusAndUserOrderByCreatedAtDesc(statusEnum, user);
         return orders.stream().map(orderMapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -503,7 +721,13 @@ public class OrderService {
     public List<OrderResponse> getOrdersByUser() {
         User user = getUserByJwtHelper.getCurrentUser();
 
-        List<Order> orders = orderRepository.findAllByUserId(user.getId());
+        List<Order> orders = orderRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
+        return orders.stream().map(orderMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<OrderResponse> getOrdersForAdmin() {
+        List<Order> orders = orderRepository.findAllByOrderByCreatedAtDesc();
         return orders.stream().map(orderMapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -528,6 +752,18 @@ public class OrderService {
         OrderStatus newStatusEnum = OrderStatus.valueOf(newStatus.toUpperCase());
         if (order.getOrderStatus() != newStatusEnum) {
             order.setOrderStatus(newStatusEnum);
+            orderRepository.save(order);
+        } else {
+            throw new ApplicationException(ErrorCode.ORDER_STATUS_INVALID);
+        }
+    }
+
+    @Transactional
+    public void updateShippingStatus(UUID orderId, String newStatus) {
+        Order order = findOrderById(orderId);
+        ShippingStatus newStatusEnum = ShippingStatus.valueOf(newStatus.toUpperCase());
+        if (order.getGhnStatus() != newStatusEnum) {
+            order.setGhnStatus(newStatusEnum);
             orderRepository.save(order);
         } else {
             throw new ApplicationException(ErrorCode.ORDER_STATUS_INVALID);

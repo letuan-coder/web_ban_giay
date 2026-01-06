@@ -24,7 +24,10 @@ public class ProductVariantRequest {
     private List<SizeRequest> sizes;
     private List<String> sizeCodes;
     private String sku;
-
+    private Integer weight;
+    private Integer Length;
+    private Integer Width;
+    private Integer Height;
     @Min(value = 0, message = "PRICE_MUST_BE_POSITIVE")
     private BigDecimal price;
 

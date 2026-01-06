@@ -23,6 +23,7 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final StoreMapper storeMapper;
+    private final StockService stockService;
     private final String storeCode="CN";
     private final SnowflakeIdGenerator snowflakeIdGenerator;
     public StoreResponse createStore(StoreRequest request) {
@@ -30,8 +31,9 @@ public class StoreService {
         String storeId = storeCode + code;
         Store store = storeMapper.toStore(request);
         store.setCode(storeId);
-        store = storeRepository.save(store);
-        return storeMapper.toStoreResponse(store);
+        Store storesaved = storeRepository.save(store);
+        stockService.createStockForStore(storesaved.getId(),100);
+        return storeMapper.toStoreResponse(storesaved);
     }
 
     public List<StoreResponse> getAllStores() {

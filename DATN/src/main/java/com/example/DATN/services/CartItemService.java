@@ -16,7 +16,6 @@ import com.example.DATN.models.User;
 import com.example.DATN.repositories.CartItemRepository;
 import com.example.DATN.repositories.CartRepository;
 import com.example.DATN.repositories.ProductVariantRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +37,6 @@ public class CartItemService {
     private final CartRepository cartRepository;
     private final ProductVariantRepository productVariantRepository;
 
-    private String CART_REDIS_KEY_PREFIX = "cart:";
     private final GetJwtIdForGuest getJwtIdForGuest;
     private final RedisTemplate<String, Object> redisTemplate;
     private final GetUserByJwtHelper getUserByJwtHelper;
@@ -59,20 +56,10 @@ public class CartItemService {
 //            }
 //        }
         User user = getUserByJwtHelper.getCurrentUser();
-        String redisUserKey = "cart:user:" + user.getId() + ":items";
-        Object cachedUserData = redisTemplate.opsForValue().get(redisUserKey);
-        if (cachedUserData != null) {
-            return objectMapper.convertValue(
-                    cachedUserData,
-                    new TypeReference<List<CartItemResponse>>() {
-                    }
-            );
-        }
         Cart cart = cartRepository.findByUser(user)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.CART_NOT_FOUND));
-        List<CartItemResponse> listResponse = cartItemRepository.findByCart(cart).stream()
+        List<CartItemResponse> listResponse = cartItemRepository.findByCartOrderByCreatedAt(cart).stream()
                 .map(cartItemMapper::toCartItemResponse).toList();
-        redisTemplate.opsForValue().set(redisUserKey, listResponse, 7, TimeUnit.DAYS);
         return listResponse;
     }
 
@@ -116,7 +103,7 @@ public class CartItemService {
         cartItem.setTotal_price(cartItem.getProductVariant().getPrice()
                 .multiply(BigDecimal.valueOf(cartItem.getQuantity())));
         cartItemRepository.save(cartItem);
-        List<CartItem> updatedDbCartItems = cartItemRepository.findByCart(cart);
+        List<CartItem> updatedDbCartItems = cartItemRepository.findByCartOrderByCreatedAt(cart);
         BigDecimal newTotalPrice = updatedDbCartItems.stream()
                 .map(item -> item.getProductVariant().getPrice()
                         .multiply(new BigDecimal(item.getQuantity())))

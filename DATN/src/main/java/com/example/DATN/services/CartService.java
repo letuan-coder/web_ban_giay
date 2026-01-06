@@ -60,7 +60,7 @@ public class CartService {
 
         CartResponse cartResponse = cartMapper.toCartResponse(cart);
         List<CartItemResponse> cartItemResponse = cartItemRepository
-                .findByCart(cart).stream().map(cartItemMapper::toCartItemResponse).toList();
+                .findByCartOrderByCreatedAt(cart).stream().map(cartItemMapper::toCartItemResponse).toList();
         BigDecimal total = Calculate_Total_Price(cartItemResponse);
         cartResponse.setTotal_price(total);
         return cartResponse;

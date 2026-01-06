@@ -26,7 +26,6 @@ public class ProductVariantDetailResponse {
     private BigDecimal finalPrice;
     private Integer total_stock;
     private List<StockResponse> stocks;
-    // Helper method to calculate and set total_stock from the 'stocks' list
     public void calculateAndSetTotalStock() {
         if (this.stocks != null) {
             this.total_stock = this.stocks.stream()
@@ -36,9 +35,7 @@ public class ProductVariantDetailResponse {
             this.total_stock = 0;
         }
     }
-    public void calculateFinalPrice(){
 
-    }
 }
 
 

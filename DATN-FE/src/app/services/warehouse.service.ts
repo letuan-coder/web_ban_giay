@@ -32,4 +32,8 @@ export class WarehouseService {
   delete(code:string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${code}`);
   }
+
+  setCentral(id: string, isCentral: boolean): Observable<any> {
+    return this.http.post(`${this.apiUrl}/update`, { id, isCentral });
+  }
 }

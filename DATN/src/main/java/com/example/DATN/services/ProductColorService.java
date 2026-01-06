@@ -120,7 +120,7 @@ public class ProductColorService {
         }
     }
     public List<ImageProductResponse> getImageById(UUID id) {
-        List<ImageProduct> imageProduct = imageProductRepository.findAllByProductColorId(id);
+        List<ImageProduct> imageProduct = imageProductRepository.findAllByProductColor_Id(id);
         return imageProduct.stream()
                 .map(imageProductMapper::toImageProductResponse).collect(Collectors.toList());
 

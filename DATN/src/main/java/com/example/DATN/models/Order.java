@@ -4,11 +4,15 @@ import com.example.DATN.constant.OrderStatus;
 import com.example.DATN.constant.PaymentMethodEnum;
 import com.example.DATN.constant.PaymentStatus;
 import com.example.DATN.constant.ShippingStatus;
+import com.example.DATN.models.Embeddable.ShippingAddress;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UuidGenerator;
@@ -88,8 +92,8 @@ public class Order extends BaseEntity {
     @Enumerated(EnumType.STRING)
     PaymentStatus paymentStatus;
 
-    @ManyToOne
-    UserAddress userAddress;
+    @Embedded
+    ShippingAddress userAddresses;
 
     Integer total_weight;
     Integer total_height;

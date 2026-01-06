@@ -15,10 +15,19 @@ import java.util.UUID;
  */
 @Repository
 public interface OrderRepository extends JpaRepository<Order, UUID> {
-   Optional<Order> findByOrderCode(String orderCode);
-   List<Order> findAllByUserId (Long userId);
-   List<Order> findAllByOrderStatus(OrderStatus status);
-   List<Order> findAllByOrderStatusAndUser(OrderStatus status, User user);
-   List<Order> findByUser(User user);
+
+    List<Order> findAllByUserIdOrderByCreatedAtDesc(Long userId);
+
+    Optional<Order> findByOrderCode(String orderCode);
+
+    Optional<Order> findByOrderCodeAndUser_Id(String orderCode,Long userId);
+
+    List<Order> findAllByOrderByCreatedAtDesc();
+
+    List<Order> findAllByOrderStatusOrderByCreatedAtDesc(OrderStatus status);
+
+    List<Order> findAllByOrderStatusAndUserOrderByCreatedAtDesc(OrderStatus status, User user);
+
+    List<Order> findByUserOrderByCreatedAtDesc(User user);
 }
 

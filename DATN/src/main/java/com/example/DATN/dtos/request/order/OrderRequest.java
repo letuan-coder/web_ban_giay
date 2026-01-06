@@ -3,6 +3,7 @@ package com.example.DATN.dtos.request.order;
 import com.example.DATN.constant.OrderStatus;
 import com.example.DATN.constant.PaymentMethodEnum;
 import com.example.DATN.constant.ShippingStatus;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,11 +21,13 @@ import java.util.UUID;
 public class OrderRequest {
     private String Note;
     private Integer serviceId;
-    private UUID userAddressesId;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private UUID userAddressId;
     private Integer total_weight;
     private Integer total_height;
     private Integer total_width;
     private Integer total_length;
+    private ShippingAddressRequest userAddress;
     private ShippingStatus ghnStatus;
     private OrderStatus orderStatus;
     private BigDecimal shippingFee;

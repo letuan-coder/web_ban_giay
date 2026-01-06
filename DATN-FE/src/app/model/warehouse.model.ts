@@ -8,4 +8,5 @@ export interface Warehouse {
   provinceCode?:number;
   districtCode?:number;
   wardCode?:number;
+  isCentral?: boolean;
 }

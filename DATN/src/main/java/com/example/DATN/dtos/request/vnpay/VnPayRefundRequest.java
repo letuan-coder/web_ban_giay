@@ -1,11 +1,13 @@
 package com.example.DATN.dtos.request.vnpay;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@Builder
 @NoArgsConstructor
 public class VnPayRefundRequest {
     private String txnRef;         // vnp_TxnRef

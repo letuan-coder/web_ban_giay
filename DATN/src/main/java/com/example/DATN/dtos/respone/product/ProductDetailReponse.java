@@ -21,6 +21,7 @@ public class ProductDetailReponse {
     private String productCode;
     private String description;
     private Is_Available available;
+    private String thumbnailUrl;
     private List<ProductColorDetailResponse> colorResponses;
     private List<ProductVariantDetailResponse> variantDetailResponses;
     private List<ProductReviewResponse> reviewResponses;

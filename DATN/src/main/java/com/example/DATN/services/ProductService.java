@@ -54,6 +54,7 @@ public class ProductService {
     private final ColorRepository colorRepository;
     private final SupplierRepository supplierRepository;
     private final ProductReviewRepository productReviewRepository;
+    private final ProductVariantRepository productVariantRepository;
 //    private final ProductRedisRepository productRedisRepository;
 
     //    public List<ProductResponse> getProductByProductCode(String productCode) {
@@ -124,12 +125,20 @@ public class ProductService {
         product.setImportPrice(request.getImportPrice());
         product.setPrice(request.getPrice());
         product.setThumbnailUrl("");
+        product.setWeight(request.getWeight());
+        product.setHeight(request.getHeight());
+        product.setWidth(request.getWidth());
+        product.setLength(request.getLength());
         product.setSupplier(supplier);
         Product savedProduct = productRepository.save(product);
         for (String colorCode : request.getColorCodes()) {
             Color color = colorRepository.findByCode(colorCode)
                     .orElseThrow(() -> new ApplicationException(ErrorCode.COLOR_NOT_FOUND));
             ProductVariantRequest productVariantRequest = ProductVariantRequest.builder()
+                    .weight(product.getWeight())
+                    .Height(product.getHeight())
+                    .Length(product.getLength())
+                    .Width(product.getWidth())
                     .sizeCodes(request.getSizeCodes())
                     .price(request.getPrice())
                     .stock(null)
@@ -181,6 +190,9 @@ public class ProductService {
             ProductStatus status, Long brandId, Long categoryId, String sizeCode, String colorCode, Pageable pageable) {
         Page<Product> productsPage = productRepository.findAll(filterProducts(productName,
                 priceMin, priceMax, status, brandId, categoryId, colorCode, sizeCode), pageable);
+        productVariantRepository.setAvailableIfInStockNative();
+        productVariantRepository.setNotAvailableIfOutOfStockNative();
+
         return productsPage.map(this::mapProductToProductResponse);
     }
 

@@ -74,7 +74,26 @@
                             <input type="file" id="mainImage" (change)="onMainFileSelected($event)" name="mainImage"
                                 class="form-control" />
                         </div>
-
+                         <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="Weight" class="form-label">Khối lượng (g)</label>
+                                <input type="number" id="Weight" [(ngModel)]="product.Weight" name="Weight" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="Height" class="form-label">Chiều cao (cm)</label>
+                                <input type="number" id="Height" [(ngModel)]="product.Height" name="Height" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="Length" class="form-label">Chiều dài (cm)</label>
+                                <input type="number" id="Length" [(ngModel)]="product.Length" name="Length" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="Width" class="form-label">Chiều rộng (cm)</label>
+                                <input type="number" id="Width" [(ngModel)]="product.Width" name="Width" class="form-control">
+                            </div>
+                        </div>
                         <!-- Variants Info -->
                         <hr class="my-4">
                         <h4 class="mb-3">2. Các phiên bản (Màu sắc & Size)</h4>

@@ -28,6 +28,10 @@ export interface ProductBaseInfo {
   supplierId: number | null;
   price: number;
   importPrice: number;
+  Weight?: number;
+  Height?: number;
+  Length?: number;
+  Width?: number;
 }
 
 @Component({
@@ -72,7 +76,7 @@ export class ProductCreateComponent implements OnInit {
     private colorService: ColorService,
     private sizeService: SizeService,
     private supplierService: SupplierService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadInitialData();
@@ -81,18 +85,18 @@ export class ProductCreateComponent implements OnInit {
 
   loadInitialData(): void {
     this.brandService.getAll().subscribe(res => {
-        this.brands = res.data;
-        if (this.brands.length > 0) this.product.brandId = this.brands[0].id;
+      this.brands = res.data;
+      if (this.brands.length > 0) this.product.brandId = this.brands[0].id;
     });
     this.categoryService.getAll().subscribe(res => {
-        this.categories = res.data;
-        if (this.categories.length > 0) this.product.categoryId = this.categories[0].id;
+      this.categories = res.data;
+      if (this.categories.length > 0) this.product.categoryId = this.categories[0].id;
     });
     this.colorService.getAll().subscribe(res => this.colors = res.data);
     this.sizeService.getAll().subscribe(res => this.sizes = res.data);
     this.supplierService.getAllSuppliers().subscribe(res => {
-        this.suppliers = res.data;
-        if (this.suppliers.length > 0) this.product.supplierId = this.suppliers[0].id;
+      this.suppliers = res.data;
+      if (this.suppliers.length > 0) this.product.supplierId = this.suppliers[0].id;
     });
     // this.productService.getAllProductNames().subscribe(res => this.productsExisting = res.data);
   }
@@ -189,16 +193,20 @@ export class ProductCreateComponent implements OnInit {
     const uniqueSizeCodes = [...new Set(allSizeCodes)];
 
     const request: ProductCreateRequest = {
-        name: this.product.name,
-        description: this.product.description,
-        brandId: this.product.brandId!,
-        categoryId: this.product.categoryId!,
-        supplierId: this.product.supplierId!,
-        price: this.product.price,
-        importPrice: this.product.importPrice,
-        file: this.selectedMainFile,
-        colorCodes: colorCodes,
-        sizeCodes: uniqueSizeCodes
+      name: this.product.name,
+      description: this.product.description,
+      brandId: this.product.brandId!,
+      categoryId: this.product.categoryId!,
+      supplierId: this.product.supplierId!,
+      price: this.product.price,
+      importPrice: this.product.importPrice,
+      Weight: this.product.Weight,
+      Height: this.product.Height,
+      Length: this.product.Length,
+      Width: this.product.Width,
+      file: this.selectedMainFile,
+      colorCodes: colorCodes,
+      sizeCodes: uniqueSizeCodes
     };
 
     this.productService.createProduct(request).subscribe({
@@ -226,7 +234,7 @@ export class ProductCreateComponent implements OnInit {
       categoryId: this.categories.length > 0 ? this.categories[0].id : null,
       supplierId: this.suppliers.length > 0 ? this.suppliers[0].id : null,
       price: 0,
-      importPrice: 0
+      importPrice: 0,
     };
     this.variantData = [];
     this.addColorEntry();

@@ -52,6 +52,10 @@ public class ProductVariantService {
                         productColor.getColor().getCode() + "-" + size.getCode();
                 ProductVariant productVariant = ProductVariant
                         .builder()
+                        .weight(request.getWeight())
+                        .height(request.getWidth())
+                        .length(request.getLength())
+                        .width(request.getWidth())
                         .productColor(productColor)
                         .stocks(null)
                         .size(size)
@@ -168,6 +172,11 @@ public class ProductVariantService {
         ProductColor productColor = productColorRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
         productColorRepository.delete(productColor);
+    }
+    @Transactional
+    public void syncVariantAvailability() {
+        productVariantRepository.setAvailableIfInStockNative();
+        productVariantRepository.setNotAvailableIfOutOfStockNative();
     }
 
 

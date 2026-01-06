@@ -9,13 +9,14 @@ import org.springframework.http.HttpStatusCode;
 @AllArgsConstructor
 public enum ErrorCode {
     // Auth & User
+    INVALID_TOKEN(9000,"invalid token ",HttpStatus.BAD_REQUEST),
     PASSWORD_MATCHED(1057,"password must be differrent from old password",HttpStatus.BAD_REQUEST),
     PASSWORD_NOT_MATCH(1038, "Incorrect password", HttpStatus.BAD_REQUEST),
     PASSWORD_CONFIRM_NOT_MATCH(1039, "Password and confirm password do not match", HttpStatus.BAD_REQUEST),
     ROLE_NOT_FOUND(1036, "ROLE NOT FOUND", HttpStatus.NOT_FOUND),
     EXPIRED_TOKEN(1001, "TOKEN EXPIRED", HttpStatus.UNAUTHORIZED),
-    USERNAME_INVALID(1003, "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
-    INVALID_PASSWORD(1004, "Password must be at least {min} characters", HttpStatus.BAD_REQUEST),
+    USERNAME_INVALID(1003, "Username must be at least 8 characters", HttpStatus.BAD_REQUEST),
+    INVALID_PASSWORD(1004, "Password must be at least 8 characters", HttpStatus.BAD_REQUEST),
     USER_NOT_EXISTED(1005, "User not existed", HttpStatus.NOT_FOUND),
     UNAUTHENTICATED(1007, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     INVALID_DOB(1008, "Your age must be at least 12  ", HttpStatus.BAD_REQUEST),
@@ -88,6 +89,8 @@ public enum ErrorCode {
     CART_NOT_FOUND(1026, "cart is not exsited", HttpStatus.NOT_FOUND),
 
     // Order
+    ORDER_NOT_CANCEABLE(2020,"order not allow to cancle ",HttpStatus.BAD_REQUEST),
+    ORDER_REVIEW_EXISTED(1980,"order item all ready reviewed",HttpStatus.BAD_REQUEST),
     ORDER_ITEM_NOT_FOUND(1054, "Order item not found", HttpStatus.NOT_FOUND),
     ORDER_NOT_FOUND(1043, "Order not found", HttpStatus.NOT_FOUND),
     ORDER_STATUS_INVALID(1060, "Order status is invalid", HttpStatus.BAD_REQUEST),
@@ -135,6 +138,9 @@ public enum ErrorCode {
 
     //STOCK-TRANSACTION
     INVALID_DATE(1130, "Invalid date", HttpStatus.BAD_REQUEST),
+
+    //Voucher
+    VOUCHER_NOT_FOUND(3000,"Voucher not found",HttpStatus.NOT_FOUND),
 
     // Generic
     INVALID_INPUT(9998,"INVALID_INPUT",HttpStatus.BAD_REQUEST),

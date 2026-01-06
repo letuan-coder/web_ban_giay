@@ -12,5 +12,6 @@ import java.util.UUID;
 public interface WareHouseRepository extends JpaRepository<WareHouse, UUID> {
     Optional<WareHouse> findBywarehouseCode(String warehouseCode);
     List<WareHouse> findAllByDeletedFalse();
+    Optional<WareHouse> findByProvinceCodeAndIsCentralTrue(Integer provinceId);
 
 }

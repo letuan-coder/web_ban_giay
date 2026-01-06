@@ -34,6 +34,7 @@ public class OrderController {
                 .build();
     }
 
+
     @PostMapping
     public ApiResponse<OrderResponse> createOrder(
             @RequestBody @Valid OrderRequest request
@@ -49,10 +50,21 @@ public class OrderController {
                 .build();
     }
 
+    @PostMapping("/cancel-order/{id}")
+    public ApiResponse<OrderResponse> cancelOrder(
+            @RequestBody @Valid UUID orderId,
+            HttpServletRequest req) {
+        orderService.cancelOrder(orderId,req);
+        return ApiResponse.<OrderResponse>builder()
+                .data(null)
+                .message("order cancel successful ")
+                .build();
+    }
+
     @PostMapping("/check-out")
     public ApiResponse<CheckOutResponse> checkOutOrder(
-            @RequestBody @Valid List<CheckOutRequest> request
-    ) {
+            @RequestBody @Valid CheckOutRequest request
+    ){
         CheckOutResponse response = orderService.checkOutOrder(request);
         return ApiResponse.<CheckOutResponse>builder()
                 .data(response)
@@ -71,9 +83,21 @@ public class OrderController {
                 .build();
     }
 
+    @PatchMapping("/{orderId}/shipping")
+    public ApiResponse<OrderResponse> updateShippingStatus(
+            @PathVariable UUID orderId,
+            @RequestBody String newStatus
+    ) {
+        orderService.updateShippingStatus(orderId, newStatus);
+        return ApiResponse.<OrderResponse>builder()
+                .data(null)
+                .message("update shipping status for order")
+                .build();
+    }
+
     @GetMapping("/all")
     public ApiResponse<List<OrderResponse>> getOrdersForAdmin() {
-        List<OrderResponse> response = orderService.getOrdersByUser();
+        List<OrderResponse> response = orderService.getOrdersForAdmin();
         return ApiResponse.<List<OrderResponse>>builder()
                 .data(response)
                 .build();

@@ -14,7 +14,7 @@ import java.util.UUID;
 public interface StockRepository extends JpaRepository<Stock, Long> {
     Optional<Stock> findByVariantAndStore(ProductVariant variant, Store store);
 
-    Optional<Stock> findByStoreId(UUID storeId);
+    Optional<Stock> findByStore_Id(UUID storeId);
 
     Optional<Stock> findByVariantAndWarehouse(ProductVariant variant, WareHouse warehouse);
 

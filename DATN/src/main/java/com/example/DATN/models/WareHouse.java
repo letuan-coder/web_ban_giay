@@ -34,14 +34,9 @@ public class WareHouse extends BaseEntity{
     private Integer provinceCode;
     private Integer districtCode;
     private Integer wardCode;
-
-
-
     private Integer capacity;
-
     private Boolean deleted = false;
-
-
+    private Boolean isCentral;
     @OneToMany(mappedBy = "warehouse", cascade = CascadeType.ALL)
     private Set<Stock> stocks = new HashSet<>();
 

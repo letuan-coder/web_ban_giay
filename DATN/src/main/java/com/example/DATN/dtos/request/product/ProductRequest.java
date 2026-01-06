@@ -24,12 +24,16 @@ public class ProductRequest {
     private MultipartFile file;
     private BigDecimal price;
     private BigDecimal importPrice;
+    private Integer weight;
+    private Integer Length;
+    private Integer Width;
+    private Integer Height;
     private List<String> colorCodes;
     private List<String> sizeCodes;
     private UUID supplierId;
     @NotNull(message = "BRAND_ID_REQUIRED")
     private Long brandId;
-    private Double weight;
+
     @NotNull(message = "CATEGORY_ID_REQUIRED")
     private Long categoryId;
 

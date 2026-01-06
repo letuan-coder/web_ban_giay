@@ -5,7 +5,10 @@ import com.example.DATN.dtos.respone.product.ProductVariantDetailResponse;
 import com.example.DATN.dtos.respone.product.ProductVariantResponse;
 import com.example.DATN.models.ProductColor;
 import com.example.DATN.models.ProductVariant;
-import org.mapstruct.*;
+import org.mapstruct.IterableMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +21,8 @@ public interface ProductVariantMapper {
     @Mapping(target = "createdAt" ,source = "createdAt")
     @Mapping(target = "id", source = "id")
     ProductVariantResponse toProductVariantResponse(ProductVariant productVariant);
+
+
 
     List<ProductVariantResponse> toProductVariantResponse(List<ProductVariant> productVariants);
 
@@ -32,7 +37,7 @@ public interface ProductVariantMapper {
     ProductVariantDetailResponse basicToDetail(ProductVariant variant);
 
     @Named("toVariantDetail")
-    default ProductVariantDetailResponse toDetail(ProductVariant variant) {
+    default ProductVariantDetailResponse toDetail (ProductVariant variant) {
         if (variant == null) {
             return null;
         }

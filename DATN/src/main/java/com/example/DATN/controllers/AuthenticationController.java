@@ -1,5 +1,6 @@
 package com.example.DATN.controllers;
 
+import com.example.DATN.config.CustomeJwtDecoder;
 import com.example.DATN.dtos.request.jwt.*;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.jwt.AuthenticationResponse;
@@ -25,7 +26,7 @@ import java.text.ParseException;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
-
+    private final CustomeJwtDecoder jwtDecoder;
 
     @PostMapping("/login")
     ApiResponse <AuthenticationResponse> login(

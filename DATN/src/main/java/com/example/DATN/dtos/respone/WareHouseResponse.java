@@ -20,4 +20,5 @@ public class WareHouseResponse {
     private String name;
     private String location;
     private Integer capacity;
+    private Boolean isCentral;
 }

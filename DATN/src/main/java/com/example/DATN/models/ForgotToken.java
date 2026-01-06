@@ -2,6 +2,9 @@ package com.example.DATN.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.util.UUID;
 
 @Entity
 @Table(name = "forgot_tokens")
@@ -12,8 +15,8 @@ import lombok.*;
 @Builder
 public class ForgotToken {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @UuidGenerator
+    private UUID id;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String token;

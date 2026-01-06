@@ -27,6 +27,9 @@ public class UserAddress extends BaseEntity{
     @JsonBackReference("user-address")
     private User user;
 
+    private Double Longitude;
+    private Double Latitude;
+
     @Column(nullable = false, length = 255)
     private String receiverName;
 

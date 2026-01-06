@@ -8,7 +8,6 @@ import com.example.DATN.dtos.respone.jwt.AuthenticationResponse;
 import com.example.DATN.dtos.respone.jwt.IntrospectResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
-import com.example.DATN.helper.GetUserByJwtHelper;
 import com.example.DATN.models.ForgotToken;
 import com.example.DATN.models.InvalidateToken;
 import com.example.DATN.models.Role;
@@ -41,6 +40,7 @@ import org.springframework.util.CollectionUtils;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.text.ParseException;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -50,7 +50,6 @@ import java.util.*;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class AuthenticationService {
     private final ForgotTokenRepository forgotTokenRepository;
-
     @Value("${jwt.secret}")
     private String jwtSecret;
 
@@ -59,7 +58,7 @@ public class AuthenticationService {
 
     @Value("${jwt.valid-duration}")
     @NonFinal
-    private long VALID_DURATION; // 1 hour in seconds
+    private long VALID_DURATION;
 
     @Value("${jwt.refreshable-duration}")
     private long REFRESHABLE_DURATION; // 7 days in seconds
@@ -68,7 +67,6 @@ public class AuthenticationService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
-    private final GetUserByJwtHelper getUserByJwtHelper;
 
     final InvalidateTokenRepository invalidateTokenRepository;
     private final MailService mailService;
@@ -110,20 +108,25 @@ public class AuthenticationService {
         mailService.sendMail(mailStructure);
 
     }
-
+    @Transactional(rollbackFor = Exception.class)
     public void resetPassword(ResetPasswordRequest request) throws ParseException, JOSEException {
         ForgotToken forgotToken = forgotTokenRepository.findByToken(request.getToken())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.EXPIRED_TOKEN));
-
-        verifiedToken(request.getToken(), false);
+       SignedJWT signedJWT = verifiedToken(request.getToken(), false);
         if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
             throw new ApplicationException(ErrorCode.PASSWORD_CONFIRM_NOT_MATCH);
         }
         User user = userRepository.findByEmail(forgotToken.getEmail())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+        InvalidateToken invalidateToken = InvalidateToken.builder()
+                .id(signedJWT.getJWTClaimsSet().getJWTID())
+                .expiryTime(signedJWT.getJWTClaimsSet().getExpirationTime())
+                .build();
+        invalidateTokenRepository.save(invalidateToken);
     }
 
 
@@ -250,7 +253,7 @@ public class AuthenticationService {
         Optional<User> user = userRepository.findByUsername(request.getUsername());
         boolean isPasswordMatch = passwordEncoder.matches(request.getPassword(), user.get().getPassword());
         if (!isPasswordMatch) {
-            throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+            throw new ApplicationException(ErrorCode.PASSWORD_NOT_MATCH);
         }
         //generate jwt
         String jwt = GenerateJWT(user.get());
@@ -292,7 +295,7 @@ public class AuthenticationService {
     public String GenerateJwtForForgotPassword(String email) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + VALID_DURATION * 1000L);
+        Date expiryDate = Date.from(  Instant.now().plus(15, ChronoUnit.MINUTES));
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject("email_" + email)
@@ -389,7 +392,7 @@ public class AuthenticationService {
             throw new ApplicationException(ErrorCode.EXPIRED_TOKEN);
         }
         if (invalidateTokenRepository.existsById(id)) {
-            throw new ApplicationException(ErrorCode.USER_NOT_EXISTED);
+            throw new ApplicationException(ErrorCode.INVALID_TOKEN);
         }
         return signedJWT;
     }

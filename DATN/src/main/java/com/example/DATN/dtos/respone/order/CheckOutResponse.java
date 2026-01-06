@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,5 +16,6 @@ import java.util.UUID;
 public class CheckOutResponse {
     private List<CheckOutProductResponse> products;
     private UUID userAddressId;
-    private Integer ExpectedFee;
+    private Integer shippingFee;
+    private BigDecimal finalPrice;
 }

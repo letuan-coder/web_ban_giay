@@ -1,6 +1,5 @@
 package com.example.DATN.dtos.respone.order;
 
-import com.example.DATN.models.UserAddress;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -13,7 +12,7 @@ public class PendingOrderRedis {
     private String phoneNumber;
     private String receiverName;
     private Long userId;
-    private UserAddress userAddressesId;
+    private ShippingAddressRedis userAddresses;
     private List<PendingOrderItem> items;
     private BigDecimal totalPrice;
     private Integer totalWeight;

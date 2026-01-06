@@ -7,7 +7,8 @@ export interface OrderItem {
 }
 
 export interface Order {
-  id: number;
+  id: string;
+  orderCode:string;
   userName: string;
   phoneNumber: string;
   userAddress: string;
@@ -16,7 +17,7 @@ export interface Order {
   orderStatus: OrderStatus;
   shippingStatus: ShippingStatus;
   created_At: string;
-  paymentMethod: string;
+  paymentMethod: PaymentStatus;
   items: OrderItem[];
   note?: string;
 }
@@ -32,7 +33,6 @@ export const PAYMENT_STATUS: PaymentStatus[] = [
 ];
 
 export type ShippingStatus =
-
   | 'DELEVERED'
   | 'DELEVERING'
   | 'PICKING'

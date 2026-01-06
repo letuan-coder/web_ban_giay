@@ -1,21 +1,23 @@
 package com.example.DATN.dtos.respone.order;
 
 import com.example.DATN.constant.OrderStatus;
+import com.example.DATN.constant.PaymentStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class OrderResponse {
+    private UUID id;
     private String orderCode;
     private String userName;
-    private String userAddress;
-    private String phoneNumber;
-    private String receiverName;
+    private ShippingAddressResponse shippingAddressResponse;
     private String paymentMethodName;
+    private PaymentStatus paymentStatus;
     private OrderStatus orderStatus;
     private BigDecimal totalPrice;
     private String response;

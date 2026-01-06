@@ -29,6 +29,9 @@ public class Store extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String location;
 
+    private Double Longitude;
+    private Double Latitude;
+
     private Integer provinceCode;
     private Integer districtCode;
     private Integer wardCode;

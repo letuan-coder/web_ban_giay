@@ -3,6 +3,8 @@ package com.example.DATN.mapper;
 import com.example.DATN.dtos.request.order.OrderRequest;
 import com.example.DATN.dtos.respone.order.OrderResponse;
 import com.example.DATN.dtos.respone.order.PendingOrderRedis;
+import com.example.DATN.dtos.respone.order.ShippingAddressRedis;
+import com.example.DATN.models.Embeddable.ShippingAddress;
 import com.example.DATN.models.Order;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,19 +16,17 @@ public interface OrderMapper {
     Order toEntity (OrderRequest request);
 
 
+    @Mapping(target = "id", source = "id")
     @Mapping(target = "paymentMethodName",source = "paymentMethod")
     @Mapping(target = "totalPrice",source = "total_price")
     @Mapping(target = "items",source = "items")
     @Mapping(target = "created_At",source = "createdAt")
-    @Mapping(target = "userAddress",source = "userAddress.userAddress")
-    @Mapping(target = "receiverName",source = "userAddress.receiverName")
-    @Mapping(target = "phoneNumber",source = "userAddress.phoneNumber")
+    @Mapping(target = "shippingAddressResponse",source = "userAddresses")
     @Mapping(target = "userName",source = "user.username")
     OrderResponse toResponse(Order oder);
 
     @Mapping(target = "orderCode", source = "orderCode")
     @Mapping(target = "userId", source = "user.id")
-    @Mapping(target = "userAddressesId",source = "userAddress")
     @Mapping(target = "totalPrice", source = "total_price")
     @Mapping(target = "totalWeight", source = "total_weight")
     @Mapping(target = "totalHeight", source = "total_height")
@@ -44,4 +44,8 @@ public interface OrderMapper {
     @Mapping(target = "total_length", source = "totalLength")
     @Mapping(target = "items", source = "items")
     Order toOrder(PendingOrderRedis pending);
+
+    ShippingAddressRedis toAddress (ShippingAddress shippingAddress);
+
+    ShippingAddress toShipping (ShippingAddressRedis shippingAddress);
 }

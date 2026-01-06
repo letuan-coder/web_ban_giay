@@ -47,7 +47,12 @@
           <input [currencyMask]="{ prefix: '', thousands: '.', align: 'left', precision: 0 }" type="text"
             class="form-control" [(ngModel)]="warehouseCapacityRaw" (ngModelChange)="onCapacityChange($event)"
             name="capacity" />
+        </div>
 
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" role="switch" id="isCentral" 
+                 [(ngModel)]="selectedWarehouse.isCentral" name="isCentral">
+          <label class="form-check-label" for="isCentral">Đặt làm kho tổng</label>
         </div>
 
         <button type="submit" class="btn btn-primary me-2">Lưu</button>
@@ -73,10 +78,16 @@
     <tbody>
       <tr *ngFor="let warehouse of warehouses">
         <th scope="row">{{ warehouse.warehouseCode }}</th>
-        <td>{{ warehouse.name }}</td>
+        <td>
+          {{ warehouse.name }}
+          <span *ngIf="warehouse.isCentral" class="badge bg-primary ms-2">Kho tổng</span>
+        </td>
         <td>{{ warehouse.location }}</td>
         <td>{{ warehouse.capacity | number:'1.0-0' }}</td>
         <td>
+          <button class="btn btn-sm btn-info me-2" (click)="setCentralWarehouse(warehouse.id)" [disabled]="warehouse.isCentral">
+            Đặt làm kho tổng
+          </button>
           <button class="btn btn-sm btn-warning me-2" (click)="selectWarehouse(warehouse)">Sửa</button>
           <button class="btn btn-sm btn-danger" (click)="deleteWarehouse(warehouse.warehouseCode)">Xóa</button>
         </td>

@@ -148,6 +148,7 @@ export class WarehousesComponent implements OnInit {
     const requestPayload = {
       name: this.selectedWarehouse.name,
       capacity: this.selectedWarehouse.capacity,
+      isDefault: this.selectedWarehouse.isCentral || false,
       location: locationString,
       addressDetail: this.selectedWarehouse.addressDetail,
       provinceCode: this.ghnSelectedProvinceId,
@@ -181,6 +182,14 @@ export class WarehousesComponent implements OnInit {
   deleteWarehouse(code: string): void {
     if (confirm('Bạn có chắc chắn muốn xóa kho này không?')) {
       this.warehouseService.delete(code).subscribe(() => {
+        this.loadWarehouses();
+      });
+    }
+  }
+
+  setCentralWarehouse(id: string): void {
+    if (confirm('Bạn có chắc chắn muốn đặt kho này làm kho tổng không? Chỉ có thể có một kho tổng.')) {
+      this.warehouseService.setCentral(id, true).subscribe(() => {
         this.loadWarehouses();
       });
     }

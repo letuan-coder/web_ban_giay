@@ -91,7 +91,7 @@
                   <label class="form-label">Tồn kho</label>
                   <input type="number" class="form-control" [(ngModel)]="variantGroup.stock" name="stock_{{i}}" required>
                 </div>
-                <div class="mb-3">
+                <!-- <div class="mb-3">
                   <label class="form-label">Cân nặng (gram)</label>
                   <input type="number" class="form-control" [(ngModel)]="variantGroup.weight" name="weight_{{i}}" required>
                 </div>
@@ -106,7 +106,7 @@
                 <div class="mb-3">
                   <label class="form-label">Chiều dài (cm)</label>
                   <input type="number" class="form-control" [(ngModel)]="variantGroup.length" name="length_{{i}}" required>
-                </div>
+                </div> -->
               </div>
 
             </div>
@@ -222,7 +222,7 @@
              'bi-arrow-down': sortColumn === 'stock' && sortDirection === 'asc',
              'bi-arrow-up': sortColumn === 'stock' && sortDirection === 'desc'
            }"></i>
-                    </button>
+                  </button>
                   </th>
                   <!-- <th scope="col">Cân nặng (g)</th>
                   <th scope="col">Cao (cm)</th>
@@ -238,7 +238,7 @@
                 <tr *ngFor="let variant of colorVariant.variantResponses">
                   <td><input type="checkbox" (change)="onSelectProduct($event, variant.id)"></td>
                   <td>{{ variant.sku }}</td>
-                  <td>{{ variant.size?.name }}</td>
+                  <td>{{ variant.size?.code }}</td>
                   <td>{{ variant.price | currency:'VND':'symbol':'1.0-0' }}</td>
                   <td>{{ variant.total_stock }}</td>
                   <!-- <td>{{ variant.weight }}</td>

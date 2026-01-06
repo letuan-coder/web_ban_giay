@@ -1,5 +1,6 @@
 package com.example.DATN.services;
 
+import com.example.DATN.constant.Is_Available;
 import com.example.DATN.constant.StockType;
 import com.example.DATN.constant.TransactionStatus;
 import com.example.DATN.constant.TransactionType;
@@ -64,18 +65,16 @@ public class StockService {
                 .orElseThrow(()->new ApplicationException(ErrorCode.WAREHOUSE_NOT_FOUND));
         List<Stock> stocks = new ArrayList<>();
         List<ProductVariant> productVariantList = productVariantRepository.findAll();
-        Long value = productVariantList.stream().count();
-        Long realmin =minQuantity.longValue()/value;
         for (ProductVariant variant : productVariantList) {
             boolean exists = stockRepository
-                    .existsByWarehouseAndVariantAndStockType(wareHouse, variant, StockType.STORE);
+                    .existsByWarehouseAndVariantAndStockType(wareHouse, variant, StockType.WAREHOUSE);
             if (exists) continue;
             Stock stock = Stock.builder()
                     .warehouse(wareHouse)
                     .variant(variant)
-                    .stockType(StockType.STORE)
+                    .stockType(StockType.WAREHOUSE)
                     .quantity(0)
-                    .minQuantity(realmin.compareTo(realmin))
+                    .minQuantity(minQuantity)
                     .build();
             stocks.add(stock);
         }
@@ -117,8 +116,10 @@ public class StockService {
             for (StockTransactionItem item : items) {
                 Stock stock = stockRepository.findByVariantAndStore(item.getVariant(),stockTransaction.getToStore())
                         .orElseThrow(()->new ApplicationException(ErrorCode.STOCK_NOT_FOUND));
+//                Stock stock = stockRepository.findByStoreId(stockTransaction.ge)
                 stock.setQuantity(stock.getQuantity()+item.getQuantity());
-
+                item.getVariant().setIsAvailable(Is_Available.AVAILABLE);
+                productVariantRepository.save(item.getVariant());
                 Stock savedStockForStore = stockRepository.save(stock);
                 response = stockMapper.toStockResponse(savedStockForStore);
             }

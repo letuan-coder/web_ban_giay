@@ -51,6 +51,12 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "category_id")
     Category category;
 
+    Integer Height;
+    Integer Length;
+    Integer Width;
+    Integer Weight;
+
+
     @NotNull
     @Column(name = "thumbnail_url")
     String thumbnailUrl;

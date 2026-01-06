@@ -2,6 +2,7 @@ package com.example.DATN.services;
 
 import cn.ipokerface.snowflake.SnowflakeIdGenerator;
 import com.example.DATN.dtos.request.WareHouseRequest;
+import com.example.DATN.dtos.request.warehouse.UpdateCentralRequest;
 import com.example.DATN.dtos.respone.WareHouseResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
@@ -27,6 +28,9 @@ public class WareHouseService {
     public WareHouseResponse createWareHouse(WareHouseRequest request) {
         Long snowflake = snowflakeIdGenerator.nextId();
         String code =wareHousePrefix+(snowflake);
+        if(request.getIsCentral()==null){
+          request.setIsCentral(false);
+        }
         WareHouse wareHouse = WareHouse.builder()
                 .warehouseCode(code)
                 .addressDetail(request.getAddressDetail())
@@ -36,11 +40,12 @@ public class WareHouseService {
                 .name(request.getName())
                 .location(request.getLocation())
                 .capacity(request.getCapacity())
+                .isCentral(request.getIsCentral())
                 .stocks(null)
                 .deleted(false)
                 .build();
         wareHouse = wareHouseRepository.save(wareHouse);
-        stockService.createStockForWarehouse(wareHouse.getId(),wareHouse.getCapacity());
+        stockService.createStockForWarehouse(wareHouse.getId(),100);
         return wareHouseMapper.toWareHouseResponse(wareHouse);
     }
 
@@ -48,6 +53,14 @@ public class WareHouseService {
         return wareHouseRepository.findAllByDeletedFalse().stream()
                 .map(wareHouseMapper::toWareHouseResponse)
                 .collect(Collectors.toList());
+    }
+
+    public void UpdateToCentral (UpdateCentralRequest request){
+        WareHouse wareHouse = wareHouseRepository.findById(request.getId())
+                .orElseThrow(() -> new ApplicationException(ErrorCode.WAREHOUSE_NOT_FOUND));
+
+        wareHouse.setIsCentral(request.getIsCentral());
+        wareHouseRepository.save(wareHouse);
     }
 
     public WareHouseResponse getWareHouseById(String warehouseCode) {

@@ -18,6 +18,8 @@ import { StockTransactionComponent } from './admin/stock-transaction/stock-trans
 import { CreateSupplierComponent } from './admin/suppliers/create-supplier/create-supplier.component'; // Import the new component
 import { WarehousesComponent } from './admin/warehouses/warehouses.component';
 import { SupplierListComponent } from './admin/suppliers/supplier-list/supplier-list.component'; // Import the new component
+import { Component } from '@angular/core';
+import { OrdersComponent } from './admin/orders/orders.component';
 // import { OrdersComponent } from './admin/orders/orders.component';
 
 export const routes: Routes = [
@@ -40,6 +42,6 @@ export const routes: Routes = [
   { path: 'admin/stock-transaction', component: StockTransactionComponent },
   { path: 'admin/suppliers', component: SupplierListComponent }, // New route for SupplierListComponent
   { path: 'admin/suppliers/create', component: CreateSupplierComponent }, // New route for CreateSupplierComponent
-  // { path: 'admin/orders', component: OrdersComponent },
-  { path: 'promotions', component: PromotionsComponent }
+  { path: 'admin/orders', component:OrdersComponent},
+  { path: 'promotions', component: PromotionsComponent },
 ];

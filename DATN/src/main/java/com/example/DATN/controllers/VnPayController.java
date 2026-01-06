@@ -14,6 +14,7 @@ import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.OrderMapper;
 import com.example.DATN.models.*;
+import com.example.DATN.models.Embeddable.ShippingAddress;
 import com.example.DATN.repositories.*;
 import com.example.DATN.services.OrderService;
 import com.example.DATN.services.VnPayServices;
@@ -168,11 +169,12 @@ public class VnPayController {
                     objectMapper.readValue(json, PendingOrderRedis.class);
             Order order = new Order();
             order = orderMapper.toOrder(pending);
+            ShippingAddress address = orderMapper.toShipping(pending.getUserAddresses());
             List<PendingOrderItem> pendingOrderItems = pending.getItems();
             User user = userRepository.findById(pending.getUserId())
                     .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
             order.setUser(user);
-            order.setUserAddress(pending.getUserAddressesId());
+            order.setUserAddresses(address);
             order.setOrderStatus(OrderStatus.PENDING);
             order.setPaymentStatus(PaymentStatus.PAID);
             order.setPaymentMethod(PaymentMethodEnum.VNPAY);

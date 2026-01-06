@@ -32,13 +32,21 @@ public class ProductReviewService {
             ProductReviewRequest request) {
         User user = getUserByJwtHelper.getCurrentUser();
 
-        Order order = orderRepository.findByOrderCode(orderCode)
+        Order order = orderRepository.findByOrderCodeAndUser_Id(orderCode,user.getId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
+        Boolean isExisted = orderItemRepository.existsByOrder_Id(order.getId());
+        if(!isExisted){
+            throw new ApplicationException(ErrorCode.ORDER_NOT_FOUND);
+        }
         if (!order.getOrderStatus().equals(OrderStatus.COMPLETED)) {
             throw new ApplicationException((ErrorCode.UNCATEGORIZED_EXCEPTION));
         } else {
+
             OrderItem orderItem =orderItemRepository.findById(request.getOrderItemId())
                     .orElseThrow(()->new ApplicationException(ErrorCode.ORDER_ITEM_NOT_FOUND));
+            if(orderItem.getRated()==true){
+                throw new ApplicationException(ErrorCode.ORDER_REVIEW_EXISTED);
+            }
             orderItem.setRated(true);
             ProductReview productReview = ProductReview.builder()
                     .user(user)

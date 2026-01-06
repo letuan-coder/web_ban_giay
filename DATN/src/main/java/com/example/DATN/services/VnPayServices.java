@@ -159,7 +159,6 @@ public class VnPayServices {
             long vnpAmount = Long.parseLong(request.getParameter("vnp_Amount")) / 100;
             String responseCode = request.getParameter("vnp_ResponseCode");
 
-            // ===== 4. Check order =====
             Order order = orderRepository.findByOrderCode(orderCode).orElse(null);
             if (order == null) {
                 response.put("RspCode", "01");

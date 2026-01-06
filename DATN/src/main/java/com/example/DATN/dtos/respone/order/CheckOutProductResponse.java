@@ -21,6 +21,7 @@ public class CheckOutProductResponse {
     private String colorName;
     private Integer sizeName;
     private BigDecimal price;
+    private BigDecimal finaPrice;
     private Integer stock;
     private String imageUrl;
 }

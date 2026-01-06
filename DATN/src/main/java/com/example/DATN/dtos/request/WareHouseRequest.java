@@ -20,4 +20,5 @@ public class WareHouseRequest {
     private String location;
 //    @NotNull (message = "CAPACITY_IS_NULL")
     private Integer capacity;
+    private Boolean isCentral;
 }
