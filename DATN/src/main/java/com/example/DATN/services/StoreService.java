@@ -32,7 +32,6 @@ public class StoreService {
         Store store = storeMapper.toStore(request);
         store.setCode(storeId);
         Store storesaved = storeRepository.save(store);
-        stockService.createStockForStore(storesaved.getId(),100);
         return storeMapper.toStoreResponse(storesaved);
     }
 

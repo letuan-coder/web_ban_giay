@@ -1,10 +1,23 @@
 package com.example.DATN.models;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 import java.util.UUID;
 
 public interface VoucherRepository extends JpaRepository<Voucher, UUID> {
     Optional<Voucher> findByVoucherCode(String code);
+    @Modifying
+    @Query("""
+    UPDATE Voucher v
+    SET v.usedCount = v.usedCount + 1
+    WHERE v.id = :voucherId
+      AND v.isActive = true
+      AND v.usedCount < v.usageLimit
+""")
+    int lockVoucher(@Param("voucherId") UUID voucherId);
+
 }

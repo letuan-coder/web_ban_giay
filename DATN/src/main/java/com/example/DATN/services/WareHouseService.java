@@ -45,7 +45,6 @@ public class WareHouseService {
                 .deleted(false)
                 .build();
         wareHouse = wareHouseRepository.save(wareHouse);
-        stockService.createStockForWarehouse(wareHouse.getId(),100);
         return wareHouseMapper.toWareHouseResponse(wareHouse);
     }
 

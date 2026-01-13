@@ -28,9 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Service nghiệp vụ giỏ hàng
- */
 @Service
 @EnableWebSecurity
 @RequiredArgsConstructor

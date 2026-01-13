@@ -27,9 +27,6 @@ public class ProductColor extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.AUTO)
     UUID id;
 
-
-
-
     @ManyToOne
     @JoinColumn(name = "color_code")
     Color color;
@@ -37,7 +34,7 @@ public class ProductColor extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "product_id")
     @JsonBackReference
-            @OnDelete(action = OnDeleteAction.CASCADE)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     Product product;
 
     @OneToMany(mappedBy = "productColor"

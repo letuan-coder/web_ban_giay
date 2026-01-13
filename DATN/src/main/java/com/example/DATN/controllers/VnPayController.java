@@ -1,28 +1,19 @@
 package com.example.DATN.controllers;
 
 import com.example.DATN.config.VnPayConfig;
-import com.example.DATN.constant.OrderStatus;
-import com.example.DATN.constant.PaymentMethodEnum;
-import com.example.DATN.constant.PaymentStatus;
 import com.example.DATN.dtos.request.vnpay.VnPayRefundRequest;
 import com.example.DATN.dtos.request.vnpay.VnPaymentRequest;
 import com.example.DATN.dtos.request.vnpay.VnQueryRequest;
-import com.example.DATN.dtos.respone.order.PendingOrderItem;
-import com.example.DATN.dtos.respone.order.PendingOrderRedis;
+import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.vnpay.VnPayResponse;
-import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.OrderMapper;
-import com.example.DATN.models.*;
-import com.example.DATN.models.Embeddable.ShippingAddress;
 import com.example.DATN.repositories.*;
 import com.example.DATN.services.OrderService;
 import com.example.DATN.services.VnPayServices;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,24 +22,22 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
 
 @Controller
 @RequestMapping("/api/vnpay")
-public class VnPayController {
-
+public class VnPayController
+{
     @Autowired
     private VnPayServices vnpayServices;
     @Autowired
     private OrderMapper orderMapper;
 
     private final RestTemplate restTemplate;
-    @Autowired
-    private RedisTemplate redisTemplate;
 
-    @Autowired
-    private ObjectMapper objectMapper;
     @Autowired
     private VnpayRepository vnpayRepository;
     private final String vnp_TmnCode = VnPayConfig.vnp_TmnCode;
@@ -132,76 +121,16 @@ public class VnPayController {
     }
 
     @GetMapping("/return")
-    public String vnpayReturn(
+    public ApiResponse<?> vnpayReturn(
             Model model,
-            HttpServletRequest request) throws UnsupportedEncodingException, JsonProcessingException {
-        Map<String, String> params = new HashMap<>();
-        request.getParameterMap()
-                .forEach((k, v) -> params.put(k, v[0]));
-
-        // verify checksum
-        boolean valid = vnpayServices.verifyReturn(request);
-
+            HttpServletRequest request)
+            throws UnsupportedEncodingException, JsonProcessingException {
         String orderCode = request.getParameter("vnp_TxnRef");
-        String responseCode = request.getParameter("vnp_ResponseCode");
-
-        model.addAttribute("params", params);
-        model.addAttribute("orderCode", orderCode);
-        model.addAttribute("success", valid && "00".equals(responseCode));
-        Vnpay vnpay = Vnpay.builder()
-                .vnpTxnRef(orderCode)
-                .vnp_BankCode(request.getParameter("vnp_BankCode"))
-                .vnp_OrderInfo(request.getParameter("vnp_OrderInfo"))
-                .vnp_PayDate(request.getParameter("vnp_PayDate"))
-                .vnp_TransactionNo(request.getParameter("vnp_TransactionNo"))
-                .vnp_Amount(request.getParameter("vnp_Amount"))
-                .vnp_ResponseCode(responseCode)
-                .vnp_CardType(request.getParameter("vnp_CardType"))
-                .build();
-        vnpayRepository.save(vnpay);
-        String key = "ORDER_PENDING:" + orderCode;
-        String json = (String) redisTemplate.opsForValue().get(key);
-
-        if (json == null) {
-            throw new ApplicationException(ErrorCode.ORDER_NOT_FOUND);
-        } else {
-            PendingOrderRedis pending =
-                    objectMapper.readValue(json, PendingOrderRedis.class);
-            Order order = new Order();
-            order = orderMapper.toOrder(pending);
-            ShippingAddress address = orderMapper.toShipping(pending.getUserAddresses());
-            List<PendingOrderItem> pendingOrderItems = pending.getItems();
-            User user = userRepository.findById(pending.getUserId())
-                    .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
-            order.setUser(user);
-            order.setUserAddresses(address);
-            order.setOrderStatus(OrderStatus.PENDING);
-            order.setPaymentStatus(PaymentStatus.PAID);
-            order.setPaymentMethod(PaymentMethodEnum.VNPAY);
-            order.setCreatedAt(LocalDateTime.now());
-            List<OrderItem> items = new ArrayList<>();
-            for (PendingOrderItem item : pendingOrderItems) {
-                OrderItem orderItem = new OrderItem();
-                ProductVariant productVariant = productVariantRepository.findBysku(item.getSku())
-                        .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
-                Integer quantity = item.getQuantity();
-                orderItem.setQuantity(quantity);
-                orderItem.setOrder(order);
-                orderItem.setProductVariant(productVariant);
-                orderItem.setPrice(item.getPrice());
-                orderItem.setWeight(item.getWeight());
-                orderItem.setHeight(item.getHeight());
-                orderItem.setWidth(item.getWidth());
-                orderItem.setLength(item.getLength());
-                orderItem.setRated(false);
-                items.add(orderItem);
-            }
-            order.setItems(items);
-            orderRepository.save(order);
-            redisTemplate.delete(key);
-            return "vnpay_return";
-
-        }
+        vnpayServices.PendingToOrder(  model, request);
+            return ApiResponse.builder()
+                    .data(null)
+                    .message("payment order "+orderCode+" successfully !!!")
+                    .build();
     }
 
     @GetMapping("/ipn")

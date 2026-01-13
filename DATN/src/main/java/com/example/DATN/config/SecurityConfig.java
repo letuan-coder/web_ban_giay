@@ -36,6 +36,7 @@ public class SecurityConfig {
                     , "/api/newsletter/subscribe"
                     , "/api/products"
                     , "/api/products/search"
+                    ,"/api/product-variants/**"
                     , "/api/ghtk/create-order",
                     "/api/guest"};
     private final String[] POST_PUBLIC_API = {"/api/ghtk/create-order"};
@@ -64,6 +65,7 @@ public class SecurityConfig {
 //                org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class
 //        );
         httpSecurity.authorizeHttpRequests(request -> request
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/vnpay/return").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/vnpay/ipn").permitAll()
 

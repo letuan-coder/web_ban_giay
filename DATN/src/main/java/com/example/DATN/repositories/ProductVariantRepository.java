@@ -3,6 +3,7 @@ package com.example.DATN.repositories;
 import com.example.DATN.models.ProductColor;
 import com.example.DATN.models.ProductVariant;
 import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,12 +18,17 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     List<ProductVariant> findAllByproductColor(ProductColor productColor);
 
     ProductVariant findByProductColor (ProductColor productColor);
-
+    List<ProductVariant> findAllBySkuIn(List<String> skus);
     Optional<ProductVariant> findById(UUID id);
 
 
     Integer countById(UUID id);
-
+    @EntityGraph(attributePaths = {
+            "size",
+            "productColor.color",
+            "productColor.product",
+            "productColor.images"
+    })
     Optional<ProductVariant> findBysku(String sku);
     @Modifying
     @Transactional

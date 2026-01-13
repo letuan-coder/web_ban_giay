@@ -2,6 +2,7 @@ package com.example.DATN.dtos.respone.product;
 
 import com.example.DATN.constant.Is_Available;
 import com.example.DATN.dtos.respone.StockResponse;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +26,7 @@ public class ProductVariantDetailResponse {
     private BigDecimal price;
     private BigDecimal finalPrice;
     private Integer total_stock;
+    @JsonIgnore
     private List<StockResponse> stocks;
     public void calculateAndSetTotalStock() {
         if (this.stocks != null) {

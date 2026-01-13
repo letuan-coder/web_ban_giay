@@ -1,6 +1,5 @@
 package com.example.DATN.repositories;
 
-import com.example.DATN.models.Order;
 import com.example.DATN.models.OrderItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -13,7 +12,7 @@ import java.util.UUID;
  */
 @Repository
 public interface OrderItemRepository extends JpaRepository<OrderItem, UUID> {
-    List<OrderItem> findAllByOrder(Order order);
+    List<OrderItem> findAllByOrder_Id(UUID  orderId);
     Boolean existsByOrder_Id(UUID id);
 }
 

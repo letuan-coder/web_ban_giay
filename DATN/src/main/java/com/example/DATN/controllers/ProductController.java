@@ -10,6 +10,7 @@ import com.example.DATN.dtos.respone.product.ProductSupplierResponse;
 import com.example.DATN.dtos.respone.product.SearchProductResponse;
 import com.example.DATN.repositories.projection.ProductSalesProjection;
 import com.example.DATN.services.ProductService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -53,7 +54,7 @@ public class ProductController {
             @RequestParam(name = "price_min", required = false) Double priceMin,
             @RequestParam(name = "price_max", required = false) Double priceMax,
             @RequestParam(name = "status", required = false) ProductStatus status
-    ) {
+    ) throws JsonProcessingException{
         String sortField = (sortBy == null || sortBy.trim().isEmpty()) ? "createdAt" : sortBy.trim();
 
         Sort.Direction direction = "asc".equalsIgnoreCase(sortOrder)
@@ -93,7 +94,7 @@ public class ProductController {
                 .build();
     }
     @GetMapping("/supplier/{supplierId}")
-    public ApiResponse<List<ProductSupplierResponse>> getProductByProductCode(
+    public ApiResponse<List<ProductSupplierResponse>> getProductBySupplierId(
             @PathVariable UUID supplierId) {
         return ApiResponse.<List<ProductSupplierResponse>>builder()
                 .data(productService.getProductBySupplierId(supplierId))
@@ -103,7 +104,7 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ApiResponse<ProductDetailReponse> getProductById
-            (@PathVariable UUID id) {
+            (@PathVariable UUID id) throws JsonProcessingException {
         return ApiResponse.<ProductDetailReponse>builder()
                 .data(productService.getProductById(id))
                 .build();

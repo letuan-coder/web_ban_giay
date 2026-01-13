@@ -3,27 +3,38 @@ package com.example.DATN.services;
 import com.example.DATN.dtos.request.ghtk.GhnOrderInfo;
 import com.example.DATN.dtos.respone.ghn.CalculateFeeRequest;
 import com.example.DATN.dtos.respone.ghn.ShippingFeeResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class GhnService {
+    private static String ghnTokenStatic;
+    private static String createUrlStatic;
+
     @Value("${ghn.api.token}")
-    static String ghnToken;
+    private String ghnToken;
 
     @Value("${ghn.api.create.url}")
-    static String create_url;
+    private String createUrl;
+
+    @PostConstruct
+    public void init() {
+        ghnTokenStatic = this.ghnToken;
+        createUrlStatic = this.createUrl;
+    }
+
     @Value("${ghn.api.calculate-fee.url}")
     private String url;
+
+
     public static void createOrder(GhnOrderInfo ghnOrderInfo) {
         // URL GHN (sandbox)
-        String url =create_url;
+        String url = createUrlStatic;
 
         // Tạo RestTemplate
         RestTemplate restTemplate = new RestTemplate();
@@ -31,8 +42,8 @@ public class GhnService {
         // Tạo header
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Token",ghnToken );  // thay bằng token thật
-        headers.set("ShopId", "YOUR_SHOP_ID");   // thay bằng shopId thật
+        headers.set("Token", ghnTokenStatic);  // thay bằng token thật
+        headers.set("ShopId", "198223");   // thay bằng shopId thật
 
         // Tạo HttpEntity với body và header
         HttpEntity<GhnOrderInfo> requestEntity = new HttpEntity<>(ghnOrderInfo, headers);
@@ -55,7 +66,7 @@ public class GhnService {
         }
     }
 
-    public ShippingFeeResponse calculateShippingFee(CalculateFeeRequest request){
+    public ShippingFeeResponse calculateShippingFee(CalculateFeeRequest request) {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();

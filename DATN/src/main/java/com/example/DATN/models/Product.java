@@ -56,6 +56,10 @@ public class Product extends BaseEntity {
     Integer Width;
     Integer Weight;
 
+    @Column(name = "total_view")
+    @Builder.Default
+    Long totalView = 0L;
+
 
     @NotNull
     @Column(name = "thumbnail_url")
@@ -94,7 +98,7 @@ public class Product extends BaseEntity {
     private Set<Promotion> promotions = new HashSet<>();
 
     @OneToMany(mappedBy = "product",
-            fetch = FetchType.EAGER,
+            fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     @JsonManagedReference

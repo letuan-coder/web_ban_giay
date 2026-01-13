@@ -29,10 +29,7 @@ public class VoucherService {
         if(request.getUsageLimit()==null) {
             request.setUsageLimit(-1);
         }
-        String voucherType = request.getType().getPrefix();
-        String voucherName = voucherType
-                +"_"+request.getDiscountValue()
-                +"_"+snowflakeIdGenerator.nextId();
+        String voucherName = request.getType().format(request.getDiscountValue());
         Voucher voucher = Voucher.builder()
                 .voucherCode(code)
                 .discountValue(request.getDiscountValue())

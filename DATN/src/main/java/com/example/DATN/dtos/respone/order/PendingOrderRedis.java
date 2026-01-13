@@ -9,8 +9,6 @@ import java.util.List;
 public class PendingOrderRedis {
     private String orderCode;
     private String Note;
-    private String phoneNumber;
-    private String receiverName;
     private Long userId;
     private ShippingAddressRedis userAddresses;
     private List<PendingOrderItem> items;

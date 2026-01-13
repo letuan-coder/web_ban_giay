@@ -17,7 +17,6 @@ public class ShippingAddressRequest {
     private Integer district_Id;
     private String wardCode;
     private String wardName;
-
     private String streetDetail;
     private String fullDetail;
 }

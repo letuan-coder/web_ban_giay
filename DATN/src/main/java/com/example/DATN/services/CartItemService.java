@@ -1,28 +1,27 @@
 package com.example.DATN.services;
 
 import com.example.DATN.constant.Is_Available;
+import com.example.DATN.constant.VariantType;
 import com.example.DATN.dtos.request.cart.CartItemRequest;
 import com.example.DATN.dtos.request.cart.UpdateCartIItemRequest;
 import com.example.DATN.dtos.respone.cart.CartItemResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
-import com.example.DATN.helper.GetJwtIdForGuest;
 import com.example.DATN.helper.GetUserByJwtHelper;
 import com.example.DATN.mapper.CartItemMapper;
-import com.example.DATN.models.Cart;
-import com.example.DATN.models.CartItem;
-import com.example.DATN.models.ProductVariant;
-import com.example.DATN.models.User;
-import com.example.DATN.repositories.CartItemRepository;
-import com.example.DATN.repositories.CartRepository;
-import com.example.DATN.repositories.ProductVariantRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.DATN.models.*;
+import com.example.DATN.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,11 +35,12 @@ public class CartItemService {
     private final CartItemMapper cartItemMapper;
     private final CartRepository cartRepository;
     private final ProductVariantRepository productVariantRepository;
-
-    private final GetJwtIdForGuest getJwtIdForGuest;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
     private final GetUserByJwtHelper getUserByJwtHelper;
-    private final ObjectMapper objectMapper;
+    private static final DateTimeFormatter DAY_FMT =
+            DateTimeFormatter.ofPattern("yyyyMMdd")
+                    .withZone(ZoneId.of("Asia/Ho_Chi_Minh"));
+    private final ProductViewRepository productViewRepository;
 
     public List<CartItemResponse> getAllCartItems() {
 //        String guestKey = getJwtIdForGuest.GetGuestKey();
@@ -58,6 +58,7 @@ public class CartItemService {
         User user = getUserByJwtHelper.getCurrentUser();
         Cart cart = cartRepository.findByUser(user)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.CART_NOT_FOUND));
+
         List<CartItemResponse> listResponse = cartItemRepository.findByCartOrderByCreatedAt(cart).stream()
                 .map(cartItemMapper::toCartItemResponse).toList();
         return listResponse;
@@ -69,10 +70,33 @@ public class CartItemService {
         return cartItemMapper.toCartItemResponse(res);
     }
 
+    @Async
+    public void increaseView(UUID variantId, UUID product) {
+        String day = DAY_FMT.format(Instant.now());
+        String key = "product:view:variant:" + variantId + ":" + day;
+        String keyProduct = "product:view:product:" + product + ":" + day;
+        redisTemplate.opsForValue().increment(keyProduct, 1);
+        redisTemplate.expire(keyProduct, Duration.ofDays(2));
+        redisTemplate.opsForValue().increment(key, 1);
+        redisTemplate.expire(key, Duration.ofDays(2));
+    }
+
+    @Async
+    public void AddView(ProductVariant variant, User user) {
+        UUID productId = variant.getProductColor().getProduct().getId();
+        ProductView view = ProductView.builder()
+                .variant(variant)
+                .variantType(VariantType.CART)
+                .user(user)
+                .build();
+        productViewRepository.save(view);
+        increaseView(variant.getId(), productId);
+    }
 
     @Transactional
     public CartItemResponse AddCartItem(CartItemRequest request) {
         User user = getUserByJwtHelper.getCurrentUser();
+
         Cart cart = new Cart();
         cart = cartRepository.findByUser(user)
                 .orElseGet(() -> {
@@ -84,6 +108,7 @@ public class CartItemService {
         ProductVariant variant = productVariantRepository
                 .findBysku(request.getSku())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
+        AddView(variant, user);
         if (variant.getIsAvailable() == Is_Available.NOT_AVAILABLE) {
             throw new ApplicationException(ErrorCode.PRODUCT_NOT_AVAILABLE);
         }
@@ -117,8 +142,7 @@ public class CartItemService {
     public void updateCartItem(UpdateCartIItemRequest request) {
         User user = getUserByJwtHelper.getCurrentUser();
         Optional<Cart> cartOpt = cartRepository.findByUser(user);
-        if (!cartOpt.isPresent())
-        {
+        if (!cartOpt.isPresent()) {
             Cart cart = cartOpt.get();
             ProductVariant productVariant = productVariantRepository.findBysku(request.getSku())
                     .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -134,7 +158,7 @@ public class CartItemService {
                 );
                 cartItemRepository.save(existingItem);
             }
-        }else {
+        } else {
             CartItemRequest cartItemRequest = CartItemRequest.builder()
                     .sku(request.getSku())
                     .quantity(request.getQuantity())

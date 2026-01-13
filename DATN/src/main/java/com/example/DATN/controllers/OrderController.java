@@ -1,12 +1,14 @@
 package com.example.DATN.controllers;
 
 import com.example.DATN.constant.PaymentMethodEnum;
-import com.example.DATN.dtos.request.order.CheckOutRequest;
 import com.example.DATN.dtos.request.order.OrderRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
-import com.example.DATN.dtos.respone.order.CheckOutResponse;
 import com.example.DATN.dtos.respone.order.OrderItemResponse;
 import com.example.DATN.dtos.respone.order.OrderResponse;
+import com.example.DATN.exception.ApplicationException;
+import com.example.DATN.exception.ErrorCode;
+import com.example.DATN.repositories.UserAddressRepository;
+import com.example.DATN.services.CheckOutService;
 import com.example.DATN.services.OrderService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,11 +24,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
-
+    private final CheckOutService checkOutService;
+    private final UserAddressRepository userAddressRepository;
 
     @PostMapping("/admin/confirm-orders")
     public ApiResponse<OrderResponse> confirmOrder(
-            @RequestBody @Valid UUID orderId){
+            @RequestBody @Valid UUID orderId) {
         orderService.confirmOrder(orderId);
         return ApiResponse.<OrderResponse>builder()
                 .data(null)
@@ -38,7 +41,14 @@ public class OrderController {
     @PostMapping
     public ApiResponse<OrderResponse> createOrder(
             @RequestBody @Valid OrderRequest request
+            , @RequestHeader(value = "X-Idempotency-Key", required = false) String headerKey
             , HttpServletRequest servletRequest) throws JsonProcessingException {
+        String idempotencyKey = headerKey != null ? headerKey : request.getIdempotency();
+        if (idempotencyKey == null || idempotencyKey.trim().isEmpty()) {
+            throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
+        }
+        request.setIdempotency(idempotencyKey);
+
         OrderResponse response = new OrderResponse();
         if (request.getType() == PaymentMethodEnum.CASH_ON_DELIVERY) {
             response = orderService.createOrder(request);
@@ -54,20 +64,10 @@ public class OrderController {
     public ApiResponse<OrderResponse> cancelOrder(
             @RequestBody @Valid UUID orderId,
             HttpServletRequest req) {
-        orderService.cancelOrder(orderId,req);
+        orderService.cancelOrder(orderId, req);
         return ApiResponse.<OrderResponse>builder()
                 .data(null)
                 .message("order cancel successful ")
-                .build();
-    }
-
-    @PostMapping("/check-out")
-    public ApiResponse<CheckOutResponse> checkOutOrder(
-            @RequestBody @Valid CheckOutRequest request
-    ){
-        CheckOutResponse response = orderService.checkOutOrder(request);
-        return ApiResponse.<CheckOutResponse>builder()
-                .data(response)
                 .build();
     }
 

@@ -1,15 +1,14 @@
 package com.example.DATN.controllers;
 
 import com.example.DATN.dtos.request.StockRequest;
-import com.example.DATN.dtos.request.stock.CreateStockForStoreRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.StockResponse;
+import com.example.DATN.dtos.respone.StockTransactionResponse;
 import com.example.DATN.services.StockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/stocks")
@@ -18,23 +17,13 @@ public class StockController {
 
     private final StockService stockService;
 
-    @PostMapping("/min-stock/{storeId}")
-    public ApiResponse<Void> createStockForStore(
-            @PathVariable UUID storeId,
-            @RequestBody CreateStockForStoreRequest request
-    ){
-        stockService.createStockForStore(storeId,request.getMinQuantity());
-        return ApiResponse.<Void>builder()
-                .data(null)
-                .message("create min stock successful")
-                .build();
-    }
+
 
     @PostMapping
-    public ApiResponse<StockResponse> createStock(
+    public ApiResponse<StockTransactionResponse> createStock(
             @RequestBody StockRequest request) {
-       StockResponse response= stockService.createStock(request);
-        return ApiResponse.<StockResponse>builder()
+        StockTransactionResponse response= stockService.createStock(request);
+        return ApiResponse.<StockTransactionResponse>builder()
                 .data(response)
                 .build();
     }

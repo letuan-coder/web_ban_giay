@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatusCode;
 @AllArgsConstructor
 public enum ErrorCode {
     // Auth & User
+    IDEMPOTENCY_TIMEOUT(7000,"idempotency is expired",HttpStatus.BAD_REQUEST),
+    CONCURRENT_REQUEST_ERROR(6000,"Concurrent request is error",HttpStatus.BAD_REQUEST),
+    MISSING_IDEMPOTENCY_KEY(8000,"Missing idempotency key",HttpStatus.BAD_REQUEST),
     INVALID_TOKEN(9000,"invalid token ",HttpStatus.BAD_REQUEST),
     PASSWORD_MATCHED(1057,"password must be differrent from old password",HttpStatus.BAD_REQUEST),
     PASSWORD_NOT_MATCH(1038, "Incorrect password", HttpStatus.BAD_REQUEST),
@@ -138,8 +141,8 @@ public enum ErrorCode {
 
     //STOCK-TRANSACTION
     INVALID_DATE(1130, "Invalid date", HttpStatus.BAD_REQUEST),
-
     //Voucher
+    VOUCHER_EXPIRED(2999,"voucher is expired ",HttpStatus.BAD_REQUEST),
     VOUCHER_NOT_FOUND(3000,"Voucher not found",HttpStatus.NOT_FOUND),
 
     // Generic

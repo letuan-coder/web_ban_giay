@@ -207,10 +207,12 @@ public class StockTransactionService {
         if (request.getFromSupplierId() == null || (request.getToWarehouseId() == null)) {
             throw new ApplicationException(ErrorCode.INVALID_VALIDATION);
         }
-        Supplier supplier = supplierRepository.findByTaxCode(request.getFromSupplierId())
+        UUID id = UUID.fromString(request.getFromSupplierId());
+        UUID wareId = UUID.fromString(request.getToWarehouseId());
+        Supplier supplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.SUPPLIER_NOT_FOUND));
         transaction.setSupplier(supplier);
-        WareHouse wareHouse = wareHouseRepository.findBywarehouseCode(request.getToWarehouseId())
+        WareHouse wareHouse = wareHouseRepository.findById(wareId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
         transaction.setToWareHouse(wareHouse);
         List<StockTransactionItemRequest> transactionItems = request.getItems();
@@ -313,10 +315,10 @@ public class StockTransactionService {
             Integer quantity, Boolean isIncrease) {
         Stock stock;
         if (warehouse != null) {
-            stock = stockRepository.findByVariantAndWarehouse(variant, warehouse)
+            stock = stockRepository.findByVariant_IdAndWarehouse(variant.getId(), warehouse)
                     .orElseGet(() -> createNewStock(variant, warehouse, null));
         } else if (store != null) {
-            stock = stockRepository.findByVariantAndStore(variant, store)
+            stock = stockRepository.findByVariant_IdAndStore(variant.getId(), store)
                     .orElseGet(() -> createNewStock(variant, null, store));
         } else {
             return;

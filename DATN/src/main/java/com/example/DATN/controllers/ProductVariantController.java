@@ -66,9 +66,10 @@ public class ProductVariantController {
     public ResponseEntity<ApiResponse<List<ProductVariantResponse>>> createListProductVariant(
             @PathVariable UUID product_color_id,
             @Valid @RequestBody ProductVariantRequest variantRequest) {
-        List<ProductVariantResponse> responses = productVariantService.createListProductVariant(product_color_id, variantRequest);
-
-        List<UUID> ids = responses.stream().map(ProductVariantResponse::getId).collect(Collectors.toList());
+        List<ProductVariantResponse> responses = productVariantService.
+                createListProductVariant(product_color_id, variantRequest);
+        List<UUID> ids = responses.stream().map(ProductVariantResponse::getId)
+                .collect(Collectors.toList());
         List<ProductVariant> variants = productVariantRepository.findAllById(ids);
 //        List<ProductVariantIndex> variantIndices = variants.stream()
 //                .map(productVariantIndexMapper::toIndex)

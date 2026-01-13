@@ -15,6 +15,10 @@ public class ShippingAddressRedis {
     private String provinceName;
     private String districtName;
     private String wardName;
+    private Integer district_Id;
+    private String wardCode;
     private String streetDetail;
     private String fullDetail;
+    private Double longitude;
+    private Double latitude;
 }

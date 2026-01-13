@@ -109,26 +109,26 @@ public class OrderReturnService {
     }
 
     @Transactional
-    public OrderReturn approveReturnRequest(Long returnId) {
+    public OrderReturn approveReturnRequest(UUID returnId) {
+
         OrderReturn orderReturn = orderReturnRepository.findById(returnId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.RETURN_REQUEST_NOT_FOUND));
 
         if (orderReturn.getStatus() != OrderReturnStatus.PENDING) {
             throw new ApplicationException(ErrorCode.RETURN_STATUS_INVALID);
         }
-
         orderReturn.setStatus(OrderReturnStatus.APPROVED);
         return orderReturnRepository.save(orderReturn);
     }
 
-    public OrderReturnResponse getReturnRequestId(Long returnId) {
+    public OrderReturnResponse getReturnRequestId(UUID returnId) {
         OrderReturn orderReturn = orderReturnRepository.findById((returnId))
                 .orElseThrow(() -> new ApplicationException(ErrorCode.RETURN_REQUEST_NOT_FOUND));
         return orderReturnMapper.toOrderReturnResponse(orderReturn);
     }
 
     @Transactional
-    public OrderReturn rejectReturnRequest(Long returnId) {
+    public OrderReturn rejectReturnRequest(UUID returnId) {
         // Add logic to check if user is admin
 
         OrderReturn orderReturn = orderReturnRepository.findById(returnId)

@@ -18,15 +18,22 @@ import com.example.DATN.mapper.ProductMapper;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
 import com.example.DATN.repositories.projection.ProductSalesProjection;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.Normalizer;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -46,6 +53,10 @@ public class ProductService {
     private final ProductMapper productMapper;
     private final ProductColorService productColorService;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
+    private static final DateTimeFormatter DAY_FMT =
+            DateTimeFormatter.ofPattern("yyyyMMdd")
+                    .withZone(ZoneId.of("Asia/Ho_Chi_Minh"));
+    private final RedisTemplate redisTemplate;
     private final String PREFIX = "SHOES";
     private final ImageProductService imageProductService;
     private final FormatInputString formatInputString;
@@ -63,6 +74,7 @@ public class ProductService {
 //                .map(productMapper::toProductResponse)
 //                .collect(Collectors.toList());
 //    }
+
     public List<String> getImageByProductColorId(UUID productColorId) {
         ProductColor productColor = productColorRepository.findById(productColorId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -83,10 +95,11 @@ public class ProductService {
     }
 
     public Page<ProductSalesProjection> BestSellingProductSales(Pageable pageable) {
-       return productRepository.findBestSellingProductsDetail(pageable);
+        return productRepository.findBestSellingProductsDetail(pageable);
 
     }
-    public List<ProductSalesProjection> WorstSellingProductSales(Pageable page){
+
+    public List<ProductSalesProjection> WorstSellingProductSales(Pageable page) {
         return productRepository.findWorstSellingProducts(page);
     }
 
@@ -110,9 +123,7 @@ public class ProductService {
         }
         String formatProductName = formatInputString.formatInputString(request.getName().trim());
         Long snowCode = snowflakeIdGenerator.nextId();
-        ;
         String productCode = (generate(PREFIX, snowCode));
-//        String formatDescription = formatInputString.formatInputString(request.getDescription());
         String rawDesc = request.getDescription();
         String realDesc = rawDesc.replace("\\n", "\n");
         Product product = productMapper.toProduct(request);
@@ -150,14 +161,7 @@ public class ProductService {
                     .build();
             ProductColor productColor = productColorMapper
                     .toEntity(productColorService.createProductColor(productColorRequest));
-//            ProductRedis productRedis = ProductRedis.builder()
-//                    .id(savedProduct.getId())
-//                    .name(savedProduct.getName())
-//                    .productCode(savedProduct.getProductCode())
-//                    .price(savedProduct.getPrice())
-//                    .thumbnailUrl(savedProduct.getThumbnailUrl())
-//                    .build();
-//            productRedisRepository.save(productRedis);
+//
         }
         UploadImageRequest uploadImageRequest = UploadImageRequest.builder()
                 .product(savedProduct)
@@ -185,18 +189,22 @@ public class ProductService {
         return slug.toLowerCase(Locale.ROOT);
     }
 
+
     public Page<ProductResponse> getAllProducts(
             String productName, Double priceMin, Double priceMax,
-            ProductStatus status, Long brandId, Long categoryId, String sizeCode, String colorCode, Pageable pageable) {
+            ProductStatus status, Long brandId, Long categoryId,
+            String sizeCode, String colorCode, Pageable pageable) {
+
         Page<Product> productsPage = productRepository.findAll(filterProducts(productName,
                 priceMin, priceMax, status, brandId, categoryId, colorCode, sizeCode), pageable);
-        productVariantRepository.setAvailableIfInStockNative();
-        productVariantRepository.setNotAvailableIfOutOfStockNative();
+
 
         return productsPage.map(this::mapProductToProductResponse);
+
     }
 
     public List<SearchProductResponse> getProductByProductCode(String productCode) {
+
         return productRepository.findByProductCode(productCode)
                 .stream().map(productMapper::toSearchDetail)
                 .collect(Collectors.toList());
@@ -210,16 +218,35 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    public List<ProductResponse> searchProductsByName(String name) {
-        return productRepository.findByNameContainingIgnoreCase(name).stream()
-                .map(this::mapProductToProductResponse)
-                .collect(Collectors.toList());
-    }
+    //
+//    public List<ProductResponse> searchProductsByName(String name) {
+//        return productRepository.findByNameContainingIgnoreCase(name).stream()
+//                .map(this::mapProductToProductResponse)
+//                .collect(Collectors.toList());
+//    }
 
-    public ProductDetailReponse getProductById(UUID id) {
+//    @Async
+//    public Long getRealtimeViewByProduct(UUID id)
+//            throws JsonProcessingException {
+//        String day = DAY_FMT.format(Instant.now());
+//        String keyProduct = "product:view:product:" + id + ":" + day;
+//        Object value = redisTemplate.opsForValue().get(keyProduct);
+//        String view = new ObjectMapper().writeValueAsString(value);
+//        long total = value != null ? Long.parseLong(view) : 0L;
+//        return total;
+//    }
+    @Async
+    public void SetTotal_View(UUID id){
+        String day = DAY_FMT.format(Instant.now());
+        String keyProduct = "product:view:product:" + id + ":" + day;
+        redisTemplate.opsForValue().increment(keyProduct, 1L);
+    }
+    public ProductDetailReponse getProductById(UUID id) throws JsonProcessingException {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
-        return productMapper.toDetail(product);
+        SetTotal_View(id);
+        ProductDetailReponse reponse = productMapper.toDetail(product);
+        return reponse;
     }
 
     public ProductResponse getProductAdminById(UUID id) {
@@ -244,7 +271,6 @@ public class ProductService {
         existingProduct.setCategory(category);
         existingProduct.setSlug(toSlug(request.getName()));
         existingProduct.setUpdatedAt(LocalDateTime.now());
-
         existingProduct.setPrice(request.getPrice());
         Product updatedProduct = productRepository.save(existingProduct);
         return productMapper.toProductResponse(updatedProduct);
@@ -279,9 +305,10 @@ public class ProductService {
         }
         productRepository.delete(product);
     }
-
+    @SneakyThrows
     private ProductResponse mapProductToProductResponse(Product product) {
         List<ProductReview> productReviews = productReviewRepository.findAllByProduct(product);
+
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -299,6 +326,8 @@ public class ProductService {
                 .altText(product.getAltText())
                 .price(product.getPrice())
                 .averageRating(productMapper.calculateAverageRating(productReviews))
+                .totalComment(productReviews.size())
+                .totalView(product.getTotalView())
                 .build();
     }
 }

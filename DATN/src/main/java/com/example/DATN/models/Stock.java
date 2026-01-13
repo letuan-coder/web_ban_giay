@@ -10,8 +10,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "stock")
 @Getter
-@Setter
 @Builder
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Stock extends BaseEntity {
@@ -34,8 +34,15 @@ public class Stock extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "store_id")
     private Store store;
+    @Builder.Default
+    @Column(name = "min_quantity")
+    private Integer minQuantity=10;
 
-    private Integer minQuantity;
+    @Builder.Default
     private Integer quantity = 0;
+
+    @Builder.Default
+    @Column(name = "sellable_quantity")
+    private Integer sellableQuantity = 0;
 }
 

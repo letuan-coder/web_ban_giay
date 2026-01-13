@@ -1,4 +1,4 @@
-package com.example.DATN.dtos.request.order;
+package com.example.DATN.dtos.request.checkout;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CheckOutItemRequest {
-    private String sku;
-    private Integer quantity;
+public class ApplyVoucherRequest {
+    String idempotencyKey;
+    String voucherCode;
 }

@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,10 +19,12 @@ public class ProductDetailReponse {
     private UUID id;
     private String name;
     private String slug;
+    private BigDecimal price;
     private String productCode;
     private String description;
     private Is_Available available;
     private String thumbnailUrl;
+    private Long totalView;
     private List<ProductColorDetailResponse> colorResponses;
     private List<ProductVariantDetailResponse> variantDetailResponses;
     private List<ProductReviewResponse> reviewResponses;

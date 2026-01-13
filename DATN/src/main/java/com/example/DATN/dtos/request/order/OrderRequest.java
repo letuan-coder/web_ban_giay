@@ -27,6 +27,10 @@ public class OrderRequest {
     private Integer total_height;
     private Integer total_width;
     private Integer total_length;
+    private String voucherCode;
+    private UUID StoreId;
+    private UUID WarehouseId;
+    private String idempotency;
     private ShippingAddressRequest userAddress;
     private ShippingStatus ghnStatus;
     private OrderStatus orderStatus;

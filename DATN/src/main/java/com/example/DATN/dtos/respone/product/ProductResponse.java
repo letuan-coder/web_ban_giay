@@ -34,4 +34,7 @@ public class ProductResponse {
     private LocalDateTime updatedAt;
     private Double averageRating;
     private Double weight;
+    private Integer totalComment;
+    @Builder.Default
+    private Long totalView =0L;
 }
