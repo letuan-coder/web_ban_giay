@@ -84,7 +84,8 @@ public class VnPayConfig {
     }
 
     //Util for VNPAY
-    public static String hashAllFields(Map<String, String> fields) throws UnsupportedEncodingException {
+    public static String hashAllFields(Map<String, String> fields)
+            throws UnsupportedEncodingException {
         List<String> fieldNames = new ArrayList<>(fields.keySet());
         Collections.sort(fieldNames);
         StringBuilder sb = new StringBuilder();

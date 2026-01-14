@@ -6,6 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class VnQueryRequest {
-    private String orderId;
-    private String transDate;
+    private String orderCode;
 }

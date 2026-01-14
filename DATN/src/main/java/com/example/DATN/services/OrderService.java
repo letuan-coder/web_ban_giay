@@ -7,6 +7,7 @@ import com.example.DATN.constant.PaymentStatus;
 import com.example.DATN.constant.ShippingStatus;
 import com.example.DATN.dtos.request.ghtk.GhnOrderInfo;
 import com.example.DATN.dtos.request.ghtk.GhnProduct;
+import com.example.DATN.dtos.request.order.CancelOrderRequest;
 import com.example.DATN.dtos.request.order.OrderItemRequest;
 import com.example.DATN.dtos.request.order.OrderRequest;
 import com.example.DATN.dtos.request.vnpay.VnPayRefundRequest;
@@ -29,6 +30,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -53,6 +56,7 @@ public class OrderService {
     private final StoreRepository storeRepository;
     private final StockRepository stockRepository;
     private static final String IDEMPOTENCY_PREFIX = "checkout:idempotency:";
+
     private CheckOutResponse getIdempotentResponse(String key) {
         try {
             String cacheKey = IDEMPOTENCY_PREFIX + key;
@@ -67,31 +71,67 @@ public class OrderService {
         return null;
     }
 
+    public String acquireCancelLock(Long userId, UUID orderId) {
+        String redisKey = "idempotency:cancel_order:" + userId + ":" + orderId;
 
-    public void cancelOrder(UUID orderId, HttpServletRequest req) {
-        User user = getUserByJwtHelper.getCurrentUser();
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
-        if (order.getPaymentStatus() == PaymentStatus.PAID) {
-            Vnpay vnpay = vnpayRepository.findByVnpTxnRef(order.getOrderCode())
-                    .orElseThrow(() -> new ApplicationException(ErrorCode.PAYMENT_VNPAY_FAIL));
-            VnPayRefundRequest refundRequest = VnPayRefundRequest.builder()
-                    .txnRef(order.getOrderCode())
-                    .orderInfo(vnpay.getVnp_OrderInfo())
-                    .CreateBy(user.getUsername())
-                    .transactionDate(order.getCreatedAt().toString())
-                    .amount(Long.parseLong(vnpay.getVnp_Amount()))
-                    .transactionType("02")
-                    .build();
-            vnPayServices.processRefund(refundRequest, req);
+        Boolean locked = redisTemplate.opsForValue()
+                .setIfAbsent(redisKey, "1", Duration.ofMinutes(5));
 
+        if (Boolean.FALSE.equals(locked)) {
+            throw new ApplicationException(ErrorCode.DUPLICATE_REQUEST);
         }
-        if (order.getOrderStatus() != OrderStatus.PENDING) {
-            throw new ApplicationException(ErrorCode.ORDER_NOT_CANCEABLE);
-        } else {
+        return redisKey;
+    }
+
+    public boolean CheckingRequest (Long user ){
+        String key = "cancel:count:" + user + ":" + LocalDate.now();
+        Long count = redisTemplate.opsForValue().increment(key);
+        redisTemplate.expire(key, 1, TimeUnit.DAYS);
+        boolean flag = false;
+        if (count > 10) {
+            flag= true;
+        }
+        return flag;
+    }
+
+
+    @Transactional(rollbackOn = Exception.class)
+    public CancelOrderResponse cancelOrder(CancelOrderRequest request, HttpServletRequest req) {
+        User user = getUserByJwtHelper.getCurrentUser();
+        if(CheckingRequest(user.getId())){
+            throw new ApplicationException(ErrorCode.TOO_MANY_CANCEL_REQUEST);
+        }
+        String redisKey = acquireCancelLock(user.getId(), request.getOrderId());
+        try {
+            Order order = orderRepository.findById(request.getOrderId())
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
+            if (order.getOrderStatus() != OrderStatus.PENDING) {
+                throw new ApplicationException(ErrorCode.ORDER_NOT_CANCEABLE);
+
+            }
             order.setOrderStatus(OrderStatus.CANCELLED);
             orderRepository.save(order);
+            if (order.getPaymentStatus() == PaymentStatus.PAID) {
+                Vnpay vnpay = vnpayRepository.findByVnpTxnRef(order.getOrderCode())
+                        .orElseThrow(() -> new ApplicationException(ErrorCode.PAYMENT_VNPAY_FAIL));
+                VnPayRefundRequest refundRequest = VnPayRefundRequest.builder()
+                        .txnRef(order.getOrderCode())
+                        .TransactionNo(vnpay.getVnp_TransactionNo())
+                        .orderInfo(vnpay.getVnp_OrderInfo())
+                        .CreateBy(user.getUsername())
+                        .transactionDate(order.getCreatedAt().toString())
+                        .amount(Long.parseLong(vnpay.getVnp_Amount()))
+                        .transactionType("02")
+                        .build();
+               CancelOrderResponse response =
+                       vnPayServices.processRefund(refundRequest, req, order, request.getReason());
+                return response;
+            }
+        } catch (Exception e) {
+            redisTemplate.delete(redisKey);
+            throw new ApplicationException(ErrorCode.ORDER_NOT_FOUND);
         }
+        return null;
     }
 
 
@@ -210,7 +250,7 @@ public class OrderService {
                 ProductVariant item = productVariantOpt.get();
                 BigDecimal itemTotal = item.getPrice()
                         .multiply(BigDecimal.valueOf(itemRequest.getQuantity()));
-                totalPrice =totalPrice.add(itemTotal);
+                totalPrice = totalPrice.add(itemTotal);
             }
         }
         return totalPrice;
@@ -274,7 +314,7 @@ public class OrderService {
             throws JsonProcessingException {
         User user = getUserByJwtHelper.getCurrentUser();
         ShippingAddress shippingAddress = createShippingAddress(request);
-        Order order = BuilderOrder(request,user,shippingAddress);
+        Order order = BuilderOrder(request, user, shippingAddress);
         VnPaymentRequest vnPaymentRequest = VnPaymentRequest.builder()
                 .amount(order.getTotal_price().longValue())
                 .orderCode(order.getOrderCode())
@@ -330,11 +370,11 @@ public class OrderService {
 
     }
 
-    public ShippingAddress createShippingAddress(OrderRequest request){
+    public ShippingAddress createShippingAddress(OrderRequest request) {
         ShippingAddress shippingAddress = new ShippingAddress();
-        if(request.getUserAddressId()!=null) {
+        if (request.getUserAddressId() != null) {
             UserAddress userAddress = userAddressRepository.findById(request.getUserAddressId())
-                    .orElseThrow(()->new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND));
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND));
             shippingAddress = ShippingAddress.builder()
                     .receiverName(userAddress.getReceiverName())
                     .phoneNumber(userAddress.getPhoneNumber())
@@ -346,7 +386,7 @@ public class OrderService {
                     .streetDetail(userAddress.getStreetDetail())
                     .fullDetail(userAddress.getUserAddress())
                     .build();
-        }else if(request.getUserAddress() != null){
+        } else if (request.getUserAddress() != null) {
             shippingAddress = ShippingAddress.builder()
                     .receiverName(request.getUserAddress().getReceiverName())
                     .phoneNumber(request.getUserAddress().getPhoneNumber())
@@ -359,7 +399,7 @@ public class OrderService {
                     .fullDetail(request.getUserAddress().getFullDetail())
                     .build();
 
-        }else {
+        } else {
             throw new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND);
         }
         return shippingAddress;
@@ -369,20 +409,21 @@ public class OrderService {
     public OrderResponse createOrder
             (OrderRequest request) {
         User user = getUserByJwtHelper.getCurrentUser();
-        ShippingAddress shippingAddress =createShippingAddress(request);
-        Order order = BuilderOrder(request,user,shippingAddress);
+        ShippingAddress shippingAddress = createShippingAddress(request);
+        Order order = BuilderOrder(request, user, shippingAddress);
         OrderResponse response = orderMapper.toResponse(orderRepository.save(order));
         response.setUserName(user.getUsername());
         return response;
     }
 
-    public String GenerateOrderCode(){
+    public String GenerateOrderCode() {
         Long code = snowflakeIdGenerator.nextId();
         String orderCode = OrderCodePrefix + code;
         return orderCode;
     }
+
     @Transactional(rollbackOn = Exception.class)
-    public Order BuilderOrder(OrderRequest request,User user,ShippingAddress shippingAddress){
+    public Order BuilderOrder(OrderRequest request, User user, ShippingAddress shippingAddress) {
         Order order = new Order();
         order.setUser(user);
         String orderCode = GenerateOrderCode();
@@ -454,6 +495,7 @@ public class OrderService {
         order.setServiceId(request.getServiceId());
         return order;
     }
+
     public List<OrderResponse> getOrdersByStatus(String status) {
         User user = getUserByJwtHelper.getCurrentUser();
         OrderStatus statusEnum;

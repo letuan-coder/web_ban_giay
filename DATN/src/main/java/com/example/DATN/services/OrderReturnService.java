@@ -11,39 +11,72 @@ import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.GetUserByJwtHelper;
 import com.example.DATN.mapper.OrderReturnMapper;
 import com.example.DATN.models.*;
-import com.example.DATN.repositories.*;
+import com.example.DATN.repositories.OrderItemRepository;
+import com.example.DATN.repositories.OrderRepository;
+import com.example.DATN.repositories.OrderReturnRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 public class OrderReturnService {
 
     private final OrderReturnRepository orderReturnRepository;
-    private final OrderReturnItemRepository orderReturnItemRepository;
+    private final MailService mailService;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
-    private final ProductVariantRepository productVariantRepository;
     private final GetUserByJwtHelper getUserByJwtHelper;
     private final OrderReturnMapper orderReturnMapper;
     private final RefundService refundService;
+    private final RedisTemplate<String,String> redisTemplate;
+    public String acquireCancelLock(Long userId, UUID orderId) {
+        String redisKey = "idempotency:cancel_order:" + userId + ":" + orderId;
+
+        Boolean locked = redisTemplate.opsForValue()
+                .setIfAbsent(redisKey, "1", Duration.ofMinutes(5));
+
+        if (Boolean.FALSE.equals(locked)) {
+            throw new ApplicationException(ErrorCode.DUPLICATE_REQUEST);
+        }
+        return redisKey;
+    }
+
+    public boolean CheckingRequest (Long user ){
+        String key = "cancel:count:" + user + ":" + LocalDate.now();
+        Long count = redisTemplate.opsForValue().increment(key);
+        redisTemplate.expire(key, 1, TimeUnit.DAYS);
+        boolean flag = false;
+        if (count > 10) {
+            flag= true;
+        }
+        return flag;
+    }
+
     @Transactional
     public OrderReturnResponse createReturnRequest(OrderReturnRequest request) {
         User currentUser = getUserByJwtHelper.getCurrentUser();
         Order order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
+        if (CheckingRequest(currentUser.getId())){
+            throw new ApplicationException(ErrorCode.TOO_MANY_CANCEL_REQUEST);
+        }
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime expiredDate = order.getReceivedDate().plusDays(7);
-        if(now.isAfter(expiredDate))
+        if(now.isAfter(expiredDate)) {
             throw new ApplicationException(ErrorCode.RETURN_PERIOD_EXPIRED);
 
+        }
         if (!Objects.equals(order.getUser().getId(), currentUser.getId())) {
             throw new ApplicationException(ErrorCode.ACCESS_DENIED);
         }
@@ -59,9 +92,9 @@ public class OrderReturnService {
         OrderReturn orderReturn = new OrderReturn();
         orderReturn.setUser(currentUser);
         orderReturn.setOrder(order);
+        orderReturn.setReturnType(request.getReturnType());
         orderReturn.setReasonReturn(request.getReason());
         orderReturn.setStatus(OrderReturnStatus.PENDING);
-
         RefundRequest refundRequest = RefundRequest.builder()
                 .amount(order.getTotal_price())
                 .reason(request.getReason())
@@ -73,7 +106,6 @@ public class OrderReturnService {
         for (ReturnItemRequest itemRequest : request.getReturnItems()) {
             OrderItem orderItem = orderItemRepository.findById(itemRequest.getOrderItemId())
                     .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_ITEM_NOT_FOUND));
-
             if (!Objects.equals(orderItem.getOrder().getId(), order.getId())) {
                 throw new ApplicationException(ErrorCode.ACCESS_DENIED);
             }
@@ -90,8 +122,12 @@ public class OrderReturnService {
         }
 
         orderReturn.setReturnItems(returnItems);
-        OrderReturnResponse response = orderReturnMapper.toOrderReturnResponse(orderReturnRepository.save(orderReturn));
-        return response;
+        return orderReturnMapper.toOrderReturnResponse(orderReturnRepository.save(orderReturn));
+
+    }
+
+    public void ExchangeItem(){
+
     }
 
     public Boolean checkReturnRequestExists(UUID orderId) {

@@ -32,7 +32,6 @@ public class RefundService {
                 .reason(request.getReason())
                 .status(RefundStatus.PENDING)
                 .orderReturn(request.getOrderReturn())
-                .order(request.getOrder())
                 .build();
         log.info("Creating refund request: {}", refund );
         log.info("Refund creating by : {}", user.getId() );

@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class IncreaseQuantityRequest {
     private String sku;
     private Integer quantity;
-    String idempotencyKey;
+    private String idempotencyKey;
 
 }

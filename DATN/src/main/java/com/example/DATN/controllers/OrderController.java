@@ -1,8 +1,10 @@
 package com.example.DATN.controllers;
 
 import com.example.DATN.constant.PaymentMethodEnum;
+import com.example.DATN.dtos.request.order.CancelOrderRequest;
 import com.example.DATN.dtos.request.order.OrderRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
+import com.example.DATN.dtos.respone.order.CancelOrderResponse;
 import com.example.DATN.dtos.respone.order.OrderItemResponse;
 import com.example.DATN.dtos.respone.order.OrderResponse;
 import com.example.DATN.exception.ApplicationException;
@@ -60,14 +62,21 @@ public class OrderController {
                 .build();
     }
 
-    @PostMapping("/cancel-order/{id}")
-    public ApiResponse<OrderResponse> cancelOrder(
-            @RequestBody @Valid UUID orderId,
-            HttpServletRequest req) {
-        orderService.cancelOrder(orderId, req);
-        return ApiResponse.<OrderResponse>builder()
-                .data(null)
-                .message("order cancel successful ")
+    @PostMapping("/cancel-order/{orderId}")
+    public ApiResponse<CancelOrderResponse> cancelOrder(
+            @PathVariable  UUID orderId,
+            @RequestBody @Valid CancelOrderRequest request,
+            @RequestHeader (value = "X-Idempotency-Key",required = false) String headerKey
+            ,HttpServletRequest req) {
+        String idempotencyKey = headerKey != null ? headerKey : request.getIdempotencyKey();
+        if (idempotencyKey == null || idempotencyKey.trim().isEmpty()) {
+            throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
+        }
+        request.setIdempotencyKey(idempotencyKey);
+        request.setOrderId(orderId);
+      CancelOrderResponse response=  orderService.cancelOrder(request, req);
+        return ApiResponse.<CancelOrderResponse>builder()
+                .data(response)
                 .build();
     }
 

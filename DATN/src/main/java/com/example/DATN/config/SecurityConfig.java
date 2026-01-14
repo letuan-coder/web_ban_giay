@@ -36,8 +36,9 @@ public class SecurityConfig {
                     , "/api/newsletter/subscribe"
                     , "/api/products"
                     , "/api/products/search"
-                    ,"/api/product-variants/**"
-                    , "/api/ghtk/create-order",
+                    , "/api/product-variants/**"
+                    , "/api/ghtk/create-order","/api/vnpay/ipn",
+                    "/api/vnpay/return",
                     "/api/guest"};
     private final String[] POST_PUBLIC_API = {"/api/ghtk/create-order"};
     @Value("${jwt.secret}")
@@ -58,7 +59,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.cors(cors -> cors.configurationSource(corsConfigurationSource()));
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+        httpSecurity
+                .csrf(AbstractHttpConfigurer::disable);
         //rateLimit không dùng trong thời gian dev
 //        httpSecurity.addFilterBefore(
 //                rateLimitFilter,
@@ -66,14 +68,8 @@ public class SecurityConfig {
 //        );
         httpSecurity.authorizeHttpRequests(request -> request
                         .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/vnpay/return").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/vnpay/ipn").permitAll()
-
                         .requestMatchers(PUBLIC_API).permitAll()
-
-//                .requestMatchers(HttpMethod.GET, "/api/users")
-//                .hasAuthority("USER_VIEW")
-                        .requestMatchers( "/google-login-test.html").permitAll()
+                        .requestMatchers("/google-login-test.html").permitAll()
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products").permitAll()
                         .requestMatchers(HttpMethod.POST, POST_PUBLIC_API).permitAll()

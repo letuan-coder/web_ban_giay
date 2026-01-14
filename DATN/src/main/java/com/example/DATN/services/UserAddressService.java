@@ -28,12 +28,10 @@ public class UserAddressService {
 
     private String buildFullAddress(UserAddressRequest request) {
         StringJoiner joiner = new StringJoiner(", ");
-
         add(joiner, request.getStreetDetail());
         add(joiner, request.getWardName());
         add(joiner, request.getDistrictName());
         add(joiner, request.getProvinceName());
-
         return joiner.toString();
     }
 
@@ -68,11 +66,12 @@ public class UserAddressService {
                 .userAddress(request.getStreetDetail())
                 .streetDetail(request.getStreetDetail())
                 .userAddress(fullAddress)
+                .Latitude(request.getLat())
+                .Longitude(request.getLng())
                 .isDefault(request.isDefault())
                 .build();
         UserAddress savedAddress = userAddressRepository.save(userAddress);
-        UserAddressResponse response = userAddressMapper.toResponse(savedAddress);
-        return response;
+        return userAddressMapper.toResponse(savedAddress);
     }
 
     public List<UserAddressResponse> getUserAddresses() {

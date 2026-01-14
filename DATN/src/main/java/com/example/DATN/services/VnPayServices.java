@@ -4,20 +4,19 @@ import com.example.DATN.config.VnPayConfig;
 import com.example.DATN.constant.OrderStatus;
 import com.example.DATN.constant.PaymentMethodEnum;
 import com.example.DATN.constant.PaymentStatus;
+import com.example.DATN.constant.RefundStatus;
 import com.example.DATN.dtos.request.vnpay.VnPayRefundRequest;
 import com.example.DATN.dtos.request.vnpay.VnPaymentRequest;
+import com.example.DATN.dtos.respone.order.CancelOrderResponse;
 import com.example.DATN.dtos.respone.order.PendingOrderItem;
 import com.example.DATN.dtos.respone.order.PendingOrderRedis;
 import com.example.DATN.dtos.respone.vnpay.VnPayResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.OrderMapper;
-import com.example.DATN.models.*;
 import com.example.DATN.models.Embeddable.ShippingAddress;
-import com.example.DATN.repositories.OrderRepository;
-import com.example.DATN.repositories.ProductVariantRepository;
-import com.example.DATN.repositories.UserRepository;
-import com.example.DATN.repositories.VnpayRepository;
+import com.example.DATN.models.*;
+import com.example.DATN.repositories.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,7 +24,10 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -43,6 +45,8 @@ import java.util.*;
 @Slf4j
 public class VnPayServices {
     @Autowired
+    private RefundRepository refundRepository;
+    @Autowired
     private ProductVariantRepository productVariantRepository;
     @Autowired
     private UserRepository userRepository;
@@ -56,25 +60,115 @@ public class VnPayServices {
     private final String orderType = "other";
     private final OrderRepository orderRepository;
     @Autowired
-    private RedisTemplate<String,String> redisTemplate;
+    private RedisTemplate<String, String> redisTemplate;
     private OrderMapper orderMapper;
     @Autowired
     private ObjectMapper objectMapper;
+
+
+    public Boolean CheckPayMent(String orderCode, HttpServletRequest req) {
+        try {
+
+            Vnpay vnpay = vnpayRepository.findByVnpTxnRef(orderCode)
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.PAYMENT_VNPAY_FAIL));
+            String vnp_RequestId = VnPayConfig.getRandomNumber(8);
+            String vnp_Version = "2.1.0";
+            String vnp_Command = "querydr";
+            String vnp_TxnRef = vnpay.getVnpTxnRef();
+            String vnp_OrderInfo = "Kiem tra ket qua GD orderCode:" + vnp_TxnRef;
+            String vnp_TransDate = vnpay.getVnp_PayDate();
+
+            Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+            String vnp_CreateDate = formatter.format(cld.getTime());
+
+            String vnp_IpAddr = VnPayConfig.getIpAddress(req);
+
+            Map<String, String> vnp_Params = new HashMap<>();
+            vnp_Params.put("vnp_RequestId", vnp_RequestId);
+            vnp_Params.put("vnp_Version", vnp_Version);
+            vnp_Params.put("vnp_Command", vnp_Command);
+            vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
+            vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+            vnp_Params.put("vnp_TransactionDate", vnp_TransDate);
+            vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+            vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+            vnp_Params.put("vnp_OrderInfo", vnp_OrderInfo);
+            String hash_Data = String.join("|",
+                    vnp_RequestId, vnp_Version, vnp_Command,
+                    vnp_TmnCode, vnp_TxnRef, vnp_TransDate,
+                    vnp_CreateDate, vnp_IpAddr, vnp_OrderInfo);
+            String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.secretKey, hash_Data);
+            vnp_Params.put("vnp_SecureHash", vnp_SecureHash);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, String>> entity = new HttpEntity<>(vnp_Params, headers);
+            ResponseEntity<VnPayResponse> response =
+                    restTemplate.postForEntity(VnPayConfig.vnp_ApiUrl, entity, VnPayResponse.class);
+            if ("00".equals(response.getBody().getVnp_ResponseCode())) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+
+            return false;
+        }
+    }
+    public ResponseEntity<?> QueryVnpay(String orderCode, HttpServletRequest req) {
+        try {
+            Vnpay vnpay = vnpayRepository.findByVnpTxnRef(orderCode)
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.PAYMENT_VNPAY_FAIL));
+            String vnp_RequestId = VnPayConfig.getRandomNumber(8);
+            String vnp_Version = "2.1.0";
+            String vnp_Command = "querydr";
+            String vnp_TxnRef = vnpay.getVnpTxnRef();
+            String vnp_OrderInfo = "Kiem tra ket qua GD orderCode:" + vnp_TxnRef;
+            String vnp_TransDate = vnpay.getVnp_PayDate();
+
+            Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+            String vnp_CreateDate = formatter.format(cld.getTime());
+
+            String vnp_IpAddr = VnPayConfig.getIpAddress(req);
+
+            Map<String, String> vnp_Params = new HashMap<>();
+            vnp_Params.put("vnp_RequestId", vnp_RequestId);
+            vnp_Params.put("vnp_Version", vnp_Version);
+            vnp_Params.put("vnp_Command", vnp_Command);
+            vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
+            vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+            vnp_Params.put("vnp_TransactionDate", vnp_TransDate);
+            vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+            vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+            vnp_Params.put("vnp_OrderInfo", vnp_OrderInfo);
+            String hash_Data = String.join("|",
+                    vnp_RequestId, vnp_Version, vnp_Command,
+                    vnp_TmnCode, vnp_TxnRef, vnp_TransDate,
+                    vnp_CreateDate, vnp_IpAddr, vnp_OrderInfo);
+            String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.secretKey, hash_Data);
+            vnp_Params.put("vnp_SecureHash", vnp_SecureHash);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, String>> entity = new HttpEntity<>(vnp_Params, headers);
+            ResponseEntity<VnPayResponse> response =
+                    restTemplate.postForEntity(VnPayConfig.vnp_ApiUrl, entity, VnPayResponse.class);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+
+            throw new ApplicationException(ErrorCode.PAYMENT_VNPAY_FAIL);
+        }
+    }
+
     @Transactional
-    public void PendingToOrder( Model model,
-                                HttpServletRequest request) throws UnsupportedEncodingException, JsonProcessingException {
+    public void PendingToOrder(Model model,
+                               HttpServletRequest request) throws
+            UnsupportedEncodingException, JsonProcessingException {
         Map<String, String> params = new HashMap<>();
         request.getParameterMap()
                 .forEach((k, v) -> params.put(k, v[0]));
-
-        // verify checksum
-        boolean valid = verifyReturn(request);
-
-        String orderCode = request.getParameter("vnp_TxnRef");
         String responseCode = request.getParameter("vnp_ResponseCode");
-        model.addAttribute("params", params);
-        model.addAttribute("orderCode", orderCode);
-        model.addAttribute("success", valid && "00".equals(responseCode));
+        String orderCode = request.getParameter("vnp_TxnRef");
         Vnpay vnpay = Vnpay.builder()
                 .vnpTxnRef(orderCode)
                 .vnp_BankCode(request.getParameter("vnp_BankCode"))
@@ -132,9 +226,9 @@ public class VnPayServices {
         }
     }
 
-    public ResponseEntity<?> processRefund(
+    public CancelOrderResponse processRefund(
             VnPayRefundRequest refundRequest,
-            HttpServletRequest req) {
+            HttpServletRequest req, Order order, String reason) {
         try {
             Vnpay originalPayment = vnpayRepository.findByVnpTxnRef(refundRequest.getTxnRef())
                     .orElseThrow(() -> new RuntimeException("Original transaction not found for TxnRef: " + refundRequest.getTxnRef()));
@@ -142,11 +236,11 @@ public class VnPayServices {
             String vnp_Version = version;
             String vnp_Command = commandRefund;
             String vnp_TxnRef = refundRequest.getTxnRef();
-            Long amount = refundRequest.getAmount() * 100L;
+            Long amount = refundRequest.getAmount();
             String vnp_Amount = String.valueOf(amount);
             String vnp_OrderInfo = "Hoan tien GD OrderId:" + vnp_TxnRef;
             String vnp_TransactionNo = originalPayment.getVnp_TransactionNo();
-            String vnp_TransactionDate = refundRequest.getTransactionDate();
+            String vnp_TransactionDate = originalPayment.getVnp_PayDate();
             String vnp_CreateBy = "admin";
 
             Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
@@ -179,11 +273,20 @@ public class VnPayServices {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Map<String, String>> entity = new HttpEntity<>(vnp_Params, headers);
-
-            ResponseEntity<VnPayResponse> response = restTemplate.postForEntity(VnPayConfig.vnp_ApiUrl, entity, VnPayResponse.class);
-            if (response.getBody().getVnp_ResponseCode() == "00") {
-                if (refundRequest.getTransactionType() == "02") {
+            Refund refund = Refund.builder()
+                    .order(order)
+                    .amount(order.getTotal_price())
+                    .reason(reason)
+                    .status(RefundStatus.PENDING)
+                    .refundTransactionId(vnp_TransactionNo)
+                    .expectedRefundDate(LocalDateTime.now().plusDays(5))
+                    .build();
+            ResponseEntity<VnPayResponse> response = restTemplate
+                    .postForEntity(VnPayConfig.vnp_ApiUrl, entity, VnPayResponse.class);
+            if ("00".equals(response.getBody().getVnp_ResponseCode())) {
+                if ("02".equals(response.getBody().getVnp_ResponseCode())) {
                     vnpayRepository.delete(originalPayment);
+                    refundRepository.save(refund);
                 } else {
                     String oldAmountStr = originalPayment.getVnp_Amount();
                     Long oldAmount = Long.parseLong(oldAmountStr);
@@ -195,11 +298,19 @@ public class VnPayServices {
                     originalPayment.setVnp_Amount(newAmount.toString());
                 }
             }
-            return ResponseEntity.ok(response.getBody());
+            CancelOrderResponse refundResponse = CancelOrderResponse.builder()
+                    .refundId(refund.getId())
+                    .refundStatus(refund.getStatus())
+                    .refundAmount(refund.getAmount())
+                    .expectedRefundDate(refund.getExpectedRefundDate())
+                    .vnpResponseCode(response != null ? response.getBody().getVnp_ResponseCode() : "99")
+                    .vnpMessage(response != null ? response.getBody().getVnp_Message() : "VNPAY NO RESPONSE")
+                    .vnpTxnRef(refundRequest.getTxnRef())
+                    .build();
+            return refundResponse;
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", e.getMessage()));
+            throw new ApplicationException(ErrorCode.PAYMENT_VNPAY_FAIL);
         }
     }
 
@@ -218,6 +329,7 @@ public class VnPayServices {
 
         return signValue.equals(secureHash);
     }
+
     public Map<String, String> handleIpn(HttpServletRequest request) {
         Map<String, String> response = new HashMap<>();
 
@@ -238,7 +350,6 @@ public class VnPayServices {
             fields.remove("vnp_SecureHash");
             fields.remove("vnp_SecureHashType");
 
-            // ===== 2. Check checksum =====
             String signValue = VnPayConfig.hashAllFields(fields);
 
             if (!signValue.equals(vnpSecureHash)) {
@@ -247,8 +358,7 @@ public class VnPayServices {
                 return response;
             }
 
-            // ===== 3. Lấy dữ liệu =====
-            String orderCode =request.getParameter("vnp_TxnRef");
+            String orderCode = request.getParameter("vnp_TxnRef");
             long vnpAmount = Long.parseLong(request.getParameter("vnp_Amount")) / 100;
             String responseCode = request.getParameter("vnp_ResponseCode");
 
@@ -296,15 +406,11 @@ public class VnPayServices {
     }
 
     public String createPaymentVNPAY
-            (VnPaymentRequest request, HttpServletRequest req)
-    {
+            (VnPaymentRequest request, HttpServletRequest req) {
 
         try {
-
-
-
             String vnp_Version = version;
-            String vnp_Command= commmandPay;
+            String vnp_Command = commmandPay;
             request.setAmount(request.getAmount().longValue());
             req.setAttribute("order", request.getOrderCode());
 

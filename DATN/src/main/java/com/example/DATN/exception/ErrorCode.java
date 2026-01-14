@@ -146,6 +146,8 @@ public enum ErrorCode {
     VOUCHER_NOT_FOUND(3000,"Voucher not found",HttpStatus.NOT_FOUND),
 
     // Generic
+    TOO_MANY_CANCEL_REQUEST(9001,"too many cancel request",HttpStatus.BAD_REQUEST),
+    DUPLICATE_REQUEST(9000,"duplicate request",HttpStatus.BAD_REQUEST),
     INVALID_INPUT(9998,"INVALID_INPUT",HttpStatus.BAD_REQUEST),
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR);
 

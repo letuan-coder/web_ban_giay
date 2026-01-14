@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class CheckOutService {
+    private final UserAddressRepository userAddressRepository;
     private final OrderMapper orderMapper;
     private final WareHouseRepository wareHouseRepository;
     private final ProductViewRepository productViewRepository;
@@ -130,7 +131,8 @@ public class CheckOutService {
             """;
 
     @Transactional
-    public BigDecimal CheckVoucher(CheckOutResponse response, String voucherCode, BigDecimal price) {
+    public BigDecimal CheckVoucher(CheckOutResponse response,
+                                   String voucherCode, BigDecimal price) {
         BigDecimal sum = price;
 
         Voucher voucher = voucherRepository.findByVoucherCode(voucherCode.trim())
@@ -165,7 +167,6 @@ public class CheckOutService {
         }
         return sum.setScale(0, RoundingMode.DOWN);
     }
-
 
 
     @Async
@@ -284,6 +285,8 @@ public class CheckOutService {
             String idempotencyKey = request.getIdempotencyKey();
             CheckOutResponse cacheResponse = getIdempotentResponse(idempotencyKey);
             if (cacheResponse != null) {
+                cacheResponse.setVoucherCode(null);
+                cacheResponse.setVoucherDiscount(null);
                 BigDecimal sum = cacheResponse.getProducts()
                         .stream().map(CheckOutProductResponse::getFinaPrice)
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -291,7 +294,11 @@ public class CheckOutService {
                     if (!checkSumUtil.verify(request.getVoucherCode().trim())) {
                         throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
                     }
-                    sum = CheckVoucher(cacheResponse, request.getVoucherCode(), sum);
+                    try {
+                        sum= CheckVoucher(cacheResponse, request.getVoucherCode(), sum);
+                    } catch (Exception e) {
+                        throw new ApplicationException(ErrorCode.VOUCHER_EXPIRED);
+                    }
                     cacheResponse.setVoucherCode(request.getVoucherCode());
                     cacheResponse.setVoucherDiscount(cacheResponse.getFinalPrice().subtract(sum));
                     cacheResponse.setFinalPrice(sum);
@@ -300,13 +307,13 @@ public class CheckOutService {
                 }
                 return cacheResponse;
             }
-
+            else {
+                throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
+            }
         } catch (Exception e) {
-            throw new ApplicationException(ErrorCode.IDEMPOTENCY_TIMEOUT);
+            throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
         }
-        return null;
     }
-
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -346,11 +353,11 @@ public class CheckOutService {
                 .filter(UserAddress::isDefault)
                 .findFirst()
                 .orElse(null);
-            CheckOutProjection route = resolveRoute(skus,
-                    address.getLatitude(), address.getLongitude());
+        CheckOutProjection route = resolveRoute(skus,
+                address.getLatitude(), address.getLongitude());
 
 
-        Map<String, Stock> stocks = batchLoadStocks(variants, quantities,route);
+        Map<String, Stock> stocks = batchLoadStocks(variants, quantities, route);
 
         Map<String, Boolean> lockResults = batchLockStocks(
                 request.getItem(), stocks, route, user.getId()
@@ -369,8 +376,8 @@ public class CheckOutService {
 
 
         CheckOutResponse response = checkOutOrder(
-                request,stocks, route);
-        if(address !=null){
+                request, stocks, route);
+        if (address != null) {
             ShippingAddressRedis shippingAddress = ShippingAddressRedis.builder()
                     .receiverName(address.getReceiverName())
                     .phoneNumber(address.getPhoneNumber())
@@ -385,8 +392,7 @@ public class CheckOutService {
                     .latitude(address.getLatitude())
                     .build();
             response.setShippingAddressResponse(shippingAddress);
-        }
-        else {
+        } else {
             response.setShippingAddressResponse(null);
         }
 
@@ -395,67 +401,108 @@ public class CheckOutService {
         return response;
     }
 
-    public CheckOutResponse calculatorDistance(DistanceRequest request){
+    public CheckOutResponse calculatorDistance(DistanceRequest request) {
         try {
             String idempotencyKey = request.getIdempotencyKey();
             CheckOutResponse response = getIdempotentResponse(idempotencyKey);
             if (response != null) {
                 List<String> skus = response.getProducts().stream().map(
-                        item->item.getSku()
+                        item -> item.getSku()
                 ).toList();
-                CheckOutProjection checkOutProjection =  resolveRoute(skus,
-                        request.getLat(), request.getLng());
-                BigDecimal distanceFee =shippingCalculator.calculateShippingFeeByDistance
+                if (request.getUserAddressId()==null) {
+                    ShippingAddressRedis shippingAddress = ShippingAddressRedis.builder()
+                            .receiverName(request.getShippingAddressRedis().getReceiverName())
+                            .phoneNumber(request.getShippingAddressRedis().getPhoneNumber())
+                            .provinceName(request.getShippingAddressRedis().getProvinceName())
+                            .district_Id(request.getShippingAddressRedis().getDistrict_Id())
+                            .districtName(request.getShippingAddressRedis().getDistrictName())
+                            .wardCode(request.getShippingAddressRedis().getWardCode())
+                            .wardName(request.getShippingAddressRedis().getWardName())
+                            .streetDetail(request.getShippingAddressRedis().getStreetDetail())
+                            .fullDetail(request.getShippingAddressRedis().getFullDetail())
+                            .longitude(request.getShippingAddressRedis().getLongitude())
+                            .latitude(request.getShippingAddressRedis().getLatitude())
+                            .build();
+                    response.setShippingAddressResponse(shippingAddress);
+
+                }
+                else {
+                    if(response.getUserAddressId()!=request.getUserAddressId()){
+                        UserAddress address = userAddressRepository.findById(request.getUserAddressId())
+                                .orElseThrow(()->new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND));
+                        ShippingAddressRedis shippingAddress = ShippingAddressRedis.builder()
+                                .receiverName(address.getReceiverName())
+                                .phoneNumber(address.getPhoneNumber())
+                                .provinceName(address.getProvinceName())
+                                .district_Id(address.getDistrictCode())
+                                .districtName(address.getDistrictName())
+                                .wardCode(address.getWardCode())
+                                .wardName(address.getWardName())
+                                .streetDetail(address.getStreetDetail())
+                                .fullDetail(address.getUserAddress())
+                                .longitude(address.getLongitude())
+                                .latitude(address.getLatitude())
+                                .build();
+                        response.setShippingAddressResponse(shippingAddress);
+                    }
+                }
+                CheckOutProjection checkOutProjection = resolveRoute(skus,
+                        response.getShippingAddressResponse().getLatitude(), response.getShippingAddressResponse().getLongitude());
+                response.setFrom(checkOutProjection.getDistanceKm().toString());
+                response.setStoreId(checkOutProjection.getStoreId());
+                BigDecimal distanceFee = shippingCalculator.calculateShippingFeeByDistance
                         (checkOutProjection.getDistanceKm());
                 response.setDistanceFee(distanceFee);
-                BigDecimal total = PlusFee(distanceFee,response.getQuantityFee(),response.getWeightFee());
+                BigDecimal total = PlusFee(distanceFee, response.getQuantityFee(), response.getWeightFee());
                 response.setFinalPrice(total);
+                saveIdempotentResponse(idempotencyKey,response);
                 return response;
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
         }
         return null;
 
     }
 
-    public CheckOutResponse calculatorItem (IncreaseQuantityRequest request){
+    public CheckOutResponse calculatorItem(IncreaseQuantityRequest request) {
         try {
-            int total_quantity=0;
+            int total_quantity = 0;
             String idempotencyKey = request.getIdempotencyKey();
             CheckOutResponse response = getIdempotentResponse(idempotencyKey);
-            Map<String,Integer> variantQuantity = new HashMap<>();
+            Map<String, Integer> variantQuantity = new HashMap<>();
             if (response != null) {
-                for(CheckOutProductResponse productResponse : response.getProducts()){
+                for (CheckOutProductResponse productResponse : response.getProducts()) {
                     total_quantity += productResponse.getQuantity();
-                    if(productResponse.getSku().equals(request.getSku())) {
+                    if (productResponse.getSku().equals(request.getSku())) {
                         productResponse.setQuantity(request.getQuantity());
                         variantQuantity.put(productResponse.getSku(), request.getQuantity());
                     }
-                    variantQuantity.put(productResponse.getSku(),productResponse.getQuantity());
+                    variantQuantity.put(productResponse.getSku(), productResponse.getQuantity());
                 }
                 BigDecimal variantFee = shippingCalculator
                         .calculatorShippingFeeByWeight(variantQuantity);
-                BigDecimal quantityFee= BigDecimal.valueOf(1000)
+                BigDecimal quantityFee = BigDecimal.valueOf(1000)
                         .multiply(BigDecimal.valueOf(total_quantity));
                 response.setWeightFee(variantFee);
                 response.setQuantityFee(quantityFee);
-                response.setShippingFee(PlusFee(variantFee,quantityFee,response.getDistanceFee()));
+                response.setShippingFee(PlusFee(variantFee, quantityFee, response.getDistanceFee()));
                 return response;
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
         }
         return null;
     }
+
     private BigDecimal PlusFee(BigDecimal weightFee
-            ,BigDecimal quantityFee, BigDecimal DistanceFee)
-    {
+            , BigDecimal quantityFee, BigDecimal DistanceFee) {
         return weightFee.add(quantityFee.add(DistanceFee));
     }
+
     private Map<String, Stock> batchLoadStocks(
             Map<String, ProductVariant> variants,
-            Map<String,Integer> quantities,
+            Map<String, Integer> quantities,
             CheckOutProjection route) {
 
         List<UUID> variantIds = variants.values().stream()
@@ -470,7 +517,7 @@ public class CheckOutService {
         } else {
             List<WareHouse> wareHouse = wareHouseRepository.findAll();
 
-            Stock stock = CheckStock(quantities,wareHouse);
+            Stock stock = CheckStock(quantities, wareHouse);
             stocks.add(stock);
         }
 
@@ -497,11 +544,11 @@ public class CheckOutService {
 
     @Transactional(readOnly = true)
     public CheckOutResponse checkOutOrder(CheckOutRequest request
-            ,Map<String,Stock> stockMap
+            , Map<String, Stock> stockMap
             , CheckOutProjection route
     ) {
         Integer total_quantity = 0;
-        BigDecimal shippingFee =BigDecimal.ZERO;
+        BigDecimal shippingFee = BigDecimal.ZERO;
         List<CheckOutProductResponse> checkOutProductResponses = new ArrayList<>();
         Map<String, Integer> skuQuantities = request.getItem().stream()
                 .collect(Collectors.toMap(
@@ -519,8 +566,8 @@ public class CheckOutService {
             skuQuantities.put(checkOutItemRequest.getSku(), checkOutItemRequest.getQuantity());
             BigDecimal fee = shippingCalculator
                     .calculatorShippingFee(skuQuantities,
-                            route, total_quantity, route.getDistanceKm(),response);
-            response.setFrom("from "+route.getDistanceKm());
+                            route, total_quantity, route.getDistanceKm(), response);
+            response.setFrom("from " + route.getDistanceKm());
             response.setStoreId(route.getStoreId());
             response.setShippingFee(shippingFee.add(fee));
             CheckOutProductResponse checkOutResponse = CheckOutProductResponse.builder()
@@ -541,14 +588,15 @@ public class CheckOutService {
         }
 
         response.setProducts(checkOutProductResponses);
-        BigDecimal sum = response.getProducts().stream().map(CheckOutProductResponse::getFinaPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal sum = response.getProducts().stream()
+                .map(CheckOutProductResponse::getFinaPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         if (request.getVoucherCode() != null) {
             if (!checkSumUtil.verify(request.getVoucherCode().trim())) {
                 throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
             }
             sum = CheckVoucher(response, request.getVoucherCode(), sum);
         }
-
         response.setFinalPrice(sum);
         saveIdempotentResponse(request.getIdempotencyKey(), response);
         return response;

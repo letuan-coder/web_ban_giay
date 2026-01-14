@@ -1,6 +1,7 @@
 package com.example.DATN.models;
 
 import com.example.DATN.constant.OrderReturnStatus;
+import com.example.DATN.constant.OrderReturnType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -39,6 +40,9 @@ public class OrderReturn {
             , nullable = false)
     @JsonBackReference("orders-return")
     Order order;
+
+    @Enumerated(EnumType.STRING)
+    OrderReturnType returnType;
 
     @OneToMany(mappedBy = "orderReturn"
             , cascade = CascadeType.ALL

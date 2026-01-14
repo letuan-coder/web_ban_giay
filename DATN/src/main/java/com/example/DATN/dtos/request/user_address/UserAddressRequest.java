@@ -36,6 +36,8 @@ public class UserAddressRequest {
     @NotBlank(message = "Street detail is required")
     private String streetDetail;
 
+    private Double lng;
+    private Double lat;
     @JsonProperty("isDefault")
     private boolean isDefault;
 }

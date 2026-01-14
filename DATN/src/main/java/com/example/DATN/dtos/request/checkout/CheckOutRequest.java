@@ -14,7 +14,5 @@ import java.util.List;
 public class CheckOutRequest {
     List<CheckOutItemRequest> item;
     String voucherCode;
-//    Double longtitude;
-//    Double latitude;
     String idempotencyKey;
 }

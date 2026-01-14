@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class VnPayRefundRequest {
     private String txnRef;         // vnp_TxnRef
+    private String TransactionNo;
     private Long amount;           // vnp_Amount (số tiền muốn hoàn, theo đơn vị nhỏ nhất VND * 100 nếu cần)
     private String transactionDate; // vnp_TransactionDate: ngày tạo giao dịch gốc (format yyyyMMddHHmmss)
     private String orderInfo;      // vnp_OrderInfo
