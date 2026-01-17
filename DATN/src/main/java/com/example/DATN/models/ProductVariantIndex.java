@@ -22,17 +22,14 @@ import java.util.UUID;
 public class ProductVariantIndex {
     @Id
     @UuidGenerator
-    private UUID id; // dùng ID MySQL hoặc UUID
-
+    private UUID id;
+    @Field(type = FieldType.Text)
     private String productId;
     @Field(type = FieldType.Text)
-    private String sku;
+    private String productCode;
     @Field(type = FieldType.Text)
     private String name;
     @Field(type = FieldType.Text)
-    private String color;
-    @Field(type = FieldType.Text)
-    private String size;
-
+    private String thumbnailUrl;
     private BigDecimal price;
 }

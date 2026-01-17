@@ -1,5 +1,6 @@
-package com.example.DATN.models;
+package com.example.DATN.repositories;
 
+import com.example.DATN.models.VoucherUsage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;

@@ -8,7 +8,6 @@ import com.example.DATN.dtos.request.product.UpdateProductVariantRequest;
 import com.example.DATN.dtos.respone.product.ProductVariantResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
-import com.example.DATN.mapper.ProductVariantIndexMapper;
 import com.example.DATN.mapper.ProductVariantMapper;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
@@ -38,11 +37,9 @@ public class ProductVariantService {
 
     private final ProductVariantRepository productVariantRepository;
     private final ProductVariantMapper productVariantMapper;
-    private final ProductVariantIndexRepository productVariantIndexRepository;
-    private final ProductVariantIndexMapper productVariantIndexMapper;
+
     private final ProductColorRepository productColorRepository;
     private final SizeRepository sizeRepository;
-    private final StoreService storeService;
     private final UserRepository userRepository;
     private static final DateTimeFormatter DAY_FMT =
             DateTimeFormatter.ofPattern("yyyyMMdd")
@@ -58,8 +55,7 @@ public class ProductVariantService {
              ProductVariantRequest request) {
         ProductColor productColor = productColorRepository.findById(productcolorId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
-        Set<Store> stores = storeService.getAllStore();
-        Set<Stock> stock = new HashSet<>();
+
 
         List<ProductVariant> productVariants = new ArrayList<>();
 //        for (ProductVariantRequest request : requests) {
@@ -83,8 +79,7 @@ public class ProductVariantService {
                     .build();
             productVariants.add(productVariant);
             productVariantRepository.save(productVariant);
-            ProductVariantIndex index = productVariantIndexMapper.toIndex(productVariant);
-            productVariantIndexRepository.save(index);
+
         }
         productVariantRepository.saveAll(productVariants);
         List<ProductVariant> savedProductVariants = productVariantRepository.saveAll(productVariants);
@@ -120,7 +115,7 @@ public class ProductVariantService {
         increaseView(variant.getId(), productId);
     }
 
-    @Scheduled(fixedRate = 300000) // 5 phút
+    @Scheduled(fixedRate = 300000)
     public void refreshVariantAvailability() {
         List<ProductVariant> variants = productVariantRepository.findAll();
 

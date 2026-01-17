@@ -15,6 +15,7 @@ import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.FormatInputString;
 import com.example.DATN.mapper.ProductColorMapper;
 import com.example.DATN.mapper.ProductMapper;
+import com.example.DATN.mapper.ProductVariantIndexMapper;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
 import com.example.DATN.repositories.projection.ProductSalesProjection;
@@ -64,8 +65,10 @@ public class ProductService {
     private final ImageProductRepository imageProductRepository;
     private final ColorRepository colorRepository;
     private final SupplierRepository supplierRepository;
+    private final ProductVariantIndexMapper productVariantIndexMapper;
     private final ProductReviewRepository productReviewRepository;
     private final ProductVariantRepository productVariantRepository;
+    private final ProductVariantIndexRepository productVariantIndexRepository;
 //    private final ProductRedisRepository productRedisRepository;
 
     //    public List<ProductResponse> getProductByProductCode(String productCode) {
@@ -161,7 +164,8 @@ public class ProductService {
                     .build();
             ProductColor productColor = productColorMapper
                     .toEntity(productColorService.createProductColor(productColorRequest));
-//
+            ProductVariantIndex index = productVariantIndexMapper.toIndexProduct(product);
+            productVariantIndexRepository.save(index);
         }
         UploadImageRequest uploadImageRequest = UploadImageRequest.builder()
                 .product(savedProduct)
@@ -204,9 +208,10 @@ public class ProductService {
     }
 
     public List<SearchProductResponse> getProductByProductCode(String productCode) {
+        List<Product> products = productRepository.findByProductCode(productCode);
+        productVariantIndexRepository.saveAll(products.stream().map(productVariantIndexMapper::toIndexProduct).collect(Collectors.toList()));
 
-        return productRepository.findByProductCode(productCode)
-                .stream().map(productMapper::toSearchDetail)
+        return products.stream().map(productMapper::toSearchDetail)
                 .collect(Collectors.toList());
     }
 
@@ -225,7 +230,7 @@ public class ProductService {
 //                .collect(Collectors.toList());
 //    }
 
-//    @Async
+    //    @Async
 //    public Long getRealtimeViewByProduct(UUID id)
 //            throws JsonProcessingException {
 //        String day = DAY_FMT.format(Instant.now());
@@ -236,14 +241,16 @@ public class ProductService {
 //        return total;
 //    }
     @Async
-    public void SetTotal_View(UUID id){
+    public void SetTotal_View(UUID id) {
         String day = DAY_FMT.format(Instant.now());
         String keyProduct = "product:view:product:" + id + ":" + day;
         redisTemplate.opsForValue().increment(keyProduct, 1L);
     }
+
     public ProductDetailReponse getProductById(UUID id) throws JsonProcessingException {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
+        productVariantIndexMapper.toIndexProduct(product);
         SetTotal_View(id);
         ProductDetailReponse reponse = productMapper.toDetail(product);
         return reponse;
@@ -260,6 +267,7 @@ public class ProductService {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
 
+        productVariantIndexRepository.delete(productVariantIndexMapper.toIndexProduct(existingProduct));
         Brand brand = brandRepository.findById(request.getBrandId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.BRAND_NOT_FOUND));
 
@@ -273,6 +281,7 @@ public class ProductService {
         existingProduct.setUpdatedAt(LocalDateTime.now());
         existingProduct.setPrice(request.getPrice());
         Product updatedProduct = productRepository.save(existingProduct);
+        productVariantIndexRepository.save(productVariantIndexMapper.toIndexProduct(updatedProduct));
         return productMapper.toProductResponse(updatedProduct);
     }
 
@@ -303,8 +312,10 @@ public class ProductService {
             productColorService.deleteProductColor(pc.getId());
 
         }
+        productVariantIndexRepository.delete(productVariantIndexMapper.toIndexProduct(product));
         productRepository.delete(product);
     }
+
     @SneakyThrows
     private ProductResponse mapProductToProductResponse(Product product) {
         List<ProductReview> productReviews = productReviewRepository.findAllByProduct(product);

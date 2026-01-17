@@ -4,12 +4,10 @@ import com.example.DATN.dtos.request.product.ProductVariantRequest;
 import com.example.DATN.dtos.request.product.UpdateProductVariantRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.product.ProductVariantResponse;
-import com.example.DATN.mapper.ProductVariantIndexMapper;
 import com.example.DATN.models.ProductColor;
 import com.example.DATN.models.ProductVariant;
 import com.example.DATN.models.ProductVariantIndex;
 import com.example.DATN.repositories.ProductColorRepository;
-import com.example.DATN.repositories.ProductVariantIndexRepository;
 import com.example.DATN.repositories.ProductVariantRepository;
 import com.example.DATN.services.ProductVariantService;
 import jakarta.validation.Valid;
@@ -35,8 +33,7 @@ import java.util.stream.Collectors;
 public class ProductVariantController {
 
     private final ProductVariantService productVariantService;
-    private final ProductVariantIndexRepository indexRepository;
-    private final ProductVariantIndexMapper productVariantIndexMapper;
+
     private final ProductVariantRepository productVariantRepository;
     private final ProductColorRepository productColorRepository;
     private final ElasticsearchOperations operations;

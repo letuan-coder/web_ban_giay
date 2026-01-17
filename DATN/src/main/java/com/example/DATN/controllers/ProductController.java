@@ -8,6 +8,7 @@ import com.example.DATN.dtos.respone.product.ProductDetailReponse;
 import com.example.DATN.dtos.respone.product.ProductResponse;
 import com.example.DATN.dtos.respone.product.ProductSupplierResponse;
 import com.example.DATN.dtos.respone.product.SearchProductResponse;
+import com.example.DATN.models.ProductVariantIndex;
 import com.example.DATN.repositories.projection.ProductSalesProjection;
 import com.example.DATN.services.ProductService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -17,6 +18,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +36,7 @@ import java.util.UUID;
 public class ProductController {
 
     private final ProductService productService;
+    private final ElasticsearchOperations operations;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<ProductResponse> createProduct(
@@ -39,7 +45,28 @@ public class ProductController {
                 .data(productService.createProduct(request))
                 .build();
     }
+    @GetMapping("/search")
+    public List<ProductVariantIndex> search
+            (@RequestParam String keyword,
+             @RequestParam(defaultValue = "0") int page,
+             @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
 
+        NativeQuery query = NativeQuery.builder()
+                .withQuery(q -> q.multiMatch(m -> m
+                        .query(keyword)
+                        .fields("name^3", "productCode")
+                        .fuzziness("AUTO")
+                ))
+                .withPageable(pageable)
+                .build();
+
+        SearchHits<ProductVariantIndex> result =
+                operations.search(query, ProductVariantIndex.class);
+        return result.getSearchHits().stream()
+                .map(SearchHit::getContent)
+                .toList();
+    }
     @GetMapping
     public ApiResponse<PageResponse<ProductResponse>> getAllProducts(
             @RequestParam(defaultValue = "1") int page,

@@ -12,7 +12,7 @@ import com.example.DATN.mapper.VoucherMapper;
 import com.example.DATN.models.User;
 import com.example.DATN.models.Voucher;
 import com.example.DATN.models.VoucherClaim;
-import com.example.DATN.models.VoucherClaimRepository;
+import com.example.DATN.repositories.VoucherClaimRepository;
 import com.example.DATN.repositories.UserRepository;
 import com.example.DATN.repositories.VoucherRepository;
 import lombok.RequiredArgsConstructor;

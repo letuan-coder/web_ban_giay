@@ -111,7 +111,7 @@ public class OrderController {
                 .build();
     }
 
-    @GetMapping
+    @GetMapping("/my-order")
     public ApiResponse<List<OrderResponse>> getOrdersByUser() {
         List<OrderResponse> response = orderService.getOrdersByUser();
         for (OrderResponse OrderResponse : response) {
