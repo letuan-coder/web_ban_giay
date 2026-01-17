@@ -21,7 +21,10 @@ public class Store extends BaseEntity {
     @Id
     @UuidGenerator
     private UUID id;
+    @Column(nullable = false, unique = true)
     private String code;
+    @Column(name = "store_code_ghn",nullable = false, unique = true)
+    private Integer storeCodeGHN;
 
     @Column(nullable = false, unique = true)
     private String name;
@@ -34,7 +37,7 @@ public class Store extends BaseEntity {
 
     private Integer provinceCode;
     private Integer districtCode;
-    private Integer wardCode;
+    private String wardCode;
 
     @Column(nullable = false, unique = true)
     private String phoneNumber;

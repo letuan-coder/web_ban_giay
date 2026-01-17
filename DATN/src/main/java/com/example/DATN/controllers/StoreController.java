@@ -4,6 +4,7 @@ import com.example.DATN.dtos.request.StoreRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.StoreResponse;
 import com.example.DATN.services.StoreService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,7 @@ public class StoreController {
 
     @PostMapping
     public ApiResponse<StoreResponse> createStore(
-            @RequestBody StoreRequest request) {
+            @RequestBody StoreRequest request) throws JsonProcessingException {
         return ApiResponse.<StoreResponse>builder()
                 .data(storeService.createStore(request))
                 .build();

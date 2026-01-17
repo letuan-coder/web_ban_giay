@@ -18,7 +18,9 @@ public interface OrderReturnMapper {
     OrderReturnResponse toOrderReturnResponse(OrderReturn orderReturn);
 
     @Mapping(source = "orderItem.id", target = "orderItemId")
-    @Mapping(source = "orderItem.productVariant.size.name", target = "productVariantName") // Or color, adjust as needed
+    @Mapping(source = "orderItem.productVariant.size.name", target = "sizeName")
+    @Mapping(source = "orderItem.productVariant.productColor.color.name",target = "colorName")
+    @Mapping(source = "orderItem.productVariant.productColor.product.name",target = "productName")
     @Mapping(source = "orderItem.price", target = "price")
     ReturnItemResponse toReturnItemResponse(OrderReturnItem orderReturnItem);
 

@@ -5,8 +5,8 @@ import com.example.DATN.dtos.request.vnpay.VnPaymentRequest;
 import com.example.DATN.dtos.request.vnpay.VnQueryRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.mapper.OrderMapper;
-import com.example.DATN.repositories.*;
-import com.example.DATN.services.OrderService;
+import com.example.DATN.repositories.StockRepository;
+import com.example.DATN.repositories.VnpayRepository;
 import com.example.DATN.services.VnPayServices;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +27,8 @@ import java.util.Map;
 @Slf4j
 public class VnPayController {
     @Autowired
+    private StockRepository stockRepository;
+    @Autowired
     private VnPayServices vnpayServices;
     @Autowired
     private OrderMapper orderMapper;
@@ -36,16 +38,7 @@ public class VnPayController {
     @Autowired
     private VnpayRepository vnpayRepository;
     private final String vnp_TmnCode = VnPayConfig.vnp_TmnCode;
-    @Autowired
-    private OrderRepository orderRepository;
-    @Autowired
-    private OrderService orderService;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private ProductVariantRepository productVariantRepository;
-    @Autowired
-    private UserAddressRepository userAddressRepository;
+
 
     public VnPayController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -79,6 +72,7 @@ public class VnPayController {
             HttpServletRequest request)
             throws UnsupportedEncodingException, JsonProcessingException {
 
+
         boolean valid = vnpayServices.verifyReturn(request);
         Map<String, String> fields = new HashMap<>();
         Enumeration<String> params = request.getParameterNames();
@@ -100,6 +94,7 @@ public class VnPayController {
 
         // 6. Lấy thông tin đơn hàng
         String orderCode = request.getParameter("vnp_TxnRef");
+
         boolean success = valid && "00".equals(request.getParameter("vnp_ResponseCode"));
         String message;
         if (!valid) {
@@ -108,6 +103,7 @@ public class VnPayController {
             message = "Giao dịch thành công";
             vnpayServices.PendingToOrder(model, request);
         } else {
+            vnpayServices.handleVnPayFailed(orderCode);
             message = "Giao dịch không thành công";
         }
         return ApiResponse.builder()

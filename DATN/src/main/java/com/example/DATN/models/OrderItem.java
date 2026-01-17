@@ -21,12 +21,17 @@ public class OrderItem extends BaseEntity {
     @Id
     @UuidGenerator
     UUID id;
+
     String name;
     String code;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     @JsonBackReference("order_items")
     Order order;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "stock_id", nullable = false)
+    private Stock stock;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "productVariant_id", nullable = false)

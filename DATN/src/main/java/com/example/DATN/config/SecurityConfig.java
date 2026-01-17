@@ -38,8 +38,10 @@ public class SecurityConfig {
                     , "/api/products/search"
                     , "/api/product-variants/**"
                     , "/api/ghtk/create-order","/api/vnpay/ipn",
+                    "/api/check-out/**",
                     "/api/vnpay/return",
-                    "/api/guest"};
+                    "/api/check-out/**"
+                    ,"/api/guest","/api/voucher"};
     private final String[] POST_PUBLIC_API = {"/api/ghtk/create-order"};
     @Value("${jwt.secret}")
     private String jwtSecret;

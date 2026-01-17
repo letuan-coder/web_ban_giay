@@ -5,10 +5,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Setter
@@ -34,11 +34,14 @@ public class OrderReturnItem {
     @JoinColumn(name = "order_item_id", nullable = false)
     private OrderItem orderItem;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "image_order_return_id", nullable = false)
+
+    @OneToMany(
+            mappedBy = "orderReturnItem",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     @JsonManagedReference
-    ImageOrderReturn imageReturn;
+    private List<ImageOrderReturn> images = new ArrayList<>();
+
 
     private Integer quantity;
 }

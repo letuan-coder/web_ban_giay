@@ -92,6 +92,7 @@ public enum ErrorCode {
     CART_NOT_FOUND(1026, "cart is not exsited", HttpStatus.NOT_FOUND),
 
     // Order
+    ORDER_IS_EXISTED(1234,"order already existed ",HttpStatus.BAD_REQUEST),
     ORDER_NOT_CANCEABLE(2020,"order not allow to cancle ",HttpStatus.BAD_REQUEST),
     ORDER_REVIEW_EXISTED(1980,"order item all ready reviewed",HttpStatus.BAD_REQUEST),
     ORDER_ITEM_NOT_FOUND(1054, "Order item not found", HttpStatus.NOT_FOUND),
@@ -142,6 +143,8 @@ public enum ErrorCode {
     //STOCK-TRANSACTION
     INVALID_DATE(1130, "Invalid date", HttpStatus.BAD_REQUEST),
     //Voucher
+    VOUCHER_ALREADY_CLAIMED(2997,"voucher already claimed",HttpStatus.BAD_REQUEST),
+    VOUCHER_CANT_APPLY(2998,"voucher cant not apply ",HttpStatus.BAD_REQUEST),
     VOUCHER_EXPIRED(2999,"voucher is expired ",HttpStatus.BAD_REQUEST),
     VOUCHER_NOT_FOUND(3000,"Voucher not found",HttpStatus.NOT_FOUND),
 

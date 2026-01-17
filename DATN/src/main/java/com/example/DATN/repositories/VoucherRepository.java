@@ -1,5 +1,6 @@
-package com.example.DATN.models;
+package com.example.DATN.repositories;
 
+import com.example.DATN.models.Voucher;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

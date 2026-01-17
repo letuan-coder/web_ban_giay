@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/stocks")
@@ -16,8 +17,6 @@ import java.util.List;
 public class StockController {
 
     private final StockService stockService;
-
-
 
     @PostMapping
     public ApiResponse<StockTransactionResponse> createStock(
@@ -38,7 +37,7 @@ public class StockController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<StockResponse> getStockById(@PathVariable Long id) {
+    public ApiResponse<StockResponse> getStockById(@PathVariable UUID id) {
         return ApiResponse.<StockResponse>builder()
                 .data(stockService.getStockById(id))
                 .build();
@@ -55,7 +54,7 @@ public class StockController {
 //    }
 //
     @DeleteMapping("/{id}")
-    public ApiResponse<String> deleteStock(@PathVariable Long id) {
+    public ApiResponse<String> deleteStock(@PathVariable UUID id) {
         stockService.deleteStock(id);
         return ApiResponse.<String>builder()
                 .data("Stock deleted successfully")

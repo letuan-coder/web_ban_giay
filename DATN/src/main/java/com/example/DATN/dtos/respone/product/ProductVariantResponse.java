@@ -28,7 +28,6 @@ public class ProductVariantResponse {
     @JsonIgnore
     private Set<StockResponse> stocks;
     private LocalDate createdAt;
-
     public Integer getTotal_stock() {
         if (stocks == null) return 0;
         return stocks.stream()

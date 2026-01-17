@@ -28,6 +28,8 @@ public class ImageProductService {
     private final BannerRepository bannerRepository;
     private final Format_ImageUrl_Helper formatImageUrlHelper;
     private final UserRepository userRepository;
+    private final OrderReturnRepository orderReturnRepository;
+    private final ImageOrderReturnRepository imageOrderReturnRepository;
 
     public static boolean isImageFile(MultipartFile file) {
         String contentType = file.getContentType();
@@ -79,6 +81,7 @@ public class ImageProductService {
                     .build();
             String generatedFileName = fileStorageService.storeFile(storeFileRequest);
             savedImage.setImageUrl(generatedFileName);
+
             newImages.add(imageProduct);
         }
         return newImages;
@@ -130,7 +133,17 @@ public class ImageProductService {
                     .build();
             user.setUserImage(fileStorageService.storeFile(storeRequest));
             userRepository.save(user);
-        } else {
+        }
+        else if(request.getImageOrderReturn() !=null) {
+            StoreFileRequest storeFileRequest = StoreFileRequest.builder()
+                    .imageOrderReturn(request.getImageOrderReturn())
+                    .file(request.getFile())
+                    .build();
+            request.getImageOrderReturn().setImageUrl
+                    (fileStorageService.storeFile(storeFileRequest));
+        }
+
+        else {
             throw new ApplicationException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }

@@ -44,5 +44,9 @@ public class Stock extends BaseEntity {
     @Builder.Default
     @Column(name = "sellable_quantity")
     private Integer sellableQuantity = 0;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer lockedQuantity = 0;
 }
 

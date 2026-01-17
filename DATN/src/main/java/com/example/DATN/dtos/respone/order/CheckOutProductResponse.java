@@ -1,14 +1,14 @@
 package com.example.DATN.dtos.respone.order;
 
 import com.example.DATN.constant.Is_Available;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.example.DATN.dtos.respone.StockResponse;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.UUID;
-@Data
+
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,6 +22,11 @@ public class CheckOutProductResponse {
     private Integer sizeName;
     private BigDecimal price;
     private BigDecimal finaPrice;
+    private StockResponse stockResponse;
     private Integer stock;
     private String imageUrl;
+    private Integer weight;
+    private Integer length;
+    private Integer width;
+    private Integer height;
 }

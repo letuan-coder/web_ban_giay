@@ -14,6 +14,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/check-out")
 @RequiredArgsConstructor
@@ -32,22 +34,21 @@ public class CheckOutController {
         CheckOutResponse response = checkOutService.processCheckoutInternal(request);
         return ApiResponse.<CheckOutResponse>builder()
                 .data(response)
+                .message(response==null?"Check out ":" check out gì 10p ")
                 .build();
     }
     @PostMapping("/check-out-item")
     public ApiResponse<CheckOutResponse> calculateitem(
-            @RequestBody @Valid IncreaseQuantityRequest request,
-            @RequestHeader(value = "X-Idempotency-Key", required = false) String headerKey
+            @RequestBody @Valid List<IncreaseQuantityRequest> request,
+            @RequestHeader(value = "X-Idempotency-Key", required = false) String idempotencyKey
     ) {
-
-        String idempotencyKey = headerKey != null ? headerKey : request.getIdempotencyKey();
         if (idempotencyKey == null || idempotencyKey.trim().isEmpty()) {
             throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
         }
-        request.setIdempotencyKey(idempotencyKey);
-        CheckOutResponse response = checkOutService.calculatorItem(request);
+        CheckOutResponse response = checkOutService.calculatorItem(request,idempotencyKey);
         return ApiResponse.<CheckOutResponse>builder()
                 .data(response)
+                .message(response==null?"Check out ":" check out gì 10p ")
                 .build();
     }
     @PostMapping("/apply-voucher")
@@ -65,6 +66,7 @@ public class CheckOutController {
         }
         return ApiResponse.<CheckOutResponse>builder()
                 .data(response)
+                .message(response==null?"Check out ":" check out gì 10p ")
                 .build();
     }
 
@@ -94,4 +96,14 @@ public class CheckOutController {
                 .message("Idempotency-key is deleted")
                 .build();
     }
+
+//    @GetMapping("/ghn-shipping")
+//    public ApiResponse<ShippingFeeResponse> deleteIdempotencyKey(
+//            @RequestBody Integer id
+//    ) {
+//        return ApiResponse.<ShippingFeeResponse>builder()
+//                .data(checkOutService.calculateGHNfee(id))
+//                .message("Idempotency-key is deleted")
+//                .build();
+//    }
 }

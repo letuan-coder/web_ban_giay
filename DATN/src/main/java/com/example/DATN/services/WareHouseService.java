@@ -9,6 +9,7 @@ import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.WareHouseMapper;
 import com.example.DATN.models.WareHouse;
 import com.example.DATN.repositories.WareHouseRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +23,10 @@ public class WareHouseService {
 
     private final WareHouseRepository wareHouseRepository;
     private final WareHouseMapper wareHouseMapper;
-    private final StockService stockService;
     private final String wareHousePrefix = "WH";
+    private final GhnService ghnService;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
-    public WareHouseResponse createWareHouse(WareHouseRequest request) {
+    public WareHouseResponse createWareHouse(WareHouseRequest request) throws JsonProcessingException {
         Long snowflake = snowflakeIdGenerator.nextId();
         String code =wareHousePrefix+(snowflake);
         if(request.getIsCentral()==null){
@@ -40,11 +41,14 @@ public class WareHouseService {
                 .name(request.getName())
                 .location(request.getLocation())
                 .capacity(request.getCapacity())
+                .phoneNumber(request.getPhoneNumber())
                 .isCentral(request.getIsCentral())
                 .stocks(null)
                 .deleted(false)
                 .build();
+        ghnService.registerWareHouse(wareHouse);
         wareHouse = wareHouseRepository.save(wareHouse);
+
         return wareHouseMapper.toWareHouseResponse(wareHouse);
     }
 

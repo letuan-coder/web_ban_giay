@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,43 +36,42 @@ public class StockService {
     private final StockTransactionItemRepository stockTransactionItemRepository;
     private final ProductVariantRepository productVariantRepository;
 
-   private final StockTransactionMapper stockTransactionMapper;
+    private final StockTransactionMapper stockTransactionMapper;
 
     @Transactional
-    public void createStockForStore(Store store,ProductVariant variant, Integer quantity) {
-            boolean exists = stockRepository
-                    .existsByStoreAndVariantAndStockType(store, variant, StockType.STORE);
-            if (exists){
-                Stock stockOfVariant = stockRepository.findByVariant_IdAndStore(variant.getId(),store)
-                        .orElseThrow(()->new ApplicationException(ErrorCode.STOCK_NOT_FOUND));
-                stockOfVariant.setQuantity(stockOfVariant.getQuantity()+quantity);
-            }
-            else {
-                Stock stock = Stock.builder()
-                        .store(store)
-                        .variant(variant)
-                        .stockType(StockType.STORE)
-                        .quantity(quantity)
-                        .sellableQuantity(quantity-10)
-                        .build();
-                stockRepository.save(stock);
-            }
-    }
-    @Transactional
-    public void createStockForWarehouse(WareHouse warehouse, ProductVariant variant,Integer quantity) {
-        boolean exists = stockRepository.existsByWarehouseAndVariantAndStockType(warehouse,variant,StockType.WAREHOUSE);
-        if (exists){
-            Stock stockOfVariant = stockRepository.findByVariant_IdAndWarehouse(variant.getId(),warehouse)
-                    .orElseThrow(()->new ApplicationException(ErrorCode.STOCK_NOT_FOUND));
-            stockOfVariant.setQuantity(stockOfVariant.getQuantity()+quantity);
+    public void createStockForStore(Store store, ProductVariant variant, Integer quantity) {
+        boolean exists = stockRepository
+                .existsByStoreAndVariantAndStockType(store, variant, StockType.STORE);
+        if (exists) {
+            Stock stockOfVariant = stockRepository.findByVariant_IdAndStore(variant.getId(), store)
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.STOCK_NOT_FOUND));
+            stockOfVariant.setQuantity(stockOfVariant.getQuantity() + quantity);
+        } else {
+            Stock stock = Stock.builder()
+                    .store(store)
+                    .variant(variant)
+                    .stockType(StockType.STORE)
+                    .quantity(quantity)
+                    .sellableQuantity(quantity - 10)
+                    .build();
+            stockRepository.save(stock);
         }
-        else {
+    }
+
+    @Transactional
+    public void createStockForWarehouse(WareHouse warehouse, ProductVariant variant, Integer quantity) {
+        boolean exists = stockRepository.existsByWarehouseAndVariantAndStockType(warehouse, variant, StockType.WAREHOUSE);
+        if (exists) {
+            Stock stockOfVariant = stockRepository.findByVariant_IdAndWarehouse(variant.getId(), warehouse)
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.STOCK_NOT_FOUND));
+            stockOfVariant.setQuantity(stockOfVariant.getQuantity() + quantity);
+        } else {
             Stock stock = Stock.builder()
                     .warehouse(warehouse)
                     .variant(variant)
                     .stockType(StockType.WAREHOUSE)
                     .quantity(quantity)
-                    .sellableQuantity(quantity-10)
+                    .sellableQuantity(quantity - 10)
                     .build();
             stockRepository.save(stock);
         }
@@ -95,33 +95,36 @@ public class StockService {
 
                 StockTransactionItem item = stockTransactionItemRepository
                         .findByVariantAndTransaction(variant, stockTransaction);
-               Optional<Stock> stockOtp = stockRepository.findByVariant_IdAndWarehouse
-                       (variant.getId(),item.getTransaction().getToWareHouse());
-                if(stockOtp.isPresent()) {
+                Optional<Stock> stockOtp = stockRepository.findByVariant_IdAndWarehouse
+                        (variant.getId(), item.getTransaction().getToWareHouse());
+                if (stockOtp.isPresent()) {
                     Stock stock = stockOtp.get();
-                    stock.setQuantity(stock.getQuantity() +receivedRequest.getReceivedQuantity());
+                    stock.setQuantity(stock.getQuantity() + receivedRequest.getReceivedQuantity());
                     item.setOriginalTransactionItem(item);
 
-                }
-                else {
+                } else {
                     createStockForWarehouse(stockTransaction.getToWareHouse(),
-                            variant,receivedRequest.getReceivedQuantity());
+                            variant, receivedRequest.getReceivedQuantity());
                 }
             }
         } else {
             List<StockTransactionItem> items = stockTransaction.getItems();
             for (StockTransactionItem item : items) {
-                Stock stock = stockRepository.findByVariant_IdAndStore(item.getVariant().getId(),stockTransaction.getToStore())
-                        .orElseThrow(()->new ApplicationException(ErrorCode.STOCK_NOT_FOUND));
-                stock.setQuantity(stock.getQuantity()+item.getQuantity());
-                item.getVariant().setIsAvailable(Is_Available.AVAILABLE);
-                createStockForStore(stockTransaction.getToStore(),item.getVariant(),item.getQuantity());
-                productVariantRepository.save(item.getVariant());
+
+                Optional<Stock> stockOpt = stockRepository.findByVariant_IdAndStore(item.getVariant().getId(), stockTransaction.getToStore());
+                if (stockOpt.isPresent()) {
+                    Stock stock = stockOpt.get();
+                    stock.setQuantity(stock.getQuantity() + item.getQuantity());
+                } else {
+                    item.getVariant().setIsAvailable(Is_Available.AVAILABLE);
+                    createStockForStore(stockTransaction.getToStore(), item.getVariant(), item.getQuantity());
+                    productVariantRepository.save(item.getVariant());
+                }
             }
         }
         stockTransaction.setStatus(TransactionStatus.COMPLETED);
-        StockTransaction saved=  stockTransactionRepository.save(stockTransaction);
-        StockTransactionResponse  response =stockTransactionMapper.toStockTransactionResponse(saved);
+        StockTransaction saved = stockTransactionRepository.save(stockTransaction);
+        StockTransactionResponse response = stockTransactionMapper.toStockTransactionResponse(saved);
 
         return response;
     }
@@ -133,7 +136,7 @@ public class StockService {
                 .collect(Collectors.toList());
     }
 
-    public StockResponse getStockById(Long id) {
+    public StockResponse getStockById(UUID id) {
         Stock stock = stockRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.STOCK_NOT_FOUND));
         return stockMapper.toStockResponse(stock);
@@ -171,7 +174,7 @@ public class StockService {
 //        return stockMapper.toStockResponse(stock);
 //    }
 //
-    public void deleteStock(Long id) {
+    public void deleteStock(UUID id) {
         Stock stock = stockRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.STOCK_NOT_FOUND));
         stockRepository.delete(stock);

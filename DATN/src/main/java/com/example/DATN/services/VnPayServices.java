@@ -1,29 +1,26 @@
 package com.example.DATN.services;
 
 import com.example.DATN.config.VnPayConfig;
-import com.example.DATN.constant.OrderStatus;
-import com.example.DATN.constant.PaymentMethodEnum;
 import com.example.DATN.constant.PaymentStatus;
 import com.example.DATN.constant.RefundStatus;
+import com.example.DATN.constant.StockReservationStatus;
+import com.example.DATN.dtos.request.RefundRequest;
 import com.example.DATN.dtos.request.vnpay.VnPayRefundRequest;
 import com.example.DATN.dtos.request.vnpay.VnPaymentRequest;
 import com.example.DATN.dtos.respone.order.CancelOrderResponse;
-import com.example.DATN.dtos.respone.order.PendingOrderItem;
-import com.example.DATN.dtos.respone.order.PendingOrderRedis;
 import com.example.DATN.dtos.respone.vnpay.VnPayResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
-import com.example.DATN.mapper.OrderMapper;
-import com.example.DATN.models.Embeddable.ShippingAddress;
-import com.example.DATN.models.*;
+import com.example.DATN.helper.GetUserByJwtHelper;
+import com.example.DATN.models.Order;
+import com.example.DATN.models.Refund;
+import com.example.DATN.models.StockReservation;
+import com.example.DATN.models.Vnpay;
 import com.example.DATN.repositories.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -41,15 +38,12 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
-@AllArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class VnPayServices {
-    @Autowired
-    private RefundRepository refundRepository;
-    @Autowired
-    private ProductVariantRepository productVariantRepository;
-    @Autowired
-    private UserRepository userRepository;
+    private final StockReservationRepository stockReservationRepository;
+    private final StockRepository stockRepository;
+    private final RefundRepository refundRepository;
     private final VnpayRepository vnpayRepository;
     private final RestTemplate restTemplate;
     private final String vnp_TmnCode = VnPayConfig.vnp_TmnCode;
@@ -59,11 +53,8 @@ public class VnPayServices {
     private final String commmandPay = "pay";
     private final String orderType = "other";
     private final OrderRepository orderRepository;
-    @Autowired
-    private RedisTemplate<String, String> redisTemplate;
-    private OrderMapper orderMapper;
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final GetUserByJwtHelper getUserByJwtHelper;
+    private final RefundService refundService;
 
 
     public Boolean CheckPayMent(String orderCode, HttpServletRequest req) {
@@ -101,6 +92,7 @@ public class VnPayServices {
             String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.secretKey, hash_Data);
             vnp_Params.put("vnp_SecureHash", vnp_SecureHash);
             HttpHeaders headers = new HttpHeaders();
+
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Map<String, String>> entity = new HttpEntity<>(vnp_Params, headers);
             ResponseEntity<VnPayResponse> response =
@@ -115,6 +107,7 @@ public class VnPayServices {
             return false;
         }
     }
+
     public ResponseEntity<?> QueryVnpay(String orderCode, HttpServletRequest req) {
         try {
             Vnpay vnpay = vnpayRepository.findByVnpTxnRef(orderCode)
@@ -169,6 +162,14 @@ public class VnPayServices {
                 .forEach((k, v) -> params.put(k, v[0]));
         String responseCode = request.getParameter("vnp_ResponseCode");
         String orderCode = request.getParameter("vnp_TxnRef");
+        Boolean isPay = vnpayRepository.existsByVnpTxnRef(orderCode);
+        if (isPay) {
+            return;
+        }
+        if (!"00".equals(responseCode)) {
+            handleVnPayFailed(orderCode);
+            return;
+        }
         Vnpay vnpay = Vnpay.builder()
                 .vnpTxnRef(orderCode)
                 .vnp_BankCode(request.getParameter("vnp_BankCode"))
@@ -180,49 +181,49 @@ public class VnPayServices {
                 .vnp_CardType(request.getParameter("vnp_CardType"))
                 .build();
         vnpayRepository.save(vnpay);
-        String key = "ORDER_PENDING:" + orderCode;
-        String json = redisTemplate.opsForValue().get(key);
+        handleVnPaySuccess(orderCode);
+    }
 
-        if (json == null) {
-            throw new ApplicationException(ErrorCode.ORDER_NOT_FOUND);
-        } else {
-            PendingOrderRedis pending =
-                    objectMapper.readValue(json, PendingOrderRedis.class);
-            Order order = new Order();
-            order = orderMapper.toOrder(pending);
-            ShippingAddress address = orderMapper.toShipping(pending.getUserAddresses());
-            List<PendingOrderItem> pendingOrderItems = pending.getItems();
-            User user = userRepository.findById(pending.getUserId())
-                    .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXISTED));
-            order.setUser(user);
-            order.setNote(pending.getNote());
-            order.setUserAddresses(address);
-            order.setOrderStatus(OrderStatus.PENDING);
-            order.setPaymentStatus(PaymentStatus.PAID);
-            order.setPaymentMethod(PaymentMethodEnum.VNPAY);
-            order.setCreatedAt(LocalDateTime.now());
-            List<OrderItem> items = new ArrayList<>();
-            for (PendingOrderItem item : pendingOrderItems) {
-                OrderItem orderItem = new OrderItem();
-                ProductVariant productVariant = productVariantRepository.findBysku(item.getSku())
-                        .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
-                Integer quantity = item.getQuantity();
-                orderItem.setName(item.getName());
-                orderItem.setCode(orderCode);
-                orderItem.setQuantity(quantity);
-                orderItem.setOrder(order);
-                orderItem.setProductVariant(productVariant);
-                orderItem.setPrice(item.getPrice());
-                orderItem.setWeight(item.getWeight());
-                orderItem.setHeight(item.getHeight());
-                orderItem.setWidth(item.getWidth());
-                orderItem.setLength(item.getLength());
-                orderItem.setRated(false);
-                items.add(orderItem);
+    @Transactional
+    public void handleVnPayFailed(String orderCode) {
+
+        stockReservationRepository
+                .findForUpdateByOrderCodeAndStatus(
+                        orderCode, StockReservationStatus.HOLD)
+                .ifPresent(r -> {
+                    stockRepository.unlockStock(r.getStockId(), r.getQty());
+                    r.setStatus(StockReservationStatus.RELEASE);
+                });
+    }
+
+    @Transactional
+    public void handleVnPaySuccess(String orderCode) {
+
+        StockReservation reservations =
+                stockReservationRepository.findByOrderCodeAndStatus(
+                                orderCode, StockReservationStatus.HOLD)
+                        .orElseThrow(() -> new ApplicationException(ErrorCode.STOCK_NOT_FOUND));
+        if(reservations.getStatus()==StockReservationStatus.HOLD) {
+            int updated = stockRepository.commitStock(
+                    reservations.getStockId(),
+                    reservations.getQty()
+            );
+            if (updated == 0) {
+                Order order = orderRepository.findByOrderCode(orderCode)
+                        .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
+                RefundRequest refundRequest = RefundRequest.builder()
+                        .amount(order.getTotal_price())
+                        .reason("PAYMENT SUCCESS BUT OUT OF STOCK " + orderCode)
+                        .order(order)
+                        .status(RefundStatus.PENDING)
+                        .expectedRefundDate(LocalDateTime.now().plusDays(7))
+                        .build();
+                refundService.createRefundRequest(refundRequest);
+                reservations.setStatus(StockReservationStatus.RELEASE);
+            } else {
+                int mark = stockReservationRepository.markCommitted(orderCode);
+                reservations.setStatus(StockReservationStatus.COMMITED);
             }
-            order.setItems(items);
-            orderRepository.save(order);
-            redisTemplate.delete(key);
         }
     }
 
@@ -286,6 +287,7 @@ public class VnPayServices {
             if ("00".equals(response.getBody().getVnp_ResponseCode())) {
                 if ("02".equals(response.getBody().getVnp_ResponseCode())) {
                     vnpayRepository.delete(originalPayment);
+                    refund.setStatus(RefundStatus.SUCCESS);
                     refundRepository.save(refund);
                 } else {
                     String oldAmountStr = originalPayment.getVnp_Amount();

@@ -10,6 +10,7 @@ public class PendingOrderItem {
     private UUID ID;
     private String name;
     private String sku;
+    private UUID stockId;
     private Integer weight;
     private Integer height;
     private Integer width;

@@ -18,7 +18,7 @@ public class OrderReturnResponse {
     private UUID id;
     private UUID orderId;
     private String userName;
-    private String reason;
+    private String reasonReturn;
     private OrderReturnStatus status;
     private LocalDateTime createdDate;
     private List<ReturnItemResponse> returnItems;

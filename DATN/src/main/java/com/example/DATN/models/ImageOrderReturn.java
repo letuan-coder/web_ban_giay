@@ -1,11 +1,11 @@
 package com.example.DATN.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -16,11 +16,14 @@ import lombok.*;
 @Table(name = "image_orders_return")
 public class ImageOrderReturn {
     @Id
-    Long id;
+    @UuidGenerator
+    UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_return_item_id", nullable = false)
     @JsonBackReference
-    OrderReturnItem orderReturnItem;
+    private OrderReturnItem orderReturnItem;
 
-    String imageUrl;
+    @Column(name = "image_url", nullable = false, length = 500)
+    private String imageUrl;
 }

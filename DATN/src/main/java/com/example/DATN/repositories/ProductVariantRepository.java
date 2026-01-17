@@ -23,6 +23,7 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
 
 
     Integer countById(UUID id);
+
     @EntityGraph(attributePaths = {
             "size",
             "productColor.color",

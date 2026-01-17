@@ -23,7 +23,11 @@ public class WareHouse extends BaseEntity{
     @UuidGenerator
     private UUID id;
 
+    @Column(nullable = false)
     private String warehouseCode;
+
+    @Column(name = "ware_house_code_ghn",nullable = false)
+    private Integer warehouseCodeGHN;
 
     @Column(nullable = false)
     private String name;
@@ -33,9 +37,10 @@ public class WareHouse extends BaseEntity{
     private String addressDetail;
     private Integer provinceCode;
     private Integer districtCode;
-    private Integer wardCode;
+    private String wardCode;
     private Integer capacity;
     private Boolean deleted = false;
+    private String phoneNumber;
     private Boolean isCentral;
     @OneToMany(mappedBy = "warehouse", cascade = CascadeType.ALL)
     private Set<Stock> stocks = new HashSet<>();

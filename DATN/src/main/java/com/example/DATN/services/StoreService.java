@@ -8,6 +8,8 @@ import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.StoreMapper;
 import com.example.DATN.models.Store;
 import com.example.DATN.repositories.StoreRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,14 +25,16 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final StoreMapper storeMapper;
-    private final StockService stockService;
+    private final GhnService ghnService;
     private final String storeCode="CN";
     private final SnowflakeIdGenerator snowflakeIdGenerator;
-    public StoreResponse createStore(StoreRequest request) {
+    @Transactional
+    public StoreResponse createStore(StoreRequest request) throws JsonProcessingException {
         Long code = snowflakeIdGenerator.nextId();
         String storeId = storeCode + code;
         Store store = storeMapper.toStore(request);
         store.setCode(storeId);
+        ghnService.registerShop(store);
         Store storesaved = storeRepository.save(store);
         return storeMapper.toStoreResponse(storesaved);
     }

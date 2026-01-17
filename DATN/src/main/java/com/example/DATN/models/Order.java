@@ -4,6 +4,7 @@ import com.example.DATN.constant.OrderStatus;
 import com.example.DATN.constant.PaymentMethodEnum;
 import com.example.DATN.constant.PaymentStatus;
 import com.example.DATN.constant.ShippingStatus;
+import com.example.DATN.models.Embeddable.GHN;
 import com.example.DATN.models.Embeddable.ShippingAddress;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -32,38 +33,10 @@ public class Order extends BaseEntity {
     @Id
     @UuidGenerator
     private UUID id;
-
+    @Column(name = "order_code",nullable = false)
     private String orderCode;
-    // Mã đơn hàng GHN
-    private String ghnOrderCode;
-
-    // Mã phân loại nội bộ của GHN
-    private String sortCode;
-
-
-    // Loại vận chuyển (truck, motor…)
-    private String transType;
-
-    // Mã phường/xã
-    private String wardEncode;
-
-    // Mã quận/huyện
-    private String districtEncode;
-
-    // Tổng phí GHN (total_fee)
-    private Integer totalFee;
-
-    // Phí dịch vụ chính (main_service)
-    private Integer mainServiceFee;
-
-    // Thời gian dự kiến giao hàng
-    private LocalDateTime expectedDeliveryTime;
-
-    // Đối tác vận hành (operation_partner)
-    private String operationPartner;
-
-    // Thời gian cập nhật trạng thái lần cuối
-    private LocalDateTime ghnLastUpdated;
+    @Embedded
+    GHN ghn;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -87,6 +60,10 @@ public class Order extends BaseEntity {
     @NotNull
     private BigDecimal total_price;
 
+    @Column(name = "final_price")
+    private BigDecimal finalPrice;
+
+
     private String Note;
 
     @Enumerated(EnumType.STRING)
@@ -105,7 +82,13 @@ public class Order extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "voucher_claim_id")
+    VoucherClaim voucherClaim;
+
+    BigDecimal discountAmount;
+
+    @OneToMany(mappedBy = "order", cascade =  { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JsonManagedReference("orders-return")
     private List<OrderReturn> returns;
 }

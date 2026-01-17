@@ -50,7 +50,6 @@ public class OrderController {
             throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
         }
         request.setIdempotency(idempotencyKey);
-
         OrderResponse response = new OrderResponse();
         if (request.getType() == PaymentMethodEnum.CASH_ON_DELIVERY) {
             response = orderService.createOrder(request);

@@ -16,7 +16,8 @@ public class ReturnItemResponse {
     private UUID id;
     private UUID orderItemId;
     private String productName;
-    private String productVariantName;
+    private String sizeName;
+    private String colorName;
     private Integer quantity;
     private BigDecimal price;
 }

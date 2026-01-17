@@ -19,7 +19,7 @@ import java.util.UUID;
 public class ProductVariantDetailResponse {
     private UUID id;
     private String sku;
-    private String size;
+    private Integer size;
     private String colorName;
     private String colorHex;
     private Is_Available isAvailable;

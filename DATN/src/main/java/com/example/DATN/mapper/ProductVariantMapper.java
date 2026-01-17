@@ -22,8 +22,6 @@ public interface ProductVariantMapper {
     @Mapping(target = "id", source = "id")
     ProductVariantResponse toProductVariantResponse(ProductVariant productVariant);
 
-
-
     List<ProductVariantResponse> toProductVariantResponse(List<ProductVariant> productVariants);
 
     @Mapping(target = "id", ignore = true)
@@ -35,6 +33,12 @@ public interface ProductVariantMapper {
     @Mapping(source = "productColor.color.hexCode",target = "colorHex")
     @Mapping(source = "stocks",target = "stocks")
     ProductVariantDetailResponse basicToDetail(ProductVariant variant);
+
+    @Mapping(target = "size.name", source = "size")
+    @Mapping(target = "productColor.color.name",source = "colorName")
+    @Mapping(target = "productColor.color.hexCode",source = "colorHex")
+    @Mapping(target = "stocks",source = "stocks")
+    ProductVariant DetailToVariantMapper(ProductVariantDetailResponse variant);
 
     @Named("toVariantDetail")
     default ProductVariantDetailResponse toDetail (ProductVariant variant) {

@@ -2,14 +2,16 @@ package com.example.DATN.services;
 
 import com.example.DATN.constant.Util.CheckSumUtil;
 import com.example.DATN.constant.VariantType;
+import com.example.DATN.constant.VoucherClaimStatus;
 import com.example.DATN.dtos.request.checkout.*;
+import com.example.DATN.dtos.respone.StockResponse;
 import com.example.DATN.dtos.respone.order.CheckOutProductResponse;
 import com.example.DATN.dtos.respone.order.CheckOutResponse;
 import com.example.DATN.dtos.respone.order.ShippingAddressRedis;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.GetUserByJwtHelper;
-import com.example.DATN.mapper.OrderMapper;
+import com.example.DATN.mapper.StockMapper;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
 import com.example.DATN.repositories.projection.CheckOutProjection;
@@ -31,6 +33,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -40,8 +43,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class CheckOutService {
+    private final VoucherClaimRepository voucherClaimRepository;
     private final UserAddressRepository userAddressRepository;
-    private final OrderMapper orderMapper;
     private final WareHouseRepository wareHouseRepository;
     private final ProductViewRepository productViewRepository;
     private final StoreRepository storeRepository;
@@ -51,6 +54,7 @@ public class CheckOutService {
     private final GetUserByJwtHelper getUserByJwtHelper;
     private final ShippingCalculator shippingCalculator;
     private final CheckSumUtil checkSumUtil;
+    private final StockMapper stockMapper;
     private final ObjectMapper objectMapper;
     private final String PREFIX = "route:v1:";
     private static final DateTimeFormatter DAY_FMT =
@@ -88,84 +92,132 @@ public class CheckOutService {
         return PREFIX + key;
     }
 
+//    public ShippingFeeResponse calculateGHNfee(Integer id) {
+//        return shippingCalculator.calculateShippingFee(id);
+//    }
+
     private static final String LUA_LOCK_SCRIPT = """
             local userId = ARGV[1]
-              local reqQty = tonumber(ARGV[2])
-              local sellable = tonumber(ARGV[3])
-              local ttl = tonumber(ARGV[4])
-              local maxPerUser = tonumber(ARGV[5])
+            local reqQty = tonumber(ARGV[2])
+            local sellable = tonumber(ARGV[3])
+            local ttl = tonumber(ARGV[4])
+            local maxPerUser = tonumber(ARGV[5])
             
-              -- số lượng user đã lock trước đó
-              local userLocked = tonumber(redis.call("HGET", KEYS[1], userId) or "0")
+            local userLocked = tonumber(redis.call("HGET", KEYS[1], userId) or "0")
             
-              -- giới hạn per user
-              if userLocked + reqQty > maxPerUser then
-                  return -2
-              end
+            -- giới hạn per user
+            if reqQty > maxPerUser then
+                return -2
+            end
             
-              -- chỉ lock phần CHÊNH LỆCH
-              local need = reqQty - userLocked
-              if need <= 0 then
-                  -- user chỉ checkout lại, refresh, KHÔNG trừ thêm
-                  redis.call("EXPIRE", KEYS[1], ttl)
-                  redis.call("EXPIRE", KEYS[2], ttl)
-                  return 1
-              end
+            local diff = reqQty - userLocked
+            local totalLocked = tonumber(redis.call("GET", KEYS[2]) or "0")
             
-              -- tổng đã lock
-              local totalLocked = tonumber(redis.call("GET", KEYS[2]) or "0")
+            -- CASE 1: user tăng số lượng
+            if diff > 0 then
+                if totalLocked + diff > sellable then
+                    return 0 -- OUT OF STOCK
+                end
+                redis.call("INCRBY", KEYS[2], diff)
             
-              -- kiểm tra stock
-              if totalLocked + need > sellable then
-                  return 0 -- OUT OF STOCK
-              end
+            -- CASE 2: user giảm số lượng
+            elseif diff < 0 then
+                redis.call("DECRBY", KEYS[2], -diff)
+            end
             
-              -- update lock
-              redis.call("HSET", KEYS[1], userId, reqQty)
-              redis.call("INCRBY", KEYS[2], need)
+            -- update user lock
+            if reqQty > 0 then
+                redis.call("HSET", KEYS[1], userId, reqQty)
+            else
+                redis.call("HDEL", KEYS[1], userId)
+            end
             
-              redis.call("EXPIRE", KEYS[1], ttl)
-              redis.call("EXPIRE", KEYS[2], ttl)
+            redis.call("EXPIRE", KEYS[1], ttl)
+            redis.call("EXPIRE", KEYS[2], ttl)
             
-              return 1
+            return 1
+            
             """;
+
+    public boolean checkVoucherCondition(BigDecimal totalPrice, Voucher voucher) {
+
+        if (!Boolean.TRUE.equals(voucher.getIsActive())) {
+            return false;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if (voucher.getStartAt() != null && now.isBefore(voucher.getStartAt())) {
+            return false;
+        }
+
+        if (voucher.getEndAt() != null && now.isAfter(voucher.getEndAt())) {
+            return false;
+        }
+
+        if (voucher.getMinOrderValue() != null &&
+                totalPrice.compareTo(voucher.getMinOrderValue()) < 0) {
+            return false;
+        }
+
+        if (voucher.getUsageLimit() != null &&
+                voucher.getUsageLimit() != -1 &&
+                voucher.getUsedCount() >= voucher.getUsageLimit()) {
+            return false;
+        }
+
+        return true;
+    }
 
     @Transactional
     public BigDecimal CheckVoucher(CheckOutResponse response,
-                                   String voucherCode, BigDecimal price) {
-        BigDecimal sum = price;
+                                   String voucherCode,User user, BigDecimal price) {
 
+        BigDecimal sum = price;
         Voucher voucher = voucherRepository.findByVoucherCode(voucherCode.trim())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND));
-
-        switch (voucher.getType()) {
-            case PERCENT_DISCOUNT:
-                BigDecimal discountAmount = sum
-                        .multiply(voucher.getDiscountValue())
-                        .divide(BigDecimal.valueOf(100), 0, RoundingMode.DOWN);
-                sum = sum.subtract(discountAmount);
-                break;
-            case FIXED_AMOUNT:
-                sum = sum.compareTo(voucher.getMinOrderValue()) >= 0
-                        ? sum.subtract(voucher.getDiscountValue()) : sum;
-                break;
-            case FREE_SHIPPING:
-                if (response.getShippingFee().compareTo(BigDecimal.ZERO) > 0) {
-                    response.setShippingFee(BigDecimal.ZERO);
-                } else {
-                    throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
-                }
-                break;
-            case CASHBACK:
-                sum = sum.subtract(voucher.getDiscountValue());
-                if (sum.compareTo(BigDecimal.ZERO) < 0) {
-                    sum = BigDecimal.ZERO;
-                }
-                break;
-            default:
-                throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
+        VoucherClaim voucherClaim = voucherClaimRepository.findByUser_IdAndVoucher_Id(user.getId(),voucher.getId())
+                .orElseThrow(() -> new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND));
+        if(voucherClaim.getStatus()!= VoucherClaimStatus.CLAIMED){
+            throw new ApplicationException(ErrorCode.VOUCHER_CANT_APPLY);
         }
-        return sum.setScale(0, RoundingMode.DOWN);
+        response.setVoucherId(voucherClaim.getId());
+        if(checkVoucherCondition(sum,voucher)) {
+            switch (voucher.getType()) {
+                case PERCENT_DISCOUNT:
+                    BigDecimal discountAmount = sum
+                            .multiply(voucher.getDiscountValue())
+                            .divide(BigDecimal.valueOf(100), 0, RoundingMode.DOWN);
+                    sum = sum.subtract(discountAmount);
+
+                    break;
+                case FIXED_AMOUNT:
+
+                    sum = sum.compareTo(voucher.getMinOrderValue()) >= 0
+                            ? sum.subtract(voucher.getDiscountValue()) : sum;
+                    break;
+                case FREE_SHIPPING:
+                    if (response.getShippingFee().compareTo(BigDecimal.ZERO) > 0) {
+                        response.setShippingFee(BigDecimal.ZERO);
+                    } else {
+                        throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
+                    }
+                    break;
+                case CASHBACK:
+                    sum = sum.subtract(voucher.getDiscountValue());
+                    if (sum.compareTo(BigDecimal.ZERO) < 0) {
+                        sum = BigDecimal.ZERO;
+                    }
+                    break;
+                default:
+                    throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
+            }
+            return sum.setScale(0, RoundingMode.DOWN);
+        }
+        else {
+            response.setMessageForUser(ErrorCode.VOUCHER_CANT_APPLY.getMessage());
+            return BigDecimal.ZERO;
+        }
     }
 
 
@@ -188,45 +240,48 @@ public class CheckOutService {
         redisTemplate.expire(key, Duration.ofDays(2));
     }
 
-    public Stock CheckStock(Map<String, Integer> variantMap, List<WareHouse> wareHouse) {
-        for (WareHouse ware : wareHouse) {
-            for (Map.Entry<String, Integer> variant : variantMap.entrySet()) {
-                ProductVariant productVariant = variantCache.get(variant.getKey());
-                Stock stock = stockRepository
-                        .findByVariant_IdAndWarehouse(productVariant.getId(), ware)
-                        .orElseThrow(() -> new ApplicationException(ErrorCode.WAREHOUSE_NOT_FOUND));
+    private String buildRouteCacheKey(
+            double lat,
+            double lng,
+            Map<String, Integer> quantities
+    ) {
+        double latKey = roundGrid2Km(lat);
+        double lngKey = roundGrid2Km(lng);
 
-                if (stock.getSellableQuantity() >= variant.getValue()) {
-                    return stock;
-                } else continue;
-            }
-        }
-        return null;
+        String skuHash = quantities.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(e -> e.getKey() + ":" + e.getValue())
+                .collect(Collectors.joining("|"))
+                .hashCode() + "";
+
+        return "route:" + latKey + ":" + lngKey + ":" + skuHash;
     }
 
-    public CheckOutProjection resolveRoute(List<String> skus,
-                                           double lat, double lng) throws JsonProcessingException {
+    public CheckOutProjection resolveRoute(
+            List<String> skus, Map<String, Integer> quantities,
+            double lat, double lng) throws JsonProcessingException {
 
         double latKey = roundGrid2Km(lat);
         double lngKey = roundGrid2Km(lng);
-        String cacheKey = RedisKey(lngKey, latKey);
-        String cached = redisTemplate.opsForValue().get(cacheKey);
-        if (cached != null) {
-            CheckOutProjection projection = objectMapper.readValue(cached, CheckOutProjection.class);
-            return projection;
+
+        Optional<NearestStoreProjection> nearest =
+                storeRepository.findNearestStoreWithAllSku(
+                        skus,
+                        skus.size(),
+                        lat,
+                        lng
+                );
+        if (nearest.isPresent()) {
+            return CheckOutProjection.builder()
+                    .storeId(nearest.get().getId())
+                    .distanceKm(nearest.get().getDistanceKm())
+                    .build();
         }
-        Optional<NearestStoreProjection> nearest = storeRepository
-                .findNearestStoreWithAllSku(skus, skus.size(), lat, lng);
-        CheckOutProjection route = new CheckOutProjection();
-        if (nearest.isEmpty() || nearest.get().getDistanceKm() > 10) {
-            route = route.ghn();
-        } else {
-            double distanceRounded = Math.round(nearest.get().getDistanceKm() * 100.0) / 100.0;
-            route = route.store(nearest.get().getId(), distanceRounded);
-        }
-        String json = objectMapper.writeValueAsString(route);
-        redisTemplate.opsForValue().set(cacheKey, json, Duration.ofMinutes(30));
-        return route;
+
+        return CheckOutProjection.builder()
+                .storeId(null)
+                .distanceKm(0.0)
+                .build();
     }
 
     private double roundGrid2Km(double value) {
@@ -235,6 +290,7 @@ public class CheckOutService {
 
     @Transactional(readOnly = true)
     public ProductVariant getVariant(String sku) {
+
         return variantCache.get(sku);
     }
 
@@ -244,7 +300,7 @@ public class CheckOutService {
 
         for (String sku : skus) {
             try {
-                ProductVariant variant = variantCache.getIfPresent(sku);
+                ProductVariant variant = getVariant(sku);
                 if (variant != null) {
                     result.put(sku, variant);
                 } else {
@@ -261,6 +317,7 @@ public class CheckOutService {
 
             for (ProductVariant v : loaded) {
                 result.put(v.getSku(), v);
+
                 variantCache.put(v.getSku(), v);
             }
         }
@@ -285,8 +342,7 @@ public class CheckOutService {
             String idempotencyKey = request.getIdempotencyKey();
             CheckOutResponse cacheResponse = getIdempotentResponse(idempotencyKey);
             if (cacheResponse != null) {
-                cacheResponse.setVoucherCode(null);
-                cacheResponse.setVoucherDiscount(null);
+                User user = getUserByJwtHelper.getCurrentUser();
                 BigDecimal sum = cacheResponse.getProducts()
                         .stream().map(CheckOutProductResponse::getFinaPrice)
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -295,9 +351,9 @@ public class CheckOutService {
                         throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
                     }
                     try {
-                        sum= CheckVoucher(cacheResponse, request.getVoucherCode(), sum);
+                        sum = CheckVoucher(cacheResponse, request.getVoucherCode(),user, sum);
                     } catch (Exception e) {
-                        throw new ApplicationException(ErrorCode.VOUCHER_EXPIRED);
+                        throw new ApplicationException(ErrorCode.VOUCHER_CANT_APPLY);
                     }
                     cacheResponse.setVoucherCode(request.getVoucherCode());
                     cacheResponse.setVoucherDiscount(cacheResponse.getFinalPrice().subtract(sum));
@@ -306,8 +362,7 @@ public class CheckOutService {
 
                 }
                 return cacheResponse;
-            }
-            else {
+            } else {
                 throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
             }
         } catch (Exception e) {
@@ -315,12 +370,31 @@ public class CheckOutService {
         }
     }
 
+    public Map<String, Boolean> checkStockFromStore(Map<String, Stock> stockMap, List<String> skus) {
+        List<Stock> stocks = skus.stream()
+                .map(stockMap::get)
+                .filter(Objects::nonNull)
+                .toList();
+        Map<Store, List<Stock>> stockByStore = stocks.stream()
+                .collect(Collectors.groupingBy(Stock::getStore));
+        Map<String, Boolean> result = new HashMap<>();
+        for (Map.Entry<Store, List<Stock>> entry : stockByStore.entrySet()) {
+            Store storeId = entry.getKey();
+            List<Stock> storeStocks = entry.getValue();
+            boolean hasStock = storeStocks.stream()
+                    .anyMatch(s -> s.getSellableQuantity() > 0);
+            result.put(storeId.toString(), hasStock);
+        }
+        return result;
+    }
 
     @Transactional(rollbackFor = Exception.class)
     public CheckOutResponse processCheckoutInternal(CheckOutRequest request)
             throws JsonProcessingException {
         String idempotencyKey = request.getIdempotencyKey();
+
         CheckOutResponse cacheResponse = getIdempotentResponse(idempotencyKey);
+
         if (cacheResponse != null) {
             return cacheResponse;
         }
@@ -353,14 +427,27 @@ public class CheckOutService {
                 .filter(UserAddress::isDefault)
                 .findFirst()
                 .orElse(null);
-        CheckOutProjection route = resolveRoute(skus,
-                address.getLatitude(), address.getLongitude());
-
-
+        CheckOutProjection route = new CheckOutProjection();
+        if (address != null) {
+            route = resolveRoute(skus,
+                    quantities, address.getLatitude(), address.getLongitude());
+        }
         Map<String, Stock> stocks = batchLoadStocks(variants, quantities, route);
+        if (stocks.isEmpty()) {
+            throw new ApplicationException(ErrorCode.OUT_OF_STOCK);
+        } else {
+            Map<String, Boolean> result = checkStockFromStore(stocks, skus);
+            result.forEach((sku, available) -> {
+                if (available) {
+                    System.out.println("SKU " + sku + " đã hết hàng tại cửa hàng");
+                } else {
+                    System.out.println("SKU " + sku + " đã hết hàng tại cửa hàng");
+                }
+            });
 
+        }
         Map<String, Boolean> lockResults = batchLockStocks(
-                request.getItem(), stocks, route, user.getId()
+                request.getItem(), stocks, user.getId()
         );
 
         List<String> failedLocks = lockResults.entrySet().stream()
@@ -369,14 +456,12 @@ public class CheckOutService {
                 .toList();
 
         if (!failedLocks.isEmpty()) {
-            rollbackLocks(lockResults, route, user.getId());
+            rollbackLocks(lockResults, user.getId());
             throw new ApplicationException(ErrorCode.OUT_OF_STOCK,
                     "Out of stock for SKUs: " + failedLocks);
         }
-
-
         CheckOutResponse response = checkOutOrder(
-                request, stocks, route);
+                request, stocks, address, variants, route);
         if (address != null) {
             ShippingAddressRedis shippingAddress = ShippingAddressRedis.builder()
                     .receiverName(address.getReceiverName())
@@ -393,100 +478,149 @@ public class CheckOutService {
                     .build();
             response.setShippingAddressResponse(shippingAddress);
         } else {
+            response.setMessageForUser("please add the address or fill " +
+                    "an address form to find the nearest store ");
             response.setShippingAddressResponse(null);
         }
-
         saveIdempotentResponse(request.getIdempotencyKey(), response);
 
         return response;
+
     }
+
+    public ShippingAddressRedis mapToShippingByUserAddress(UserAddress address) {
+        ShippingAddressRedis shippingAddress = ShippingAddressRedis.builder()
+                .receiverName(address.getReceiverName())
+                .phoneNumber(address.getPhoneNumber())
+                .provinceName(address.getProvinceName())
+                .district_Id(address.getDistrictCode())
+                .districtName(address.getDistrictName())
+                .wardCode(address.getWardCode())
+                .wardName(address.getWardName())
+                .streetDetail(address.getStreetDetail())
+                .fullDetail(address.getUserAddress())
+                .longitude(address.getLongitude())
+                .latitude(address.getLatitude())
+                .build();
+        return shippingAddress;
+    }
+
 
     public CheckOutResponse calculatorDistance(DistanceRequest request) {
         try {
+            User user = getUserByJwtHelper.getCurrentUser();
             String idempotencyKey = request.getIdempotencyKey();
             CheckOutResponse response = getIdempotentResponse(idempotencyKey);
             if (response != null) {
                 List<String> skus = response.getProducts().stream().map(
                         item -> item.getSku()
                 ).toList();
-                if (request.getUserAddressId()==null) {
-                    ShippingAddressRedis shippingAddress = ShippingAddressRedis.builder()
-                            .receiverName(request.getShippingAddressRedis().getReceiverName())
-                            .phoneNumber(request.getShippingAddressRedis().getPhoneNumber())
-                            .provinceName(request.getShippingAddressRedis().getProvinceName())
-                            .district_Id(request.getShippingAddressRedis().getDistrict_Id())
-                            .districtName(request.getShippingAddressRedis().getDistrictName())
-                            .wardCode(request.getShippingAddressRedis().getWardCode())
-                            .wardName(request.getShippingAddressRedis().getWardName())
-                            .streetDetail(request.getShippingAddressRedis().getStreetDetail())
-                            .fullDetail(request.getShippingAddressRedis().getFullDetail())
-                            .longitude(request.getShippingAddressRedis().getLongitude())
-                            .latitude(request.getShippingAddressRedis().getLatitude())
-                            .build();
-                    response.setShippingAddressResponse(shippingAddress);
-
+                Map<String, Integer> quantities = response.getProducts().stream()
+                        .collect(Collectors.toMap(
+                                CheckOutProductResponse::getSku,
+                                CheckOutProductResponse::getQuantity
+                        ));
+                Map<String, ProductVariant> variants = batchLoadVariants(skus);
+                Set<String> notFound = skus.stream()
+                        .filter(sku -> !variants.containsKey(sku))
+                        .collect(Collectors.toSet());
+                if (!notFound.isEmpty()) {
+                    throw new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND,
+                            "SKUs not found: " + notFound);
                 }
-                else {
-                    if(response.getUserAddressId()!=request.getUserAddressId()){
+                if (request.getUserAddressId() == null) {
+                    response.setShippingAddressResponse(request.getShippingAddressRedis());
+                } else {
+                    if (response.getUserAddressId() != request.getUserAddressId()) {
                         UserAddress address = userAddressRepository.findById(request.getUserAddressId())
-                                .orElseThrow(()->new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND));
-                        ShippingAddressRedis shippingAddress = ShippingAddressRedis.builder()
-                                .receiverName(address.getReceiverName())
-                                .phoneNumber(address.getPhoneNumber())
-                                .provinceName(address.getProvinceName())
-                                .district_Id(address.getDistrictCode())
-                                .districtName(address.getDistrictName())
-                                .wardCode(address.getWardCode())
-                                .wardName(address.getWardName())
-                                .streetDetail(address.getStreetDetail())
-                                .fullDetail(address.getUserAddress())
-                                .longitude(address.getLongitude())
-                                .latitude(address.getLatitude())
-                                .build();
+                                .orElseThrow(() -> new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND));
+                        ShippingAddressRedis shippingAddress = mapToShippingByUserAddress(address);
                         response.setShippingAddressResponse(shippingAddress);
                     }
                 }
                 CheckOutProjection checkOutProjection = resolveRoute(skus,
-                        response.getShippingAddressResponse().getLatitude(), response.getShippingAddressResponse().getLongitude());
-                response.setFrom(checkOutProjection.getDistanceKm().toString());
-                response.setStoreId(checkOutProjection.getStoreId());
-                BigDecimal distanceFee = shippingCalculator.calculateShippingFeeByDistance
-                        (checkOutProjection.getDistanceKm());
-                response.setDistanceFee(distanceFee);
-                BigDecimal total = PlusFee(distanceFee, response.getQuantityFee(), response.getWeightFee());
-                response.setFinalPrice(total);
-                saveIdempotentResponse(idempotencyKey,response);
-                return response;
-            }
-        } catch (Exception e) {
-            throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
-        }
-        return null;
+                        quantities, response.getShippingAddressResponse().getLatitude(), response.getShippingAddressResponse().getLongitude());
+                if (checkOutProjection.getStoreId().equals(response.getStoreId())) {
+                    Store store = storeRepository.findById(response.getStoreId())
+                            .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
+                    response.setShippingFee(shippingCalculator.recalculatorShippingAddress(store, response));
+                } else {
 
-    }
-
-    public CheckOutResponse calculatorItem(IncreaseQuantityRequest request) {
-        try {
-            int total_quantity = 0;
-            String idempotencyKey = request.getIdempotencyKey();
-            CheckOutResponse response = getIdempotentResponse(idempotencyKey);
-            Map<String, Integer> variantQuantity = new HashMap<>();
-            if (response != null) {
-                for (CheckOutProductResponse productResponse : response.getProducts()) {
-                    total_quantity += productResponse.getQuantity();
-                    if (productResponse.getSku().equals(request.getSku())) {
-                        productResponse.setQuantity(request.getQuantity());
-                        variantQuantity.put(productResponse.getSku(), request.getQuantity());
+                    Map<String, Stock> stockMap = batchLoadStocks(variants, quantities, checkOutProjection);
+                    Map<String, Boolean> lockResults = batchReLockStock(
+                            response, stockMap, user.getId()
+                    );
+                    List<String> failedLocks = lockResults.entrySet().stream()
+                            .filter(e -> !e.getValue())
+                            .map(Map.Entry::getKey)
+                            .toList();
+                    if (!failedLocks.isEmpty()) {
+                        rollbackLocks(lockResults, user.getId());
+                        throw new ApplicationException(ErrorCode.OUT_OF_STOCK,
+                                "Out of stock for SKUs: " + failedLocks);
                     }
-                    variantQuantity.put(productResponse.getSku(), productResponse.getQuantity());
+
+                    Store store = storeRepository.findById(checkOutProjection.getStoreId())
+                            .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
+                    response.setStoreId(store.getId());
+                    shippingCalculator.recalculatorShippingAddress(store, response);
                 }
-                BigDecimal variantFee = shippingCalculator
-                        .calculatorShippingFeeByWeight(variantQuantity);
-                BigDecimal quantityFee = BigDecimal.valueOf(1000)
-                        .multiply(BigDecimal.valueOf(total_quantity));
-                response.setWeightFee(variantFee);
-                response.setQuantityFee(quantityFee);
-                response.setShippingFee(PlusFee(variantFee, quantityFee, response.getDistanceFee()));
+                saveIdempotentResponse(idempotencyKey, response);
+                return response;
+            }
+        } catch (Exception e) {
+            throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
+        }
+        return null;
+
+    }
+
+    public CheckOutResponse calculatorItem(List<IncreaseQuantityRequest> request, String idempotencyKey) {
+        try {
+            User user = getUserByJwtHelper.getCurrentUser();
+            CheckOutResponse response = getIdempotentResponse(idempotencyKey);
+            Integer sum = 0;
+            Map<String, Stock> stockMap = new HashMap<>();
+            if (response != null) {
+                for (IncreaseQuantityRequest quantityRequest : request) {
+                    response.getProducts().stream()
+                            .filter(item -> item.getSku().equals(quantityRequest.getSku()))
+                            .findFirst()
+                            .ifPresent(item ->
+                                    item.setQuantity(quantityRequest.getQuantity() + item.getQuantity()
+                                    )
+                            );
+                    for (CheckOutProductResponse productResponse : response.getProducts()) {
+                        ProductVariant productVariant = variantCache.get(productResponse.getSku());
+                        productResponse.setFinaPrice(productVariant.getPrice()
+                                .multiply(BigDecimal.valueOf(productResponse.getQuantity())));
+                        Stock stock = stockRepository.findById(productResponse.getStockResponse().getId())
+                                .orElseThrow(() -> new ApplicationException(ErrorCode.STOCK_NOT_FOUND));
+
+                        stockMap.put(productResponse.getSku(), stock);
+                        sum += productResponse.getFinaPrice().intValue();
+                    }
+                }
+                response.setFinalPrice(BigDecimal.valueOf(sum));
+                Map<String, Boolean> lockStock = batchReLockStock(response, stockMap, user.getId());
+                List<String> failedLocks = lockStock.entrySet().stream()
+                        .filter(e -> !e.getValue())
+                        .map(Map.Entry::getKey)
+                        .toList();
+
+                if (!failedLocks.isEmpty()) {
+                    rollbackLocks(lockStock, user.getId());
+                    throw new ApplicationException(ErrorCode.OUT_OF_STOCK,
+                            "Out of stock for SKUs: " + failedLocks);
+                }
+                if (response.getStoreId() != null) {
+                    shippingCalculator.recalculatorItem(response);
+                } else {
+                    response.setMessageForUser("please add the address or fill " +
+                            "an address form to find the nearest store ");
+                    response.setStoreId(null);
+                }
+                saveIdempotentResponse(idempotencyKey, response);
                 return response;
             }
         } catch (Exception e) {
@@ -495,10 +629,6 @@ public class CheckOutService {
         return null;
     }
 
-    private BigDecimal PlusFee(BigDecimal weightFee
-            , BigDecimal quantityFee, BigDecimal DistanceFee) {
-        return weightFee.add(quantityFee.add(DistanceFee));
-    }
 
     private Map<String, Stock> batchLoadStocks(
             Map<String, ProductVariant> variants,
@@ -509,34 +639,39 @@ public class CheckOutService {
                 .map(ProductVariant::getId)
                 .toList();
         List<Stock> stocks = new ArrayList<>();
-        if (route.isStore()) {
+        if (route.getStoreId() != null) {
             Store store = storeRepository.findById(route.getStoreId())
                     .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
-
             stocks = stockRepository.findAllByVariantIdsAndStore(variantIds, store);
         } else {
-            List<WareHouse> wareHouse = wareHouseRepository.findAll();
+            List<Stock> allValidStock = stockRepository.findAllByVariantIdsAndStockType(variantIds);
+            stocks = allValidStock.stream()
+                    .filter(s -> {
+                        Integer requiredQty = quantities.get(s.getVariant().getSku());
+                        return requiredQty != null
+                                && s.getSellableQuantity() >= requiredQty;
+                    })
+                    .toList();
 
-            Stock stock = CheckStock(quantities, wareHouse);
-            stocks.add(stock);
         }
 
         return stocks.stream()
                 .collect(Collectors.toMap(
                         s -> s.getVariant().getSku(),
-                        s -> s
+                        s -> s,
+                        (s1, s2) -> s1.getSellableQuantity() >= s2.getSellableQuantity()
+                                ? s1 : s2
                 ));
     }
 
     private void rollbackLocks(
             Map<String, Boolean> lockResults,
-            CheckOutProjection route,
             Long userId) {
 
         lockResults.entrySet().stream()
                 .filter(Map.Entry::getValue)
                 .forEach(entry -> {
-                    String key = "stock_lock:" + entry.getKey() + ":" + route.getStoreId();
+                    String key = "stock_lock:" + entry.getKey();
                     redisTemplate.opsForHash().delete(key, String.valueOf(userId));
                 });
     }
@@ -545,10 +680,17 @@ public class CheckOutService {
     @Transactional(readOnly = true)
     public CheckOutResponse checkOutOrder(CheckOutRequest request
             , Map<String, Stock> stockMap
+            , UserAddress address
+            , Map<String, ProductVariant> variantMap
             , CheckOutProjection route
-    ) {
-        Integer total_quantity = 0;
-        BigDecimal shippingFee = BigDecimal.ZERO;
+    ) throws JsonProcessingException {
+        Integer lockQuantity = 0;
+        Integer total_weight = 0;
+        Integer total_length = 0;
+        Integer total_width = 0;
+        Integer total_height = 0;
+
+        BigDecimal fee = BigDecimal.ZERO;
         List<CheckOutProductResponse> checkOutProductResponses = new ArrayList<>();
         Map<String, Integer> skuQuantities = request.getItem().stream()
                 .collect(Collectors.toMap(
@@ -558,18 +700,20 @@ public class CheckOutService {
         CheckOutResponse response = new CheckOutResponse();
         for (CheckOutItemRequest checkOutItemRequest : request.getItem()) {
             ProductVariant productVariant = getVariant(checkOutItemRequest.getSku());
+            Integer quantity = checkOutItemRequest.getQuantity();
             Stock stock = stockMap.get(productVariant.getSku());
-            String totalKey = "stock_lock_total:" + route.getStoreId() + ":" + checkOutItemRequest.getSku();
-            String value = redisTemplate.opsForValue().get(totalKey);
-            Integer lockQuantity = Integer.parseInt(value);
-            total_quantity = request.getItem().size();
+//            response.setStoreId(stock.getStore().getId());
+            total_weight += productVariant.getWeight() * quantity;
+            total_height += productVariant.getHeight() * quantity;
+            total_length = Math.max(total_length, productVariant.getLength());
+            total_width = Math.max(total_width, productVariant.getWidth());
+            StockResponse stockResponse = stockMapper.toStockResponse(stock);
+            response.setStockId(stock.getId());
             skuQuantities.put(checkOutItemRequest.getSku(), checkOutItemRequest.getQuantity());
-            BigDecimal fee = shippingCalculator
-                    .calculatorShippingFee(skuQuantities,
-                            route, total_quantity, route.getDistanceKm(), response);
-            response.setFrom("from " + route.getDistanceKm());
-            response.setStoreId(route.getStoreId());
-            response.setShippingFee(shippingFee.add(fee));
+            String totalKey = "stock_lock_total:" + stock.getId();
+            String value = redisTemplate.opsForValue().get(totalKey);
+            lockQuantity = Integer.parseInt(value != null ? value : "0");
+            response.setDistance(route.getDistanceKm());
             CheckOutProductResponse checkOutResponse = CheckOutProductResponse.builder()
                     .id(productVariant.getId())
                     .isAvailable(productVariant.getIsAvailable())
@@ -579,25 +723,35 @@ public class CheckOutService {
                     .sku(productVariant.getSku())
                     .productName(productVariant.getProductColor().getProduct().getName()).price(productVariant.getPrice())
                     .finaPrice(productVariant.getPrice().multiply(BigDecimal.valueOf(checkOutItemRequest.getQuantity())))
+                    .stockResponse(stockResponse)
+                    .weight(productVariant.getWeight())
+                    .height(productVariant.getHeight())
+                    .length(productVariant.getLength())
+                    .width(productVariant.getWidth())
                     .stock(stock.getSellableQuantity() - lockQuantity)
                     .imageUrl(productVariant.getProductColor().getImages().isEmpty()
                             ? null : productVariant.getProductColor().getImages().get(0).getImageUrl())
                     .build();
             checkOutProductResponses.add(checkOutResponse);
-
         }
-
         response.setProducts(checkOutProductResponses);
         BigDecimal sum = response.getProducts().stream()
                 .map(CheckOutProductResponse::getFinaPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        if (request.getVoucherCode() != null) {
-            if (!checkSumUtil.verify(request.getVoucherCode().trim())) {
-                throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
-            }
-            sum = CheckVoucher(response, request.getVoucherCode(), sum);
-        }
         response.setFinalPrice(sum);
+        total_weight = (int) Math.ceil(total_weight * 1.1);
+
+        response.setTotal_weight(total_weight);
+        response.setTotal_height(total_height);
+        response.setTotal_width(total_width);
+        response.setTotal_length(total_length);
+        if (address != null) {
+            fee = shippingCalculator
+                    .calculatorShippingFee(skuQuantities,
+                            stockMap, variantMap, address, route, response);
+        }
+        response.setShippingFee(fee);
+        response.setStoreId(route.getStoreId());
         saveIdempotentResponse(request.getIdempotencyKey(), response);
         return response;
     }
@@ -627,7 +781,7 @@ public class CheckOutService {
         try {
             String cacheKey = IDEMPOTENCY_PREFIX + key;
             String json = objectMapper.writeValueAsString(response);
-            redisTemplate.opsForValue().set(cacheKey, json, Duration.ofMinutes(30));
+            redisTemplate.opsForValue().set(cacheKey, json, Duration.ofMinutes(10));
 
             log.info("Saved idempotent response for key: {}", key);
         } catch (Exception e) {
@@ -638,7 +792,6 @@ public class CheckOutService {
     private Map<String, Boolean> batchLockStocks(
             List<CheckOutItemRequest> items,
             Map<String, Stock> stocks,
-            CheckOutProjection route,
             Long userId) {
 
         Map<String, Boolean> results = new HashMap<>();
@@ -654,22 +807,56 @@ public class CheckOutService {
                 results.put(sku, false);
                 continue;
             }
-            String lockKey = "stock_lock:" + route.getStoreId() + ":" + sku;
-            String totalKey = "stock_lock_total:" + route.getStoreId() + ":" + sku;
-//            String realKey  = "stock_real:" + route.getStoreId() + ":" + sku;
+            String lockKey = "stock_lock:" + stock.getId();
+            String totalKey = "stock_lock_total:" + stock.getId();
             Long result = redisTemplate.execute(
                     script,
                     List.of(lockKey, totalKey),
                     String.valueOf(userId),                    // ARGV[1]
                     String.valueOf(item.getQuantity()),        // ARGV[2]
                     String.valueOf(stock.getSellableQuantity()), // ARGV[3]
-                    "1800",                                    // ARGV[4]
+                    "600",                                    // ARGV[4]
                     "5"                                        // ARGV[5]
             );
-
-            results.put(sku, result != null && result == 1);
+            results.put(stock.getId().toString(), result != null && result == 1);
         }
+        return results;
+    }
 
+    private Map<String, Boolean> batchReLockStock(
+            CheckOutResponse items,
+            Map<String, Stock> stocks,
+            Long userId) {
+
+        Map<String, Boolean> results = new HashMap<>();
+        DefaultRedisScript<Long> script = new DefaultRedisScript<>();
+        script.setScriptText(LUA_LOCK_SCRIPT);
+        script.setResultType(Long.class);
+
+        for (CheckOutProductResponse item : items.getProducts()) {
+            String sku = item.getSku();
+            Stock stock = stocks.get(sku);
+
+            if (stock == null) {
+                results.put(sku, false);
+                continue;
+            }
+            String lockKey = "stock_lock:" + stock.getId();
+            String totalKey = "stock_lock_total:" + stock.getId();
+            Long result = redisTemplate.execute(
+                    script,
+                    List.of(lockKey, totalKey),
+                    String.valueOf(userId),                    // ARGV[1]
+                    String.valueOf(item.getQuantity()),        // ARGV[2]
+                    String.valueOf(stock.getSellableQuantity()), // ARGV[3]
+                    "600",                                    // ARGV[4]
+                    "5"                                        // ARGV[5]
+            );
+            String value = redisTemplate.opsForValue().get(totalKey);
+            Integer lockQuantity = Integer.parseInt(value != null ? value : "0");
+            item.setStock(stock.getSellableQuantity() - lockQuantity);
+            results.put(stock.getId().toString(), result != null && result == 1);
+        }
         return results;
     }
 

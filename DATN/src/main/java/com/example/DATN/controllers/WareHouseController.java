@@ -5,6 +5,7 @@ import com.example.DATN.dtos.request.warehouse.UpdateCentralRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.WareHouseResponse;
 import com.example.DATN.services.WareHouseService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class WareHouseController {
 
     @PostMapping
     public ApiResponse<WareHouseResponse> createWareHouse
-            (@RequestBody @Valid WareHouseRequest request) {
+            (@RequestBody @Valid WareHouseRequest request) throws JsonProcessingException {
         return ApiResponse.<WareHouseResponse>builder()
                 .data(wareHouseService.createWareHouse(request))
                 .build();

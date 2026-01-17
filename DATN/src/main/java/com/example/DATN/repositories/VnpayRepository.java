@@ -20,4 +20,6 @@ public interface VnpayRepository extends JpaRepository<Vnpay, UUID> {
     Long sumRevenueThisYear();
 
     Optional<Vnpay> findByVnpTxnRef(String vnpTxnRef);
+
+    Boolean existsByVnpTxnRef(String vnp_TxnRef);
 }

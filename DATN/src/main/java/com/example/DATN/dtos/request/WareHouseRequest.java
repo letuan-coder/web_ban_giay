@@ -16,9 +16,10 @@ public class WareHouseRequest {
    private String addressDetail;
     private Integer provinceCode;
     private Integer districtCode;
-    private Integer wardCode;
+    private String wardCode;
     private String location;
 //    @NotNull (message = "CAPACITY_IS_NULL")
     private Integer capacity;
+    private String phoneNumber;
     private Boolean isCentral;
 }
