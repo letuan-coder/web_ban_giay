@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +25,19 @@ public interface VoucherClaimRepository extends JpaRepository<VoucherClaim, UUID
                   AND vc.voucher.endAt <= CURRENT_TIMESTAMP
             """)
     int markExpiredClaims();
-
+    @Modifying
+    @Transactional
+    @Query(value = """
+    INSERT IGNORE INTO voucher_claims
+    (id, user_id, voucher_id, status, max_usage, used_count)
+    VALUES (:id, :userId, :voucherId, 'CLAIMED', :maxUsage, 0)
+    """, nativeQuery = true)
+    int insertIgnoreClaim(
+            @Param("id") UUID id,
+            @Param("userId") Long userId,
+            @Param("voucherId") UUID voucherId,
+            @Param("maxUsage") Integer maxUsage
+    );
     @Modifying
     @Query("""
                 UPDATE VoucherClaim c
@@ -35,6 +48,20 @@ public interface VoucherClaimRepository extends JpaRepository<VoucherClaim, UUID
                   AND c.usedCount < c.maxUsage
             """)
     int lockVoucherClaim(@Param("claimId") UUID claimId);
+
+
+//    @Modifying
+//    @Transactional
+//    @Query(value = """
+//        INSERT IGNORE INTO voucher_claims
+//        (id, user_id, voucher_id, status, max_usage, used_count)
+//        VALUES (UUID_TO_BIN(UUID()), :userId, :voucherId, 'CLAIMED', :maxUsage, 0)
+//        """, nativeQuery = true)
+//    int insertIgnoreClaim(
+//            @Param("userId") Long userId,
+//            @Param("voucherId") UUID voucherId,
+//            @Param("maxUsage") Integer maxUsage
+//    );
 
     @Modifying
     @Query("""

@@ -28,7 +28,7 @@ public class Voucher {
     UUID id;
     @Column(name = "voucher_code", nullable = false, unique = true)
     String voucherCode;
-    @Column(name = "voucher_name", nullable = false, unique = true)
+    @Column(name = "voucher_name", nullable = false)
     String voucherName;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -54,7 +54,8 @@ public class Voucher {
     private Integer usageLimit;
 
     @Column(name = "used_count")
-    private Integer usedCount = 0;
+    @Builder.Default
+    private int usedCount = 0;
 
     @Column(name = "created_by")
     private String createdBy;

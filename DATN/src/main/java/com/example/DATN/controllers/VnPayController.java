@@ -70,9 +70,8 @@ public class VnPayController {
     public ApiResponse<?> vnpayReturn(
             Model model,
             HttpServletRequest request)
-            throws UnsupportedEncodingException, JsonProcessingException {
-
-
+            throws UnsupportedEncodingException, JsonProcessingException
+    {
         boolean valid = vnpayServices.verifyReturn(request);
         Map<String, String> fields = new HashMap<>();
         Enumeration<String> params = request.getParameterNames();

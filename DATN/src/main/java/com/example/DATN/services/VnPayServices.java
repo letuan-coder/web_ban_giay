@@ -11,7 +11,6 @@ import com.example.DATN.dtos.respone.order.CancelOrderResponse;
 import com.example.DATN.dtos.respone.vnpay.VnPayResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
-import com.example.DATN.helper.GetUserByJwtHelper;
 import com.example.DATN.models.Order;
 import com.example.DATN.models.Refund;
 import com.example.DATN.models.StockReservation;
@@ -53,7 +52,6 @@ public class VnPayServices {
     private final String commmandPay = "pay";
     private final String orderType = "other";
     private final OrderRepository orderRepository;
-    private final GetUserByJwtHelper getUserByJwtHelper;
     private final RefundService refundService;
 
 
@@ -167,7 +165,6 @@ public class VnPayServices {
             return;
         }
         if (!"00".equals(responseCode)) {
-            handleVnPayFailed(orderCode);
             return;
         }
         Vnpay vnpay = Vnpay.builder()
@@ -195,38 +192,37 @@ public class VnPayServices {
                     r.setStatus(StockReservationStatus.RELEASE);
                 });
     }
-
     @Transactional
     public void handleVnPaySuccess(String orderCode) {
 
-        StockReservation reservations =
+        List<StockReservation> reservationList =
                 stockReservationRepository.findByOrderCodeAndStatus(
-                                orderCode, StockReservationStatus.HOLD)
-                        .orElseThrow(() -> new ApplicationException(ErrorCode.STOCK_NOT_FOUND));
-        if(reservations.getStatus()==StockReservationStatus.HOLD) {
-            int updated = stockRepository.commitStock(
-                    reservations.getStockId(),
-                    reservations.getQty()
-            );
-            if (updated == 0) {
-                Order order = orderRepository.findByOrderCode(orderCode)
-                        .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
-                RefundRequest refundRequest = RefundRequest.builder()
-                        .amount(order.getTotal_price())
-                        .reason("PAYMENT SUCCESS BUT OUT OF STOCK " + orderCode)
-                        .order(order)
-                        .status(RefundStatus.PENDING)
-                        .expectedRefundDate(LocalDateTime.now().plusDays(7))
-                        .build();
-                refundService.createRefundRequest(refundRequest);
-                reservations.setStatus(StockReservationStatus.RELEASE);
-            } else {
-                int mark = stockReservationRepository.markCommitted(orderCode);
-                reservations.setStatus(StockReservationStatus.COMMITED);
+                                orderCode, StockReservationStatus.HOLD);
+        for(StockReservation reservations: reservationList) {
+            if (reservations.getStatus() == StockReservationStatus.HOLD) {
+                int updated = stockRepository.commitStock(
+                        reservations.getStockId(),
+                        reservations.getQty()
+                );
+                if (updated == 0) {
+                    Order order = orderRepository.findByOrderCode(orderCode)
+                            .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
+                    RefundRequest refundRequest = RefundRequest.builder()
+                            .amount(order.getTotal_price())
+                            .reason("PAYMENT SUCCESS BUT OUT OF STOCK " + orderCode)
+                            .order(order)
+                            .status(RefundStatus.PENDING)
+                            .expectedRefundDate(LocalDateTime.now().plusDays(7))
+                            .build();
+                    refundService.createRefundRequest(refundRequest);
+                    reservations.setStatus(StockReservationStatus.RELEASE);
+                } else {
+                    int mark = stockReservationRepository.markCommitted(orderCode);
+                    reservations.setStatus(StockReservationStatus.COMMITED);
+                }
             }
         }
     }
-
     public CancelOrderResponse processRefund(
             VnPayRefundRequest refundRequest,
             HttpServletRequest req, Order order, String reason) {

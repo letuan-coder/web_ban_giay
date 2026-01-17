@@ -48,7 +48,7 @@ public interface StockReservationRepository extends JpaRepository<StockReservati
                 where r.orderCode = :orderCode
                   and r.status = :status
             """)
-    Optional<StockReservation> findByOrderCodeAndStatus(
+    List<StockReservation> findByOrderCodeAndStatus(
             String orderCode,
             StockReservationStatus status
     );

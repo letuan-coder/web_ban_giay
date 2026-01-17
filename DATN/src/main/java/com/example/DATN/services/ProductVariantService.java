@@ -8,6 +8,7 @@ import com.example.DATN.dtos.request.product.UpdateProductVariantRequest;
 import com.example.DATN.dtos.respone.product.ProductVariantResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
+import com.example.DATN.mapper.ProductVariantIndexMapper;
 import com.example.DATN.mapper.ProductVariantMapper;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
@@ -37,8 +38,8 @@ public class ProductVariantService {
 
     private final ProductVariantRepository productVariantRepository;
     private final ProductVariantMapper productVariantMapper;
-    //    private final ProductVariantIndexRepository productVariantIndexRepository;
-//    private final ProductVariantIndexMapper productVariantIndexMapper;
+    private final ProductVariantIndexRepository productVariantIndexRepository;
+    private final ProductVariantIndexMapper productVariantIndexMapper;
     private final ProductColorRepository productColorRepository;
     private final SizeRepository sizeRepository;
     private final StoreService storeService;
@@ -82,16 +83,8 @@ public class ProductVariantService {
                     .build();
             productVariants.add(productVariant);
             productVariantRepository.save(productVariant);
-//                for (Store response:stores) {
-//                    Stock stockForStore = Stock.builder()
-//                            .store(response)
-//                            .quantity(0)
-//                            .minQuantity(0)
-//                            .build();
-//                    stock.add(stockForStore);
-//                }
-//                ProductVariantIndex index = productVariantIndexMapper.toIndex(productVariant);
-//                productVariantIndexRepository.save(index);
+            ProductVariantIndex index = productVariantIndexMapper.toIndex(productVariant);
+            productVariantIndexRepository.save(index);
         }
         productVariantRepository.saveAll(productVariants);
         List<ProductVariant> savedProductVariants = productVariantRepository.saveAll(productVariants);
@@ -103,7 +96,7 @@ public class ProductVariantService {
     @Async
     public void AddView(ProductVariant variant, Authentication authentication) {
         User user = null;
-        UUID productId= variant.getProductColor().getProduct().getId();
+        UUID productId = variant.getProductColor().getProduct().getId();
         if (authentication != null
                 && authentication.isAuthenticated()
                 && !(authentication.getPrincipal() instanceof String)) {
@@ -124,18 +117,20 @@ public class ProductVariantService {
             productViewRepository.save(view);
 
         }
-        increaseView(variant.getId(),productId);
+        increaseView(variant.getId(), productId);
     }
+
     @Scheduled(fixedRate = 300000) // 5 phút
     public void refreshVariantAvailability() {
         List<ProductVariant> variants = productVariantRepository.findAll();
 
     }
+
     @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Ho_Chi_Minh")
     @Transactional
     public void syncViewsToDB() {
         Set<String> keys = redisTemplate.keys("product:view:*");
-        for(String key : keys) {
+        for (String key : keys) {
             Long views = ((Number) redisTemplate.opsForValue().get(key)).longValue();
             UUID productId = extractProductIdFromKey(key);
             productRepository.incrementTotalView(productId, views);
@@ -145,6 +140,7 @@ public class ProductVariantService {
 
         }
     }
+
     private UUID extractProductIdFromKey(String key) {
         String[] parts = key.split(":");
         if (parts.length >= 4) {
@@ -158,6 +154,7 @@ public class ProductVariantService {
         System.err.println("Bỏ qua key format sai: " + key);
         return null;
     }
+
     @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Ho_Chi_Minh")
     @Transactional
     public void syncViewsDailyCron() {
@@ -173,7 +170,7 @@ public class ProductVariantService {
             UUID variantId = productId;
             Instant timeBucket = now.truncatedTo(ChronoUnit.DAYS);
             Optional<ProductViewAggregate> opt = productViewAggregateRepository
-                    .findByVariantIdAndProductIdAndTimeBucket(productId,variantId, timeBucket);
+                    .findByVariantIdAndProductIdAndTimeBucket(productId, variantId, timeBucket);
             if (opt.isPresent()) {
                 ProductViewAggregate aggregate = opt.get();
                 aggregate.setTotalView(aggregate.getTotalView() + views.intValue());
@@ -191,12 +188,12 @@ public class ProductVariantService {
         }
     }
 
-    public void increaseView(UUID variantId,UUID product) {
+    public void increaseView(UUID variantId, UUID product) {
         String day = DAY_FMT.format(Instant.now());
         String key = "product:view:variant:" + variantId + ":" + day;
 
         String keyProduct = "product:view:product:" + product + ":" + day;
-        redisTemplate.opsForValue().increment(keyProduct,1);
+        redisTemplate.opsForValue().increment(keyProduct, 1);
         redisTemplate.expire(keyProduct, Duration.ofDays(2));
         redisTemplate.opsForValue().increment(key, 1);
         redisTemplate.expire(key, Duration.ofDays(2));
@@ -207,7 +204,7 @@ public class ProductVariantService {
         ProductVariant productVariant = productVariantRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
         AddView(productVariant, auth);
-        ProductVariantResponse response=
+        ProductVariantResponse response =
                 productVariantMapper.toProductVariantResponse(productVariant);
         return response;
     }
@@ -302,6 +299,7 @@ public class ProductVariantService {
         productVariantRepository.setNotAvailableIfOutOfStockNative();
         productVariantRepository.setAvailableIfInStockNative();
     }
+
     @Cacheable
             (value = "variantAvailability", key = "#variantId")
     public boolean isAvailable(UUID variantId) {
@@ -310,6 +308,7 @@ public class ProductVariantService {
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
         return variant.getIsAvailable() == Is_Available.AVAILABLE;
     }
+
     @CacheEvict(value = "variantAvailability", key = "#variantId")
     public void updateVariantAvailability(UUID variantId) {
         ProductVariant variant = productVariantRepository.findById(variantId)

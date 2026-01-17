@@ -22,9 +22,7 @@ public class OrderItemService {
 
     private final OrderItemRepository orderItemRepository;
     private final OrderRepository orderRepository;
-    private final ProductRepository productRepository;
     private final OrderItemMapper orderItemMapper;
-    private final ProductColorRepository productColorRepository;
     private final ProductVariantRepository productVariantRepository;
 
     @Transactional

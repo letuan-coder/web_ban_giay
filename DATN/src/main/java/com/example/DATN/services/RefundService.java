@@ -6,7 +6,6 @@ import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.GetUserByJwtHelper;
 import com.example.DATN.models.Refund;
-import com.example.DATN.models.User;
 import com.example.DATN.repositories.RefundRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +20,7 @@ public class RefundService {
      private  final GetUserByJwtHelper getUserByJwtHelper;
     @Transactional
     public void createRefundRequest(RefundRequest request) {
-        User user = getUserByJwtHelper.getCurrentUser();
+
         if(request.getOrder().getTotal_price().compareTo(request.getAmount())<0){
             throw new ApplicationException(ErrorCode.REFUND_NOT_ALLOWDED);
 
@@ -34,7 +33,6 @@ public class RefundService {
                 .orderReturn(request.getOrderReturn())
                 .build();
         log.info("Creating refund request: {}", refund );
-        log.info("Refund creating by : {}", user.getId() );
         refundRepository.save(refund);
     }
 }

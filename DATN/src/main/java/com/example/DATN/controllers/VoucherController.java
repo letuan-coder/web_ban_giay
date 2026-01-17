@@ -3,13 +3,13 @@ package com.example.DATN.controllers;
 import com.example.DATN.dtos.request.voucher.CreateVoucherRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.voucher.VoucherResponse;
+import com.example.DATN.models.Voucher;
 import com.example.DATN.services.VoucherService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/voucher")
@@ -23,6 +23,22 @@ public class VoucherController {
         VoucherResponse response = voucherService.createVoucher(request);
         return ApiResponse.<VoucherResponse>builder()
                 .data(response)
+                .build();
+    }
+
+    @PostMapping("/set-voucher-for-all-user")
+    public ApiResponse<Void> setVoucherClaimForAlUser(
+            @RequestBody String voucherCode){
+        voucherService.voucherClaimForAllUser(voucherCode);
+        return ApiResponse.<Void>builder()
+                .data(null)
+                .build();
+    }
+
+    @GetMapping("/admin/all")
+    public ApiResponse<List<Voucher>> getAllVoucherClaim(){
+        return ApiResponse.<List<Voucher>>builder()
+                .data(voucherService.getAllVoucher())
                 .build();
     }
     @PostMapping("/search")

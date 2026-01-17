@@ -17,7 +17,6 @@ import com.example.DATN.repositories.UserRepository;
 import com.example.DATN.repositories.VoucherRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
@@ -26,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -92,22 +92,24 @@ public class VoucherService {
         voucherClaimRepository.save(claim);
         return claim;
     }
-    @Transactional
-    public void setVoucherForUser(Voucher voucher,User user) {
-        try {
-            VoucherClaim claim = VoucherClaim.builder()
-                    .user(user)
-                    .voucher(voucher)
-                    .status(VoucherClaimStatus.CLAIMED)
-                    .maxUsage(voucher.getUsageLimit())
-                    .build();
-            voucherClaimRepository.save(claim);
 
-        }catch (DataIntegrityViolationException e){
-        }
+    @Transactional
+    public boolean claimVoucherForUser(Voucher voucher, User user) {
+
+        int inserted = voucherClaimRepository.insertIgnoreClaim(
+                UUID.randomUUID(),
+                user.getId(),
+                voucher.getId(),
+                voucher.getUsageLimit()
+        );
+        return inserted == 1;
+    }
+
+    public List<Voucher> getAllVoucher(){
+        return voucherRepository.findAll();
     }
     @Async
-    public void voucherClaimForAllUser(String voucherCode){
+    public void voucherClaimForAllUser(String voucherCode) {
         Voucher voucher = voucherRepository.findByVoucherCode(voucherCode)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND));
 
@@ -118,16 +120,17 @@ public class VoucherService {
         do {
             users = userRepository.findAll(PageRequest.of(page, size));
             for (User user : users) {
-                setVoucherForUser(voucher, user);
+                claimVoucherForUser(voucher, user);
             }
             page++;
         } while (users.hasNext());
     }
 
-    public List<VoucherClaim> myVoucherClaim(){
+    public List<VoucherClaim> myVoucherClaim() {
         User user = getUserByJwtHelper.getCurrentUser();
-       return voucherClaimRepository.findAllByUser_Id(user.getId());
+        return voucherClaimRepository.findAllByUser_Id(user.getId());
     }
+
     @Transactional
     @Scheduled(cron = "0 */5 * * * *")
     public void expireVoucherClaims() {
