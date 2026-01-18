@@ -29,6 +29,7 @@ public class CheckOutResponse {
 
     private String voucherCode;
     private BigDecimal voucherDiscount;
+    private String voucherName;
     private UUID voucherId;
 
     private BigDecimal shippingFee;

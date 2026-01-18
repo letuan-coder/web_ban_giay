@@ -1,5 +1,6 @@
 package com.example.DATN.models;
 
+import com.example.DATN.constant.VoucherType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
@@ -21,9 +22,6 @@ import java.util.UUID;
                         name = "uk_voucher_usage_order",
                         columnNames = {"order_id"}
                 )
-        },
-        indexes = {
-                @Index(name = "idx_voucher_usage_claim", columnList = "voucher_claim_id")
         }
 )
 public class VoucherUsage {
@@ -34,19 +32,31 @@ public class VoucherUsage {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
-            name = "voucher_claim_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_voucher_usage_claim")
-    )
-    private VoucherClaim voucherClaim;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(
             name = "order_id",
             nullable = false,
             foreignKey = @ForeignKey(name = "fk_voucher_usage_order")
     )
     private Order order;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "voucher_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_voucher_usage_voucher")
+    )
+    private Voucher voucher;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "user_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_voucher_usage_user")
+    )
+    private User user;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "voucher_type", nullable = false)
+    private VoucherType voucherType;
 
     @Column(name = "discount_amount", nullable = false)
     private BigDecimal discountAmount;

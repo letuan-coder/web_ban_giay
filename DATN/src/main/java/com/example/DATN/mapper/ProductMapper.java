@@ -61,6 +61,8 @@ public interface ProductMapper {
             qualifiedByName = "productColorsToVariantDetails"
     )
     @Mapping(target = "reviewResponses", source = "reviews")
+    @Mapping(target = "averageRating", expression = "java(calculateAverageRating(product.getReviews()))")
+
     ProductDetailReponse toDetail(Product product);
 
     @Mapping(source = "productColors",

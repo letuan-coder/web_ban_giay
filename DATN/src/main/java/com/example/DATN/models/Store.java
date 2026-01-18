@@ -35,11 +35,26 @@ public class Store extends BaseEntity {
     private Double Longitude;
     private Double Latitude;
 
-    private Integer provinceCode;
-    private Integer districtCode;
-    private String wardCode;
+    @Column(name = "province_code",nullable = false, unique = true)
 
-    @Column(nullable = false, unique = true)
+    private Integer provinceCode;
+    @Column(name = "district_code",nullable = false, unique = true)
+
+    private Integer districtCode;
+    @Column(name = "ward_code",nullable = false, unique = true)
+
+    private String wardCode;
+    @Column(name = "ward_name",nullable = false, unique = true)
+
+    private String wardName;
+    @Column(name = "district_name",nullable = false, unique = true)
+
+    private String districtName;
+    @Column(name = "province_name",nullable = false, unique = true)
+
+    private String provinceName;
+    @Column(name = "phone_number",nullable = false, unique = true)
+
     private String phoneNumber;
 
     private Boolean active = true;

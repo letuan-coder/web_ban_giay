@@ -15,13 +15,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class VoucherResponse {
     String voucherName;
+    String description;
     String voucherCode;
     VoucherType type;
-    private BigDecimal discountValue;
-    private BigDecimal minOrderValue;
-    private Integer usageLimit;
-    private LocalDateTime startAt;
-    private LocalDateTime endAt;
+    BigDecimal maxDiscountValue;
+    BigDecimal discountValue;
+    BigDecimal minOrderValue;
+    Integer usageLimit;
+    LocalDateTime startAt;
+    LocalDateTime endAt;
     @Builder.Default
     private Boolean isActive = true;
 }

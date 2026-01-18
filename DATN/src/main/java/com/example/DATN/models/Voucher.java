@@ -3,15 +3,12 @@ package com.example.DATN.models;
 import com.example.DATN.constant.VoucherApply;
 import com.example.DATN.constant.VoucherTarget;
 import com.example.DATN.constant.VoucherType;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -50,6 +47,9 @@ public class Voucher {
     @Column(name = "min_order_value")
     private BigDecimal minOrderValue;
 
+    @Column(name = "max_discount_value")
+    private BigDecimal maxDiscountValue;
+
     @Column(name = "usage_limit")
     private Integer usageLimit;
 
@@ -62,9 +62,6 @@ public class Voucher {
 
     private LocalDateTime startAt;
     private LocalDateTime endAt;
-    @OneToMany(mappedBy = "voucher", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    private List<VoucherClaim> voucherUsers = new ArrayList<>();
 
     @Column(name = "is_active")
     private Boolean isActive = true;

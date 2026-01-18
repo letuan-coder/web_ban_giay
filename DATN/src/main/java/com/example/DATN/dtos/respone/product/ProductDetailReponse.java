@@ -25,6 +25,8 @@ public class ProductDetailReponse {
     private Is_Available available;
     private String thumbnailUrl;
     private Long totalView;
+    private Double averageRating;
+    private Integer totalComment;    
     private List<ProductColorDetailResponse> colorResponses;
     private List<ProductVariantDetailResponse> variantDetailResponses;
     private List<ProductReviewResponse> reviewResponses;

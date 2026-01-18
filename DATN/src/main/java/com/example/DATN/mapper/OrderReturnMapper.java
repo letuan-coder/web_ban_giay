@@ -22,6 +22,7 @@ public interface OrderReturnMapper {
     @Mapping(source = "orderItem.productVariant.productColor.color.name",target = "colorName")
     @Mapping(source = "orderItem.productVariant.productColor.product.name",target = "productName")
     @Mapping(source = "orderItem.price", target = "price")
+    @Mapping(source = "orderItem.productVariant.sku",target = "sku")
     ReturnItemResponse toReturnItemResponse(OrderReturnItem orderReturnItem);
 
     default List<ReturnItemResponse> toReturnItemResponseList(List<OrderReturnItem> items) {

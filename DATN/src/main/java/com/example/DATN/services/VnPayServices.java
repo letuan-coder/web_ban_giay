@@ -1,6 +1,7 @@
 package com.example.DATN.services;
 
 import com.example.DATN.config.VnPayConfig;
+import com.example.DATN.constant.OrderStatus;
 import com.example.DATN.constant.PaymentStatus;
 import com.example.DATN.constant.RefundStatus;
 import com.example.DATN.constant.StockReservationStatus;
@@ -16,7 +17,6 @@ import com.example.DATN.models.Refund;
 import com.example.DATN.models.StockReservation;
 import com.example.DATN.models.Vnpay;
 import com.example.DATN.repositories.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
@@ -152,9 +151,9 @@ public class VnPayServices {
     }
 
     @Transactional
-    public void PendingToOrder(Model model,
-                               HttpServletRequest request) throws
-            UnsupportedEncodingException, JsonProcessingException {
+    public void PendingToOrder(
+            HttpServletRequest request)
+ {
         Map<String, String> params = new HashMap<>();
         request.getParameterMap()
                 .forEach((k, v) -> params.put(k, v[0]));
@@ -183,7 +182,6 @@ public class VnPayServices {
 
     @Transactional
     public void handleVnPayFailed(String orderCode) {
-
         stockReservationRepository
                 .findForUpdateByOrderCodeAndStatus(
                         orderCode, StockReservationStatus.HOLD)
@@ -204,9 +202,10 @@ public class VnPayServices {
                         reservations.getStockId(),
                         reservations.getQty()
                 );
+               Order order = orderRepository.findByOrderCode(orderCode)
+                        .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
                 if (updated == 0) {
-                    Order order = orderRepository.findByOrderCode(orderCode)
-                            .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
+
                     RefundRequest refundRequest = RefundRequest.builder()
                             .amount(order.getTotal_price())
                             .reason("PAYMENT SUCCESS BUT OUT OF STOCK " + orderCode)
@@ -218,6 +217,9 @@ public class VnPayServices {
                     reservations.setStatus(StockReservationStatus.RELEASE);
                 } else {
                     int mark = stockReservationRepository.markCommitted(orderCode);
+                    stockRepository.unlockStock(reservations.getStockId(), reservations.getQty());
+                    order.setPaymentStatus(PaymentStatus.PAID);
+                    order.setOrderStatus(OrderStatus.PENDING);
                     reservations.setStatus(StockReservationStatus.COMMITED);
                 }
             }

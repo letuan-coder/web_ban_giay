@@ -6,6 +6,7 @@ import { Store } from '../../model/store.model';
 import { StoreService } from '../../services/store.service';
 import { ApiResponse } from '../../services/sale.service';
 import { SearchableDropdownComponent } from '../../shared/searchable-dropdown/searchable-dropdown.component';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-stores',
@@ -94,7 +95,7 @@ export class StoresComponent implements OnInit {
     this.searchedGhn = false;
   }
 
-  saveStore(): void {
+  async saveStore(): Promise<void> {
     // Check for required location fields first
     if (!this.selectedStore.name || !this.ghnSelectedProvinceId || !this.ghnSelectedDistrictId || !this.ghnSelectedWardCode) {
       alert('Vui lòng điền đầy đủ Tên cửa hàng, Tỉnh/Thành phố, Quận/Huyện và Phường/Xã.');
@@ -117,9 +118,43 @@ export class StoresComponent implements OnInit {
     }
     const locationString = locationParts.join(', ');
 
-    const wardCodeInt = parseInt(this.ghnSelectedWardCode, 10);
-    if (isNaN(wardCodeInt)) {
-        alert('Mã Phường/Xã không hợp lệ.');
+    // Get coordinates from OSM
+    let lat: number | null = null;
+    let lon: number | null = null;
+    if (locationString) {
+      try {
+        let osmResponse: any = await firstValueFrom(
+          this.http.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationString)}&limit=1`)
+        );
+
+        // If the first try fails, try a less specific address
+        if (!osmResponse || osmResponse.length === 0) {
+            console.warn('Could not find coordinates for the full address. Trying a less specific address.');
+            const lessSpecificLocation = locationParts.slice(1).join(', '); // Remove addressDetail
+            if (lessSpecificLocation) {
+                 osmResponse = await firstValueFrom(
+                    this.http.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(lessSpecificLocation)}&limit=1`)
+                );
+            }
+        }
+
+        if (osmResponse && osmResponse.length > 0) {
+          lat = parseFloat(osmResponse[0].lat);
+          lon = parseFloat(osmResponse[0].lon);
+        } else {
+            // If still no coordinates, we don't save because backend requires it.
+            console.warn('Could not find coordinates for the address.');
+            alert('Không thể tìm thấy tọa độ cho địa chỉ đã cung cấp. Vui lòng kiểm tra lại và thử lại.');
+            return; // Stop the save process
+        }
+
+      } catch (error) {
+        console.error('Lỗi khi lấy tọa độ từ OpenStreetMap:', error);
+        alert('Lỗi khi kết nối đến dịch vụ tọa độ. Cửa hàng sẽ không được lưu. Vui lòng thử lại.');
+        return; // Stop the save process
+      }
+    } else {
+        alert('Địa chỉ không được để trống.');
         return;
     }
 
@@ -130,7 +165,12 @@ export class StoresComponent implements OnInit {
         location: locationString,
         provinceCode: this.ghnSelectedProvinceId,
         districtCode: this.ghnSelectedDistrictId,
-        wardCode: wardCodeInt,
+        wardCode: this.ghnSelectedWardCode,
+        provinceName: this.selectedGhnProvinceName,
+        districtName: this.selectedGhnDistrictName,
+        wardName: this.selectedGhnWardName,
+        latitude: lat,
+        longitude: lon,
     };
 
 
@@ -150,7 +190,10 @@ export class StoresComponent implements OnInit {
               this.loadStores();
               this.resetForm();
             },
-            error: (err) => console.error('Lỗi khi tạo cửa hàng:', err)
+            error: (err) => {
+                console.error('Lỗi khi tạo cửa hàng:', err);
+                alert(`Lỗi khi tạo cửa hàng: ${err.error?.message || 'Vui lòng kiểm tra lại thông tin.'}`);
+            }
           });
       }
   }

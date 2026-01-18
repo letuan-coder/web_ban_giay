@@ -26,13 +26,18 @@ public class StoreService {
     private final StoreRepository storeRepository;
     private final StoreMapper storeMapper;
     private final GhnService ghnService;
-    private final String storeCode="CN";
+    private final String storeCode = "CN";
     private final SnowflakeIdGenerator snowflakeIdGenerator;
+
     @Transactional
     public StoreResponse createStore(StoreRequest request) throws JsonProcessingException {
         Long code = snowflakeIdGenerator.nextId();
+        if (request.getLatitude() == null || request.getLongitude() == null) {
+            throw new ApplicationException(ErrorCode.STORE_NOT_FOUND);
+        }
         String storeId = storeCode + code;
         Store store = storeMapper.toStore(request);
+
         store.setCode(storeId);
         ghnService.registerShop(store);
         Store storesaved = storeRepository.save(store);
@@ -45,6 +50,7 @@ public class StoreService {
                 .map(storeMapper::toStoreResponse)
                 .collect(Collectors.toList());
     }
+
     public Set<Store> getAllStore() {
         return new HashSet<>(storeRepository.findAll());
     }

@@ -1,7 +1,6 @@
 package com.example.DATN.services;
 
 
-import com.example.DATN.constant.WeightTier;
 import com.example.DATN.dtos.respone.ghn.CalculateFeeRequest;
 import com.example.DATN.dtos.respone.ghn.GhnCalculateFeeResponse;
 import com.example.DATN.dtos.respone.ghn.ItemRequest;
@@ -37,66 +36,14 @@ public class ShippingCalculator {
     private final StoreRepository storeRepository;
     private final GhnService ghnService;
 
-    //    @Cacheable(
-//            value = "product_variant",
-//            key = "#sku",
-//            unless = "#result == null"
-//    )
-//    public ProductVariant getBySku(String sku) {
-//        return productVariantRepository.findBysku(sku)
-//                .orElseThrow(() -> new ApplicationException(
-//                        ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
-//    }
-//    public ShippingFeeResponse calculateShippingFee(Integer id) {
-//        ItemRequest item1 = ItemRequest.builder()
-//                .name("Áo thun")
-//                .quantity(2)
-//                .height(5)
-//                .weight(300)
-//                .length(30)
-//                .width(20)
-//                .build();
-//
-//        ItemRequest item2 = ItemRequest.builder()
-//                .name("Quần jean")
-//                .quantity(1)
-//                .height(8)
-//                .weight(700)
-//                .length(40)
-//                .width(30)
-//                .build();
-//
-//        CalculateFeeRequest request = CalculateFeeRequest.builder()
-//                .fromDistrictId(1449)
-//                .fromWardCode("20707")
-//                .toDistrictId(1450)
-//                .toWardCode("910375")
-//                .serviceId(53321)
-//                .serviceTypeId(2)
-//                .height(15)
-//                .length(40)
-//                .width(30)
-//                .weight(1000)
-//                .insuranceValue(500000)
-//                .codFailedAmount(0)
-//                .coupon(null)
-//                .items(List.of(item1, item2))
-//                .build();
-//        return ghnService.calculateShippingFee(request, id);
-//
-//    }
-
     public List<ItemRequest> BuilderItemRequest(
             Map<String, ProductVariant> variantMap,
             Map<String, Integer> quantities) {
-
         List<ItemRequest> items = new ArrayList<>();
         for (Map.Entry<String, Integer> entry : quantities.entrySet()) {
             String sku = entry.getKey();
             Integer quantity = entry.getValue();
             ProductVariant variant = variantMap.get(sku);
-
-
             if (variant == null) continue;
             items.add(ItemRequest.builder()
                     .name(variant.getProductColor().getProduct().getName())
@@ -107,7 +54,6 @@ public class ShippingCalculator {
                     .width(variant.getWidth())
                     .build());
         }
-
         return items;
     }
 
@@ -205,65 +151,4 @@ public class ShippingCalculator {
         return BigDecimal.valueOf(shippingFeeResponse.getBody().getData().getTotal());
     }
 
-    public BigDecimal calculatorShippingFeeByWeight(Map<String, Integer> variants) {
-        BigDecimal totalPrice = BigDecimal.ZERO;
-        Integer totalWeight = 0;
-
-        for (Map.Entry<String, Integer> Productvariant : variants.entrySet()) {
-            Integer quantity = Productvariant.getValue();
-            String sku = Productvariant.getKey();
-            ProductVariant variant = productVariantRepository.findBysku(sku)
-                    .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
-            totalWeight += variant.getWeight() * quantity;
-
-        }
-        WeightTier weightTier = WeightTier.fromWeight(totalWeight);
-        switch (weightTier) {
-            case FREE_WEIGHT -> {
-                totalPrice = BigDecimal.ZERO;
-            }
-            case LIGHT -> {
-                totalPrice = WeightTier.LIGHT.getExtraFee();
-            }
-            case MEDIUM -> {
-                totalPrice = WeightTier.MEDIUM.getExtraFee();
-            }
-            case HEAVY -> {
-                totalPrice = WeightTier.HEAVY.getExtraFee();
-            }
-            case VERY_HEAVY -> {
-                totalPrice = WeightTier.VERY_HEAVY.getExtraFee();
-            }
-        }
-        return totalPrice;
-    }
-
-    public BigDecimal calculateShippingFeeByDistance(double distanceKm) {
-        int category;
-
-        if (distanceKm >= 0 && distanceKm < 3) {
-            category = 0;
-        } else if (distanceKm >= 3 && distanceKm < 7) {
-            category = 1;
-        } else if (distanceKm >= 7 && distanceKm < 10) {
-            category = 2;
-        } else if (distanceKm >= 10 && distanceKm < 20) {
-            category = 3;
-        } else {
-            category = 4;
-        }
-        switch (category) {
-            case 0:
-                return BigDecimal.valueOf(15_000);
-            case 1:
-                return BigDecimal.valueOf(30_000);
-            case 2:
-                return BigDecimal.valueOf(50_000);
-            case 3:
-                return BigDecimal.valueOf(100_000);
-            default:
-                return BigDecimal.valueOf(150_000);
-        }
-
-    }
 }

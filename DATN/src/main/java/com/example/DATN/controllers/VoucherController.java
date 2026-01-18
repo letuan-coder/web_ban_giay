@@ -26,14 +26,6 @@ public class VoucherController {
                 .build();
     }
 
-    @PostMapping("/set-voucher-for-all-user")
-    public ApiResponse<Void> setVoucherClaimForAlUser(
-            @RequestBody String voucherCode){
-        voucherService.voucherClaimForAllUser(voucherCode);
-        return ApiResponse.<Void>builder()
-                .data(null)
-                .build();
-    }
 
     @GetMapping("/admin/all")
     public ApiResponse<List<Voucher>> getAllVoucherClaim(){

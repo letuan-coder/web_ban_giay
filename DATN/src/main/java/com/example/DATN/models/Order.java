@@ -33,7 +33,7 @@ public class Order extends BaseEntity {
     @Id
     @UuidGenerator
     private UUID id;
-    @Column(name = "order_code",nullable = false)
+    @Column(name = "order_code", nullable = false)
     private String orderCode;
     @Embedded
     GHN ghn;
@@ -48,12 +48,16 @@ public class Order extends BaseEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonManagedReference("order_items")
     private List<OrderItem> items;
+    @Column(name = "service_id")
 
     private Integer serviceId;
+    @Column(name = "payment_method")
 
     private PaymentMethodEnum paymentMethod;
+    @Column(name = "shipping_fee")
 
     private BigDecimal shippingFee;
+    @Column(name = "received_date")
 
     private LocalDateTime receivedDate;
 
@@ -72,6 +76,10 @@ public class Order extends BaseEntity {
     @Embedded
     ShippingAddress userAddresses;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id", nullable = false)
+    private Store storeDelivered;
+
     Integer total_weight;
     Integer total_height;
     Integer total_width;
@@ -82,13 +90,9 @@ public class Order extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "voucher_claim_id")
-    VoucherClaim voucherClaim;
-
     BigDecimal discountAmount;
 
-    @OneToMany(mappedBy = "order", cascade =  { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JsonManagedReference("orders-return")
     private List<OrderReturn> returns;
 }

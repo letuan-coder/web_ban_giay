@@ -19,7 +19,6 @@ import com.example.DATN.mapper.OrderMapper;
 import com.example.DATN.models.Embeddable.ShippingAddress;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -44,7 +43,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderService {
     private final VoucherUsageRepository voucherUsageRepository;
-    private final VoucherClaimRepository voucherClaimRepository;
     private final VoucherRepository voucherRepository;
     private final StockReservationRepository stockReservationRepository;
     private final VnpayRepository vnpayRepository;
@@ -158,6 +156,7 @@ public class OrderService {
         Optional<Order> orderOpt = orderRepository.findById(orderId);
         if (orderOpt.isPresent()) {
             Order order = orderOpt.get();
+            Store store =order.getStoreDelivered();
             List<Integer> pickingShift = List.of(1, 2, 3);
             long codAmountLong = 0L;
             List<OrderItem> orderItem = orderItemRepository.findAllByOrder_Id(orderId);
@@ -186,19 +185,19 @@ public class OrderService {
 //        Choose who pay shipping fee.
 //        1: Shop/Seller.
 //        2: Buyer/Consignee.
-                    .payment_type_id(2)
+                    .payment_type_id(1)
                     .note(order.getNote())
                     .required_note("CHOXEMHANGKHONGTHU")
-                    .from_name("đông tuấn store")
-                    .from_phone("0777789337")
-                    .from_address("672 huỳnh tấn phát ,P,Tân Phu,Q7")
-                    .from_ward_name("Phường Tân Phú")
-                    .from_district_name("Quận 7")
-                    .from_province_name("HCM")
-                    .return_address("180 cao lỗ")
+                    .from_name(store.getName())
+                    .from_phone(store.getPhoneNumber())
+                    .from_address(store.getLocation())
+                    .from_ward_name(store.getWardName())
+                    .from_district_name(store.getDistrictName())
+                    .from_province_name(store.getProvinceName())
+                    .return_address(store.getLocation())
                     .return_district_id(null)
-                    .return_ward_code("13010")
-                    .client_order_code("")
+                    .return_ward_code(store.getWardCode())
+                    .client_order_code(order.getOrderCode())
                     .to_name(order.getUserAddresses().getDistrictName())
                     .to_phone(order.getUserAddresses().getPhoneNumber())
                     .to_address(order.getUserAddresses().getFullDetail())
@@ -219,7 +218,7 @@ public class OrderService {
                     .pick_shift(pickingShift)
                     .items(listProduct)
                     .build();
-            GhnService.createOrder(ghnOrderInfo);
+            GhnService.createOrder(ghnOrderInfo,order);
         } else {
             throw new ApplicationException(ErrorCode.ORDER_STATUS_INVALID);
         }
@@ -230,11 +229,10 @@ public class OrderService {
     @Transactional(rollbackOn = Exception.class)
     public OrderResponse createOrderVnPay
             (OrderRequest request, HttpServletRequest Serverletrequest)
-            throws JsonProcessingException {
+    {
         String idempotencyKey = request.getIdempotency();
         CheckOutResponse cacheResponse = getIdempotentResponse(idempotencyKey);
         if (cacheResponse != null) {
-            voucherRepository.lockVoucher(cacheResponse.getVoucherId());
             String orderCode = GenerateOrderCode();
             for (CheckOutProductResponse productResponse : cacheResponse.getProducts()) {
                 int updated = stockRepository.lockStock(productResponse.getStockResponse().getId(),
@@ -246,7 +244,7 @@ public class OrderService {
                         .orderCode(orderCode)
                         .status(StockReservationStatus.HOLD)
                         .stockId(productResponse.getStockResponse().getId())
-                        .qty(productResponse.getStockResponse().getQuantity())
+                        .qty(productResponse.getQuantity())
                         .expiresAt(LocalDateTime.now().plusDays(7))
                         .build();
                 stockReservationRepository.save(reservation);
@@ -254,6 +252,7 @@ public class OrderService {
             }
             User user = getUserByJwtHelper.getCurrentUser();
             Order order = BuilderOrder(cacheResponse, user);
+
             order.setNote(request.getNote());
             order.setOrderCode(orderCode);
             VnPaymentRequest vnPaymentRequest = VnPaymentRequest.builder()
@@ -263,6 +262,19 @@ public class OrderService {
                     .build();
             order.setServiceId(request.getServiceId());
             OrderResponse response = orderMapper.toResponse(orderRepository.save(order));
+            if (cacheResponse.getVoucherCode() != null) {
+                Voucher voucher = voucherRepository.findByVoucherCode(cacheResponse.getVoucherCode())
+                        .orElseThrow(() -> new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND));
+                VoucherUsage usage = VoucherUsage.builder()
+                        .order(order)
+                        .user(user)
+                        .voucherType(voucher.getType())
+                        .voucher(voucher)
+                        .discountAmount(cacheResponse.getVoucherDiscount())
+                        .usedAt(LocalDateTime.now())
+                        .build();
+                voucherUsageRepository.save(usage);
+            }
             orderItemRepository.saveAll(order.getItems());
 //            response.setUserName(user.getUsername());
             String url = vnPayServices.createPaymentVNPAY(vnPaymentRequest, Serverletrequest);
@@ -308,7 +320,7 @@ public class OrderService {
             order.setOrderCode(orderCode);
             order.setOrderStatus(OrderStatus.PENDING);
             order.setNote(request.getNote());
-            OrderResponse response = orderMapper.toResponse(order);
+            OrderResponse response = orderMapper.toResponse(orderRepository.save(order));
             response.setUserName(user.getUsername());
             for (CheckOutProductResponse productResponse : cacheResponse.getProducts()) {
                 stockRepository.commitStock(
@@ -333,34 +345,21 @@ public class OrderService {
         } else {
             throw new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND);
         }
+        UUID storeId = response.getStoreId();
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
         Order order = Order.builder()
                 .user(user)
+                .storeDelivered(store)
                 .userAddresses(shippingAddress)
                 .orderStatus(OrderStatus.PROCESSCING)
                 .build();
         List<OrderItem> orderItems = new ArrayList<>();
-        if (response.getVoucherCode() != null) {
-            Voucher voucher = voucherRepository.findByVoucherCode(response.getVoucherCode())
-                    .orElseThrow(() -> new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND));
-            VoucherClaim claim = voucherClaimRepository
-                    .findByUser_IdAndVoucher_Id(user.getId(), voucher.getId())
-                    .orElseThrow(() -> new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND));
-            voucherClaimRepository.lockVoucherClaim(claim.getId());
-            claim.setUsedCount(claim.getUsedCount() + 1);
-            VoucherUsage usage = VoucherUsage.builder()
-                    .voucherClaim(claim)
-                    .order(order)
-                    .discountAmount(response.getVoucherDiscount())
-                    .usedAt(LocalDateTime.now())
-                    .build();
-            order.setVoucherClaim(claim);
-            voucherUsageRepository.save(usage);
-        }
+
         for (CheckOutProductResponse orderItemRequest : response.getProducts()) {
             ProductVariant item = getVariantCache(orderItemRequest.getSku());
             Stock stock = stockRepository.findById(orderItemRequest.getStockResponse().getId())
                     .orElseThrow(() -> new ApplicationException(ErrorCode.STOCK_NOT_FOUND));
-
             OrderItem orderItem = new OrderItem();
             orderItem.setProductVariant(item);
             orderItem.setStock(stock);

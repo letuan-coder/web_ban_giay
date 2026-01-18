@@ -5,5 +5,5 @@ export interface Store {
   location: string;
   addressDetail?: string;
   phoneNumber: string;
-  active?: boolean; // Added this field
+  active?: boolean; 
 }

@@ -1,14 +1,20 @@
 package com.example.DATN.services;
 
+import com.example.DATN.constant.OrderStatus;
+import com.example.DATN.constant.ShippingStatus;
 import com.example.DATN.dtos.request.RegisterStoreGHNRequest;
 import com.example.DATN.dtos.request.ghtk.GhnOrderInfo;
 import com.example.DATN.dtos.respone.ghn.CalculateFeeRequest;
 import com.example.DATN.dtos.respone.ghn.GhnCalculateFeeResponse;
+import com.example.DATN.dtos.respone.ghn.GhnCreateOrderResponse;
 import com.example.DATN.dtos.respone.ghn.GhnRegisterShopResponse;
+import com.example.DATN.models.Order;
 import com.example.DATN.models.Store;
 import com.example.DATN.models.WareHouse;
+import com.example.DATN.repositories.OrderRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +23,8 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -24,6 +32,8 @@ public class GhnService {
     private static String ghnTokenStatic;
     private static String createUrlStatic;
     private final ObjectMapper objectMapper;
+
+    private static OrderRepository orderRepository;
     @Value("${ghn.api.token}")
     private String ghnToken;
 
@@ -42,7 +52,7 @@ public class GhnService {
     @Value("${ghn.api.register.url}")
     private String registerUrl;
 
-    public static void createOrder(GhnOrderInfo ghnOrderInfo) {
+    public static void createOrder(GhnOrderInfo ghnOrderInfo, Order order) {
         // URL GHN (sandbox)
         String url = createUrlStatic;
 
@@ -68,6 +78,18 @@ public class GhnService {
 
             if (response.getStatusCode() == HttpStatus.OK) {
                 System.out.println("Tạo đơn GHN thành công: " + response.getBody());
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.registerModule(new JavaTimeModule());
+
+                GhnCreateOrderResponse createOrderResponse =
+                        mapper.readValue(response.getBody(), GhnCreateOrderResponse.class);
+
+                order.getGhn().setGhnOrderCode(createOrderResponse.getData().getOrderCode());
+                order.getGhn().setExpectedDeliveryTime(createOrderResponse.getData().getExpectedDeliveryTime());
+                order.setOrderStatus(OrderStatus.DELEVERING);
+                order.setGhnStatus(ShippingStatus.PICKING);
+                order.setUpdatedAt(LocalDateTime.now());
+                orderRepository.save(order);
             } else {
                 System.out.println("Lỗi khi tạo đơn GHN: " + response.getStatusCode());
             }

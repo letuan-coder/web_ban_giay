@@ -22,6 +22,7 @@ public class CreateVoucherRequest {
     private BigDecimal discountValue;
     private BigDecimal minOrderValue;
     private Integer usageLimit;
+    private BigDecimal maxDiscountValue;
     private LocalDateTime startAt;
     private LocalDateTime endAt;
     @Builder.Default

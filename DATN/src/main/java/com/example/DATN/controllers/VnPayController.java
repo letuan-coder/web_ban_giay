@@ -3,21 +3,19 @@ package com.example.DATN.controllers;
 import com.example.DATN.config.VnPayConfig;
 import com.example.DATN.dtos.request.vnpay.VnPaymentRequest;
 import com.example.DATN.dtos.request.vnpay.VnQueryRequest;
-import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.mapper.OrderMapper;
 import com.example.DATN.repositories.StockRepository;
 import com.example.DATN.repositories.VnpayRepository;
 import com.example.DATN.services.VnPayServices;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,11 +65,9 @@ public class VnPayController {
 //    }
 
     @GetMapping("/return")
-    public ApiResponse<?> vnpayReturn(
-            Model model,
-            HttpServletRequest request)
-            throws UnsupportedEncodingException, JsonProcessingException
-    {
+    public void  vnpayReturn(
+            HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         boolean valid = vnpayServices.verifyReturn(request);
         Map<String, String> fields = new HashMap<>();
         Enumeration<String> params = request.getParameterNames();
@@ -98,17 +94,16 @@ public class VnPayController {
         String message;
         if (!valid) {
             message = "Chữ ký không hợp lệ";
+
         } else if (success) {
             message = "Giao dịch thành công";
-            vnpayServices.PendingToOrder(model, request);
+            response.sendRedirect("http://localhost:5173/cart/checkout/success?orderCode=" + orderCode);
+
+            vnpayServices.PendingToOrder( request);
         } else {
             vnpayServices.handleVnPayFailed(orderCode);
-            message = "Giao dịch không thành công";
+            response.sendRedirect("http://localhost:5173/cart/checkout/fail?orderCode=" + orderCode);
         }
-        return ApiResponse.builder()
-                .data(null)
-                .message(message)
-                .build();
     }
 
     @GetMapping("/ipn")

@@ -12,14 +12,6 @@ import java.util.UUID;
 public interface VoucherRepository extends JpaRepository<Voucher, UUID> {
     Optional<Voucher> findByVoucherCode(String code);
 
-    @Modifying
-    @Query("""
-    UPDATE Voucher v
-    SET v.usedCount = v.usedCount + 1
-    WHERE v.id = :voucherId
-      AND v.isActive = true
-      AND v.usedCount < v.usageLimit
-""")
-    int lockVoucher(@Param("voucherId") UUID voucherId);
+
 
 }

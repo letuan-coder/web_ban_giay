@@ -19,7 +19,7 @@ public interface StockReservationRepository extends JpaRepository<StockReservati
     @Modifying
     @Query("""
                 UPDATE StockReservation r
-                SET r.status = 'COMMITTED'
+                SET r.status = 'COMMITED'
                 WHERE r.orderCode = :orderCode
                   AND r.status = 'HOLD'
             """)
@@ -28,7 +28,7 @@ public interface StockReservationRepository extends JpaRepository<StockReservati
     @Modifying
     @Query("""
                 UPDATE StockReservation r
-                SET r.status = 'RELEASED'
+                SET r.status = 'RELEASE'
                 WHERE r.id = :id
                   AND r.status = 'HOLD'
             """)

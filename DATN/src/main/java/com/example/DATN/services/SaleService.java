@@ -27,8 +27,6 @@ public class SaleService {
     private final OrderRepository orderRepository;
 
     public SaleResponse getDataChart() {
-
-
         Map<String, BigDecimal> dailyTemp = new HashMap<>();
         Map<String, BigDecimal> monthlyTemp = new HashMap<>();
         Map<String, BigDecimal> yearlyTemp = new HashMap<>();

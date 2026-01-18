@@ -2,7 +2,6 @@ package com.example.DATN.services;
 
 import com.example.DATN.constant.Util.CheckSumUtil;
 import com.example.DATN.constant.VariantType;
-import com.example.DATN.constant.VoucherClaimStatus;
 import com.example.DATN.dtos.request.checkout.*;
 import com.example.DATN.dtos.respone.StockResponse;
 import com.example.DATN.dtos.respone.order.CheckOutProductResponse;
@@ -43,9 +42,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class CheckOutService {
-    private final VoucherClaimRepository voucherClaimRepository;
     private final UserAddressRepository userAddressRepository;
-    private final WareHouseRepository wareHouseRepository;
     private final ProductViewRepository productViewRepository;
     private final StoreRepository storeRepository;
     private final VoucherRepository voucherRepository;
@@ -160,64 +157,61 @@ public class CheckOutService {
             return false;
         }
 
-        if (voucher.getUsageLimit() != null &&
-                voucher.getUsageLimit() != -1 &&
-                voucher.getUsedCount() >= voucher.getUsageLimit()) {
-            return false;
-        }
 
         return true;
     }
 
     @Transactional
     public BigDecimal CheckVoucher(CheckOutResponse response,
-                                   String voucherCode,User user, BigDecimal price) {
+                                   String voucherCode, BigDecimal price) {
 
         BigDecimal sum = price;
+        BigDecimal discount = BigDecimal.ZERO;
         Voucher voucher = voucherRepository.findByVoucherCode(voucherCode.trim())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND));
-        VoucherClaim voucherClaim = voucherClaimRepository.findByUser_IdAndVoucher_Id(user.getId(),voucher.getId())
-                .orElseThrow(() -> new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND));
-        if(voucherClaim.getStatus()!= VoucherClaimStatus.CLAIMED){
-            throw new ApplicationException(ErrorCode.VOUCHER_CANT_APPLY);
-        }
-        response.setVoucherId(voucherClaim.getId());
+        response.setVoucherId(voucher.getId());
         if(checkVoucherCondition(sum,voucher)) {
             switch (voucher.getType()) {
+
                 case PERCENT_DISCOUNT:
-                    BigDecimal discountAmount = sum
+                    discount = sum
                             .multiply(voucher.getDiscountValue())
                             .divide(BigDecimal.valueOf(100), 0, RoundingMode.DOWN);
-                    sum = sum.subtract(discountAmount);
 
+                    if (voucher.getMaxDiscountValue() != null) {
+                        discount = discount.min(voucher.getMaxDiscountValue());
+                    }
+
+                    sum = sum.subtract(discount);
                     break;
+
                 case FIXED_AMOUNT:
+                    discount = voucher.getDiscountValue();
+                    sum = sum.subtract(discount);
+                    break;
 
-                    sum = sum.compareTo(voucher.getMinOrderValue()) >= 0
-                            ? sum.subtract(voucher.getDiscountValue()) : sum;
-                    break;
                 case FREE_SHIPPING:
-                    if (response.getShippingFee().compareTo(BigDecimal.ZERO) > 0) {
-                        response.setShippingFee(BigDecimal.ZERO);
-                    } else {
-                        throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
-                    }
+                    discount = response.getShippingFee();
+                    response.setShippingFee(BigDecimal.ZERO);
                     break;
+
                 case CASHBACK:
-                    sum = sum.subtract(voucher.getDiscountValue());
-                    if (sum.compareTo(BigDecimal.ZERO) < 0) {
-                        sum = BigDecimal.ZERO;
-                    }
+                    discount = voucher.getDiscountValue();
                     break;
+
                 default:
-                    throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
+                    throw new ApplicationException(ErrorCode.VOUCHER_CANT_APPLY);
             }
-            return sum.setScale(0, RoundingMode.DOWN);
+            if (sum.compareTo(BigDecimal.ZERO) < 0) {
+                sum = BigDecimal.ZERO;
+            }
+
+            response.setVoucherDiscount(discount);
+            response.setVoucherName(voucher.getVoucherName());
+            response.setFinalPrice(sum);
+
         }
-        else {
-            response.setMessageForUser(ErrorCode.VOUCHER_CANT_APPLY.getMessage());
-            return BigDecimal.ZERO;
-        }
+            return sum;
     }
 
 
@@ -338,11 +332,13 @@ public class CheckOutService {
 
     @Transactional(readOnly = true)
     public CheckOutResponse applyVoucher(ApplyVoucherRequest request) {
-        try {
+
             String idempotencyKey = request.getIdempotencyKey();
             CheckOutResponse cacheResponse = getIdempotentResponse(idempotencyKey);
             if (cacheResponse != null) {
-                User user = getUserByJwtHelper.getCurrentUser();
+                if (cacheResponse.getVoucherCode()==request.getVoucherCode()){
+                    return cacheResponse;
+                }
                 BigDecimal sum = cacheResponse.getProducts()
                         .stream().map(CheckOutProductResponse::getFinaPrice)
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -351,7 +347,7 @@ public class CheckOutService {
                         throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
                     }
                     try {
-                        sum = CheckVoucher(cacheResponse, request.getVoucherCode(),user, sum);
+                        sum = CheckVoucher(cacheResponse, request.getVoucherCode(), sum);
                     } catch (Exception e) {
                         throw new ApplicationException(ErrorCode.VOUCHER_CANT_APPLY);
                     }
@@ -365,9 +361,7 @@ public class CheckOutService {
             } else {
                 throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
             }
-        } catch (Exception e) {
-            throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
-        }
+
     }
 
     public Map<String, Boolean> checkStockFromStore(Map<String, Stock> stockMap, List<String> skus) {
@@ -431,6 +425,12 @@ public class CheckOutService {
         if (address != null) {
             route = resolveRoute(skus,
                     quantities, address.getLatitude(), address.getLongitude());
+            double distance = route.getDistanceKm()*1000;
+            double rounded = Math.round(distance * 100.0) / 100.0;
+            route.setDistanceKm(rounded);
+
+
+
         }
         Map<String, Stock> stocks = batchLoadStocks(variants, quantities, route);
         if (stocks.isEmpty()) {
@@ -540,6 +540,9 @@ public class CheckOutService {
                 }
                 CheckOutProjection checkOutProjection = resolveRoute(skus,
                         quantities, response.getShippingAddressResponse().getLatitude(), response.getShippingAddressResponse().getLongitude());
+                double distance = checkOutProjection.getDistanceKm()*1000;
+                double rounded = Math.round(distance * 100.0) / 100.0;
+                checkOutProjection.setDistanceKm(rounded);
                 if (checkOutProjection.getStoreId().equals(response.getStoreId())) {
                     Store store = storeRepository.findById(response.getStoreId())
                             .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));

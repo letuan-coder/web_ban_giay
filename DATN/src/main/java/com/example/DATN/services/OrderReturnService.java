@@ -113,7 +113,6 @@ public class OrderReturnService {
         OrderReturn orderReturn = new OrderReturn();
         orderReturn.setUser(currentUser);
         orderReturn.setReasonReturn(request.getReason());
-
         orderReturn.setOrder(order);
         orderReturn.setReturnType(request.getReturnType());
         orderReturn.setReasonReturn(request.getReason());
@@ -180,7 +179,6 @@ public class OrderReturnService {
 
     public Boolean checkReturnRequestExists(UUID orderId) {
         User currentUser = getUserByJwtHelper.getCurrentUser();
-
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND));
 
@@ -194,7 +192,6 @@ public class OrderReturnService {
 
     @Transactional
     public OrderReturn approveReturnRequest(UUID returnId) {
-
         OrderReturn orderReturn = orderReturnRepository.findById(returnId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.RETURN_REQUEST_NOT_FOUND));
 
@@ -213,8 +210,6 @@ public class OrderReturnService {
 
     @Transactional
     public OrderReturn rejectReturnRequest(UUID returnId) {
-        // Add logic to check if user is admin
-
         OrderReturn orderReturn = orderReturnRepository.findById(returnId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.RETURN_REQUEST_NOT_FOUND));
 

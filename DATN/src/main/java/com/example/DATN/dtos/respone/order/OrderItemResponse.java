@@ -16,6 +16,7 @@ public class OrderItemResponse {
     private String sku;
     private Boolean Rated;
     private String colorName;
+
     private String sizeName;
     private Integer quantity;
     private BigDecimal price;
