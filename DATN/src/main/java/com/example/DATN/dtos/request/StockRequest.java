@@ -8,7 +8,6 @@ import java.util.List;
 @Getter
 @Setter
 public class StockRequest {
-//    private String stockTransactionId;
     private String TransactionCode;
     private List<StockTransactionItemReceivedRequest> stockTransactionItemId;
 

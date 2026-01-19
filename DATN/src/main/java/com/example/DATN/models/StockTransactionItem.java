@@ -13,8 +13,8 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name ="stock_transaction_items")
-public class StockTransactionItem extends BaseEntity{
+@Table(name = "stock_transaction_items")
+public class StockTransactionItem extends BaseEntity {
     @Id
     @UuidGenerator
     private UUID id;
@@ -32,6 +32,7 @@ public class StockTransactionItem extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "variant_id")
     private ProductVariant variant;
-
+    @JoinColumn(name = "received_quantity")
+    private Integer receivedQuantity;
     private Integer quantity;
 }

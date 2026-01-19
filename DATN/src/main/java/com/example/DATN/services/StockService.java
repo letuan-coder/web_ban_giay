@@ -21,9 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -92,7 +90,6 @@ public class StockService {
                         .findById(receivedRequest.getStockTransactionId())
                         .orElseThrow(() ->
                                 new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
-
                 StockTransactionItem item = stockTransactionItemRepository
                         .findByVariantAndTransaction(variant, stockTransaction);
                 Optional<Stock> stockOtp = stockRepository.findByVariant_IdAndWarehouse
@@ -109,24 +106,50 @@ public class StockService {
             }
         } else {
             List<StockTransactionItem> items = stockTransaction.getItems();
-            for (StockTransactionItem item : items) {
-
-                Optional<Stock> stockOpt = stockRepository.findByVariant_IdAndStore(item.getVariant().getId(), stockTransaction.getToStore());
+//            for (StockTransactionItem item : items) {
+            for (StockTransactionItemReceivedRequest itemReceivedRequest: request.getStockTransactionItemId()) {
+                ProductVariant variant = productVariantRepository.findById(itemReceivedRequest.getStockTransactionId())
+                        .orElseThrow(()->new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
+                Optional<Stock> stockOpt = stockRepository.
+                        findByVariant_IdAndStore(itemReceivedRequest.getVariantId()
+                                , stockTransaction.getToStore());
                 if (stockOpt.isPresent()) {
                     Stock stock = stockOpt.get();
-                    stock.setQuantity(stock.getQuantity() + item.getQuantity());
+                    stock.setQuantity(stock.getQuantity() + itemReceivedRequest.getReceivedQuantity());
                 } else {
-                    item.getVariant().setIsAvailable(Is_Available.AVAILABLE);
-                    createStockForStore(stockTransaction.getToStore(), item.getVariant(), item.getQuantity());
-                    productVariantRepository.save(item.getVariant());
+                    variant.setIsAvailable(Is_Available.AVAILABLE);
+                    createStockForStore(stockTransaction.getToStore(), variant,itemReceivedRequest.getReceivedQuantity());
+                    productVariantRepository.save(variant);
                 }
+                adjustStockForStore(stockTransaction);
             }
+//            }
         }
         stockTransaction.setStatus(TransactionStatus.COMPLETED);
         StockTransaction saved = stockTransactionRepository.save(stockTransaction);
         StockTransactionResponse response = stockTransactionMapper.toStockTransactionResponse(saved);
 
         return response;
+    }
+
+    private void adjustStockForStore(StockTransaction stockTransaction) {
+        Map<UUID, StockTransactionItem> itemMap =
+                stockTransaction.getItems().stream()
+                        .collect(Collectors.toMap(
+                                item -> item.getVariant().getId(),
+                                item -> item
+                        ));
+        List<Stock> stockOfWarehouse = stockRepository
+                .findAllByVariantIdsAndWarehouse(new ArrayList<>(itemMap.keySet())
+                        , stockTransaction.getToWareHouse());
+        for (Stock stock : stockOfWarehouse) {
+            StockTransactionItem item = itemMap.get(stock.getVariant().getId());
+            if (item == null) {
+                continue;
+            }
+            int receivedQuantity = item.getReceivedQuantity();
+
+        }
     }
 
     public List<StockResponse> getAllStocks() {

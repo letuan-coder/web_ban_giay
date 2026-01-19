@@ -69,6 +69,10 @@ public interface StockRepository extends JpaRepository<Stock, UUID> {
     );
 
     Optional<Stock> findByVariant_IdAndWarehouse(UUID variantId, WareHouse warehouse);
+    List<Stock> findByVariant_IdInAndWarehouse(
+            List<UUID> variantIds,
+            WareHouse warehouse
+    );
 
     @Query("""
                 select s
