@@ -76,7 +76,7 @@ public class Order extends BaseEntity {
     @Embedded
     ShippingAddress userAddresses;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.PERSIST)
     @JoinColumn(name = "store_id", nullable = false)
     private Store storeDelivered;
 
@@ -92,7 +92,25 @@ public class Order extends BaseEntity {
 
     BigDecimal discountAmount;
 
+    @Column(name = "ghn_fail_count", nullable = false)
+    private int ghnFailCount = 0;
+
+    @Column(name = "ghn_last_sync_at")
+    private LocalDateTime ghnLastSyncAt;
+
     @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JsonManagedReference("orders-return")
     private List<OrderReturn> returns;
+    public void increaseFailCount() {
+        this.ghnFailCount++;
+    }
+
+    public void resetFailCount() {
+        this.ghnFailCount = 0;
+    }
+
+    public void updateLastSyncAt() {
+        this.ghnLastSyncAt = LocalDateTime.now();
+    }
+
 }

@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +25,7 @@ public class ProductColorResponse {
     String colorHexCode;
     @JsonIgnore
     Is_Available isAvailable;
+    BigDecimal discountPrice;
     List<ImageProductResponse> images;
     List<ProductVariantResponse> variantResponses;
 }

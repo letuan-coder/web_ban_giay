@@ -4,6 +4,7 @@ import com.example.DATN.dtos.request.product.PromotionRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.product.PromotionResponse;
 import com.example.DATN.services.PromotionService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,24 +41,26 @@ public class PromotionController {
 
     @PostMapping
     public ApiResponse<PromotionResponse> createPromotion(
-            @RequestBody PromotionRequest promotionRequest) {
+            @RequestBody PromotionRequest promotionRequest) throws JsonProcessingException {
         return ApiResponse.<PromotionResponse>builder()
                 .data(promotionService.createPromotion(promotionRequest))
                 .message("Promotion created successfully")
                 .build();
     }
 
-    @PostMapping("/bulk")
-    public ApiResponse<List<PromotionResponse>> createPromotionsBulk
-            (@RequestBody List<PromotionRequest> promotionRequests) {
-        List<PromotionResponse> createdPromotions = promotionRequests.stream()
-                .map(promotionService::createPromotion)
-                .toList();
-        return ApiResponse.<List<PromotionResponse>>builder()
-                .data(createdPromotions)
-                .message("Promotions created successfully")
-                .build();
-    }
+
+//    @SneakyThrows
+//    @PostMapping("/bulk")
+//    public ApiResponse<List<PromotionResponse>> createPromotionsBulk
+//            (@RequestBody List<PromotionRequest> promotionRequests) {
+//        List<PromotionResponse> createdPromotions = promotionRequests.stream()
+//                .map(promotionService::createPromotion)
+//                .toList();
+//        return ApiResponse.<List<PromotionResponse>>builder()
+//                .data(createdPromotions)
+//                .message("Promotions created successfully")
+//                .build();
+//    }
 
     @PatchMapping("/{id}")
     public ApiResponse<PromotionResponse> updatePromotion(@PathVariable Long id, @RequestBody PromotionRequest promotionRequest) {

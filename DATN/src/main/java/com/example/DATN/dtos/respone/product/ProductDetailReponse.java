@@ -20,6 +20,7 @@ public class ProductDetailReponse {
     private String name;
     private String slug;
     private BigDecimal price;
+    private BigDecimal discountPrice;
     private String productCode;
     private String description;
     private Is_Available available;

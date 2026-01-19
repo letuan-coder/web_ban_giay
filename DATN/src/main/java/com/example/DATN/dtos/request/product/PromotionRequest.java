@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -18,7 +19,7 @@ public class PromotionRequest {
     private String name;
     private String description;
     private PromotionType promotionType;
-    private Double discountValue;
+    private BigDecimal discountValue;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private Boolean active;

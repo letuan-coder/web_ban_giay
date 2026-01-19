@@ -10,6 +10,7 @@ import com.example.DATN.models.ProductVariantIndex;
 import com.example.DATN.repositories.ProductColorRepository;
 import com.example.DATN.repositories.ProductVariantRepository;
 import com.example.DATN.services.ProductVariantService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -167,7 +168,7 @@ public class ProductVariantController {
     }
 
     @GetMapping("/get-all-variants")
-    public ResponseEntity<ApiResponse<List<ProductVariantResponse>>> GetAllVariants() {
+    public ResponseEntity<ApiResponse<List<ProductVariantResponse>>> GetAllVariants() throws JsonProcessingException {
         ApiResponse response = ApiResponse.<List<ProductVariantResponse>>builder()
                 .data(productVariantService.getallproductvariant())
                 .build();

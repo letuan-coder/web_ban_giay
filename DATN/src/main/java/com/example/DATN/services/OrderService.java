@@ -8,6 +8,8 @@ import com.example.DATN.dtos.request.order.CancelOrderRequest;
 import com.example.DATN.dtos.request.order.OrderRequest;
 import com.example.DATN.dtos.request.vnpay.VnPayRefundRequest;
 import com.example.DATN.dtos.request.vnpay.VnPaymentRequest;
+import com.example.DATN.dtos.respone.ghn.GhnOrderSyncResponse;
+import com.example.DATN.dtos.respone.ghn.GhnStatusLogDto;
 import com.example.DATN.dtos.respone.order.CancelOrderResponse;
 import com.example.DATN.dtos.respone.order.CheckOutProductResponse;
 import com.example.DATN.dtos.respone.order.CheckOutResponse;
@@ -19,6 +21,7 @@ import com.example.DATN.mapper.OrderMapper;
 import com.example.DATN.models.Embeddable.ShippingAddress;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -42,7 +45,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+    private final GhnOrderStatusLogRepository ghnOrderStatusLogRepository;
     private final VoucherUsageRepository voucherUsageRepository;
+    private final GhnService ghnService;
     private final VoucherRepository voucherRepository;
     private final StockReservationRepository stockReservationRepository;
     private final VnpayRepository vnpayRepository;
@@ -218,7 +223,7 @@ public class OrderService {
                     .pick_shift(pickingShift)
                     .items(listProduct)
                     .build();
-            GhnService.createOrder(ghnOrderInfo,order);
+            ghnService.createOrder(ghnOrderInfo,order);
         } else {
             throw new ApplicationException(ErrorCode.ORDER_STATUS_INVALID);
         }
@@ -262,9 +267,11 @@ public class OrderService {
                     .build();
             order.setServiceId(request.getServiceId());
             OrderResponse response = orderMapper.toResponse(orderRepository.save(order));
-            if (cacheResponse.getVoucherCode() != null) {
-                Voucher voucher = voucherRepository.findByVoucherCode(cacheResponse.getVoucherCode())
+            if (cacheResponse.getVoucherId()!=null) {
+                Voucher voucher = voucherRepository.findById(cacheResponse.getVoucherId())
                         .orElseThrow(() -> new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND));
+                voucher.setUsedCount(voucher.getUsedCount()+1);
+                voucherRepository.save(voucher);
                 VoucherUsage usage = VoucherUsage.builder()
                         .order(order)
                         .user(user)
@@ -321,6 +328,21 @@ public class OrderService {
             order.setOrderStatus(OrderStatus.PENDING);
             order.setNote(request.getNote());
             OrderResponse response = orderMapper.toResponse(orderRepository.save(order));
+            if (cacheResponse.getVoucherId()!=null) {
+                Voucher voucher = voucherRepository.findById(cacheResponse.getVoucherId())
+                        .orElseThrow(() -> new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND));
+                voucher.setUsedCount(voucher.getUsedCount() + 1);
+                voucherRepository.save(voucher);
+                VoucherUsage usage = VoucherUsage.builder()
+                        .order(order)
+                        .user(user)
+                        .voucherType(voucher.getType())
+                        .voucher(voucher)
+                        .discountAmount(cacheResponse.getVoucherDiscount())
+                        .usedAt(LocalDateTime.now())
+                        .build();
+                voucherUsageRepository.save(usage);
+            }
             response.setUserName(user.getUsername());
             for (CheckOutProductResponse productResponse : cacheResponse.getProducts()) {
                 stockRepository.commitStock(
@@ -335,6 +357,7 @@ public class OrderService {
             throw new ApplicationException(ErrorCode.IDEMPOTENCY_TIMEOUT);
         }
     }
+
 
     @Transactional
     public Order BuilderOrder(CheckOutResponse response, User user) {
@@ -474,4 +497,108 @@ public class OrderService {
             throw new ApplicationException(ErrorCode.ORDER_STATUS_INVALID);
         }
     }
+    private ShippingStatus mapGhnStatus(String status) {
+        return switch (status) {
+            case "picking"    -> ShippingStatus.PICKING;
+            case "picked"     -> ShippingStatus.PICKED;
+            case "storing"    -> ShippingStatus.STORING;
+            case "delivering" -> ShippingStatus.DELIVERING;
+            case "delivered"  -> ShippingStatus.DELIVERED;
+            case "return"     -> ShippingStatus.RETURNED;
+            case "cancel"     -> ShippingStatus.CANCEL;
+            default -> ShippingStatus.DAMAGE;
+        };
+    }
+
+    @Scheduled(fixedDelay = 300000)
+    @Transactional
+    public void syncGhnOrderStatus() {
+        LocalDateTime syncBefore = LocalDateTime.now().minusMinutes(5);
+        List<Order> orders =
+                orderRepository.findOrdersNeedSync(syncBefore);
+
+        for (Order order : orders) {
+            try {
+                GhnOrderSyncResponse response =
+                        ghnService.getOrderDetail(
+                                order.getGhn().getGhnOrderCode()
+                        );
+
+                String ghnStatus = response.getData().getStatus();
+                List<GhnStatusLogDto> logs = response.getData().getLog();
+
+                ShippingStatus newStatus = mapGhnStatus(ghnStatus);
+
+                LocalDateTime lastUpdateTime =
+                        logs.stream()
+                                .map(l -> l.getUpdatedDate())
+                                .max(LocalDateTime::compareTo)
+                                .orElse(
+                                        response.getData()
+                                                .getUpdatedDate()
+                                                .toLocalDateTime()
+                                );
+                updateOrderFromGhn(order, newStatus, lastUpdateTime);
+                saveGhnLogs(order, logs);
+                order.resetFailCount();
+            } catch (Exception e) {
+                order.increaseFailCount();
+            }
+            order.updateLastSyncAt();
+            orderRepository.save(order);
+        }
+    }
+    private void updateOrderFromGhn(
+            Order order,
+            ShippingStatus newStatus,
+            LocalDateTime lastUpdateTime
+    ) {
+        ShippingStatus oldStatus = order.getGhnStatus();
+
+        if (newStatus != null && oldStatus != newStatus) {
+            order.setGhnStatus(newStatus);
+
+            if (newStatus == ShippingStatus.DELIVERED) {
+                order.setReceivedDate(lastUpdateTime);
+                order.setOrderStatus(OrderStatus.COMPLETED);
+            }
+
+            if (newStatus == ShippingStatus.CANCEL
+                    || newStatus == ShippingStatus.RETURNED) {
+                order.setOrderStatus(OrderStatus.CANCELLED);
+            }
+        }
+
+        order.getGhn().setGhnLastUpdated(lastUpdateTime);
+    }
+
+    private void saveGhnLogs(
+            Order order,
+            List<GhnStatusLogDto> logs
+    ) throws JsonProcessingException {
+        for (GhnStatusLogDto log : logs) {
+
+            boolean exists =
+                    ghnOrderStatusLogRepository.existsByOrder_IdAndStatusAndGhnUpdatedAt(
+                            order.getId(),
+                            log.getStatus(),
+                            log.getUpdatedDate());
+
+            if (!exists) {
+                GhnOrderStatusLog entity =
+                        GhnOrderStatusLog.builder()
+                                .order(order)
+                                .ghnOrderCode(order.getGhn().getGhnOrderCode())
+                                .status(log.getStatus())
+                                .previousStatus(order.getGhnStatus().toString())
+                                .ghnUpdatedAt(log.getUpdatedDate())
+                                .syncedAt(LocalDateTime.now())
+                                .rawData(objectMapper.writeValueAsString(log))
+                                .createdAt(LocalDateTime.now())
+                                .build();
+                ghnOrderStatusLogRepository.save(entity);
+            }
+        }
+    }
+
 }

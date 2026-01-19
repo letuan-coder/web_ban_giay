@@ -4,10 +4,8 @@ import com.example.DATN.constant.OrderStatus;
 import com.example.DATN.constant.ShippingStatus;
 import com.example.DATN.dtos.request.RegisterStoreGHNRequest;
 import com.example.DATN.dtos.request.ghtk.GhnOrderInfo;
-import com.example.DATN.dtos.respone.ghn.CalculateFeeRequest;
-import com.example.DATN.dtos.respone.ghn.GhnCalculateFeeResponse;
-import com.example.DATN.dtos.respone.ghn.GhnCreateOrderResponse;
-import com.example.DATN.dtos.respone.ghn.GhnRegisterShopResponse;
+import com.example.DATN.dtos.respone.ghn.*;
+import com.example.DATN.models.Embeddable.GHN;
 import com.example.DATN.models.Order;
 import com.example.DATN.models.Store;
 import com.example.DATN.models.WareHouse;
@@ -24,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -32,8 +31,7 @@ public class GhnService {
     private static String ghnTokenStatic;
     private static String createUrlStatic;
     private final ObjectMapper objectMapper;
-
-    private static OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
     @Value("${ghn.api.token}")
     private String ghnToken;
 
@@ -52,7 +50,7 @@ public class GhnService {
     @Value("${ghn.api.register.url}")
     private String registerUrl;
 
-    public static void createOrder(GhnOrderInfo ghnOrderInfo, Order order) {
+    public void createOrder(GhnOrderInfo ghnOrderInfo, Order order) {
         // URL GHN (sandbox)
         String url = createUrlStatic;
 
@@ -63,7 +61,7 @@ public class GhnService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Token", ghnTokenStatic);  // thay bằng token thật
-        headers.set("ShopId", "198223");   // thay bằng shopId thật
+        headers.set("ShopId", order.getStoreDelivered().getStoreCodeGHN().toString());   // thay bằng shopId thật
 
         // Tạo HttpEntity với body và header
         HttpEntity<GhnOrderInfo> requestEntity = new HttpEntity<>(ghnOrderInfo, headers);
@@ -83,9 +81,14 @@ public class GhnService {
 
                 GhnCreateOrderResponse createOrderResponse =
                         mapper.readValue(response.getBody(), GhnCreateOrderResponse.class);
-
+                if (order.getGhn() == null) {
+                    order.setGhn(new GHN());
+                }
                 order.getGhn().setGhnOrderCode(createOrderResponse.getData().getOrderCode());
-                order.getGhn().setExpectedDeliveryTime(createOrderResponse.getData().getExpectedDeliveryTime());
+                order.getGhn().setExpectedDeliveryTime(
+                                createOrderResponse.getData()
+                                .getExpectedDeliveryTime()
+                                .toLocalDateTime());
                 order.setOrderStatus(OrderStatus.DELEVERING);
                 order.setGhnStatus(ShippingStatus.PICKING);
                 order.setUpdatedAt(LocalDateTime.now());
@@ -96,6 +99,30 @@ public class GhnService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    public GhnOrderSyncResponse getOrderDetail(String orderCode) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Token", ghnToken);
+
+        Map<String, String> body = Map.of(
+                "order_code", orderCode
+        );
+
+        HttpEntity<Map<String, String>> request =
+                new HttpEntity<>(body, headers);
+
+        ResponseEntity<GhnOrderSyncResponse> response =
+                restTemplate.exchange(
+                       "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/detail",
+                        HttpMethod.POST,
+                        request,
+                        GhnOrderSyncResponse.class
+                );
+
+        return response.getBody();
     }
 
     public ResponseEntity<GhnCalculateFeeResponse> calculateShippingFee(CalculateFeeRequest request,Integer headerKey) throws JsonProcessingException {

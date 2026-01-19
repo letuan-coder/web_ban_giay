@@ -5,12 +5,15 @@ import com.example.DATN.constant.Is_Available;
 import com.example.DATN.constant.VariantType;
 import com.example.DATN.dtos.request.product.ProductVariantRequest;
 import com.example.DATN.dtos.request.product.UpdateProductVariantRequest;
+import com.example.DATN.dtos.respone.PromotionPriceResponse;
 import com.example.DATN.dtos.respone.product.ProductVariantResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.mapper.ProductVariantMapper;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -37,7 +40,7 @@ public class ProductVariantService {
 
     private final ProductVariantRepository productVariantRepository;
     private final ProductVariantMapper productVariantMapper;
-
+    private final ObjectMapper objectMapper;
     private final ProductColorRepository productColorRepository;
     private final SizeRepository sizeRepository;
     private final UserRepository userRepository;
@@ -86,6 +89,43 @@ public class ProductVariantService {
         return savedProductVariants.stream()
                 .map(productVariantMapper::toProductVariantResponse)
                 .collect(Collectors.toList());
+    }
+
+    public ProductVariantResponse getVariantPrice(String sku, ProductVariantResponse variantResponse)
+            throws JsonProcessingException {
+
+        String key = "PROMO:VARIANT:" + sku;
+
+        Object value = redisTemplate.opsForValue().get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        PromotionPriceResponse response =
+                objectMapper.readValue(
+                        value.toString(),
+                        PromotionPriceResponse.class
+                );
+        variantResponse.setPrice(response.getOriginalPrice());
+        variantResponse.setDiscountPrice(response.getDiscountPrice());
+
+        return variantResponse;
+    }
+
+    public List<ProductVariantResponse> calculateCheckoutPrices(
+            List<ProductVariantResponse> response,
+            List<ProductVariant> variants
+    ) throws JsonProcessingException {
+        List<ProductVariantResponse> productVariantResponseList = new ArrayList<>();
+
+        for (ProductVariant variant : variants) {
+            String key = variant.getSku();
+            ProductVariantResponse variantRes = productVariantMapper.toProductVariantResponse(variant);
+            ProductVariantResponse variantResponse = getVariantPrice(key, variantRes);
+            productVariantResponseList.add(variantResponse);
+        }
+        return  productVariantResponseList;
     }
 
     @Async
@@ -211,13 +251,14 @@ public class ProductVariantService {
     }
 
 
-    public List<ProductVariantResponse> getallproductvariant() {
-
-        List<ProductVariant> responses = productVariantRepository.findAll();
-        return responses
+    public List<ProductVariantResponse> getallproductvariant() throws JsonProcessingException {
+        List<ProductVariant> variants = productVariantRepository.findAll();
+        List<ProductVariantResponse> responseList = variants
                 .stream()
                 .map(productVariantMapper::toProductVariantResponse)
                 .toList();
+        return calculateCheckoutPrices(responseList, variants);
+
     }
 
     public List<ProductVariantResponse> UpdateProductVariantById

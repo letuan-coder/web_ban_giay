@@ -24,7 +24,7 @@ public class ProductVariantDetailResponse {
     private String colorHex;
     private Is_Available isAvailable;
     private BigDecimal price;
-    private BigDecimal finalPrice;
+    private BigDecimal discountPrice;
     private Integer total_stock;
     @JsonIgnore
     private List<StockResponse> stocks;

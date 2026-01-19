@@ -32,4 +32,6 @@ public class ProductVariantIndex {
     @Field(type = FieldType.Text)
     private String thumbnailUrl;
     private BigDecimal price;
+    private BigDecimal discountPrice;
+
 }

@@ -74,7 +74,7 @@ public class CheckOutController {
     public ApiResponse<CheckOutResponse> calculatorDistance(
             @RequestBody @Valid DistanceRequest request,
             @RequestHeader(value = "X-Idempotency-Key", required = false) String headerKey
-    ){
+    ) throws JsonProcessingException {
         String idempotencyKey = headerKey != null ? headerKey : request.getIdempotencyKey();
         if (idempotencyKey == null || idempotencyKey.trim().isEmpty()) {
             throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);

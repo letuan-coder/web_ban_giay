@@ -74,6 +74,7 @@ public class ShippingCalculator {
     public BigDecimal recalculatorShippingAddress
             (Store store, CheckOutResponse response)
             throws JsonProcessingException {
+
         List<ItemRequest> itemRequests = buildItemRequestByResponse(response);
         CalculateFeeRequest request = CalculateFeeRequest.builder()
                 .from_district_id(store.getDistrictCode())
@@ -93,12 +94,14 @@ public class ShippingCalculator {
         ResponseEntity<GhnCalculateFeeResponse> shippingFeeResponse = ghnService
                 .calculateShippingFee(request, store.getStoreCodeGHN());
         return BigDecimal.valueOf(shippingFeeResponse.getBody().getData().getTotal());
+
+
     }
 
     public BigDecimal recalculatorItem(CheckOutResponse response) throws JsonProcessingException {
-     List<ItemRequest>  itemRequests=  buildItemRequestByResponse(response);
-     Store store =storeRepository.findById(response.getStoreId())
-             .orElseThrow(()->new ApplicationException(ErrorCode.STORE_NOT_FOUND));
+        List<ItemRequest> itemRequests = buildItemRequestByResponse(response);
+        Store store = storeRepository.findById(response.getStoreId())
+                .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
         CalculateFeeRequest request = CalculateFeeRequest.builder()
                 .from_district_id(store.getDistrictCode())
                 .from_ward_code(store.getWardCode())

@@ -20,8 +20,11 @@ public class CheckOutProductResponse {
     private String sku;
     private String colorName;
     private Integer sizeName;
-    private BigDecimal price;
-    private BigDecimal finaPrice;
+
+    private BigDecimal originalPrice;
+    private BigDecimal discountPrice;
+    private BigDecimal finalPrice;
+    private BigDecimal discountAmount;
     private StockResponse stockResponse;
     private Integer stock;
     private String imageUrl;

@@ -26,6 +26,7 @@ public class ProductResponse {
     private String ThumbnailUrl;
     private String altText;
     private BigDecimal price;
+    private BigDecimal discountPrice;
     private Long brandId;
     private String brandName;
     private String categoryName;

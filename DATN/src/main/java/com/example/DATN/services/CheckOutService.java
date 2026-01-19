@@ -2,7 +2,9 @@ package com.example.DATN.services;
 
 import com.example.DATN.constant.Util.CheckSumUtil;
 import com.example.DATN.constant.VariantType;
+import com.example.DATN.constant.VoucherType;
 import com.example.DATN.dtos.request.checkout.*;
+import com.example.DATN.dtos.respone.PromotionPriceResponse;
 import com.example.DATN.dtos.respone.StockResponse;
 import com.example.DATN.dtos.respone.order.CheckOutProductResponse;
 import com.example.DATN.dtos.respone.order.CheckOutResponse;
@@ -163,14 +165,14 @@ public class CheckOutService {
 
     @Transactional
     public BigDecimal CheckVoucher(CheckOutResponse response,
-                                   String voucherCode, BigDecimal price) {
+                                   String voucherCode) {
 
-        BigDecimal sum = price;
+        BigDecimal sum = response.getTotalPrice();
         BigDecimal discount = BigDecimal.ZERO;
         Voucher voucher = voucherRepository.findByVoucherCode(voucherCode.trim())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND));
         response.setVoucherId(voucher.getId());
-        if(checkVoucherCondition(sum,voucher)) {
+        if (checkVoucherCondition(sum, voucher)) {
             switch (voucher.getType()) {
 
                 case PERCENT_DISCOUNT:
@@ -205,13 +207,12 @@ public class CheckOutService {
             if (sum.compareTo(BigDecimal.ZERO) < 0) {
                 sum = BigDecimal.ZERO;
             }
-
+            response.setType(voucher.getType());
             response.setVoucherDiscount(discount);
             response.setVoucherName(voucher.getVoucherName());
-            response.setFinalPrice(sum);
-
+            response.setTotalPrice(sum);
         }
-            return sum;
+        return sum;
     }
 
 
@@ -332,37 +333,40 @@ public class CheckOutService {
 
     @Transactional(readOnly = true)
     public CheckOutResponse applyVoucher(ApplyVoucherRequest request) {
-
-            String idempotencyKey = request.getIdempotencyKey();
-            CheckOutResponse cacheResponse = getIdempotentResponse(idempotencyKey);
-            if (cacheResponse != null) {
-                if (cacheResponse.getVoucherCode()==request.getVoucherCode()){
-                    return cacheResponse;
-                }
-                BigDecimal sum = cacheResponse.getProducts()
-                        .stream().map(CheckOutProductResponse::getFinaPrice)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-                if (request.getVoucherCode() != null) {
-                    if (!checkSumUtil.verify(request.getVoucherCode().trim())) {
-                        throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
-                    }
-                    try {
-                        sum = CheckVoucher(cacheResponse, request.getVoucherCode(), sum);
-                    } catch (Exception e) {
-                        throw new ApplicationException(ErrorCode.VOUCHER_CANT_APPLY);
-                    }
-                    cacheResponse.setVoucherCode(request.getVoucherCode());
-                    cacheResponse.setVoucherDiscount(cacheResponse.getFinalPrice().subtract(sum));
-                    cacheResponse.setFinalPrice(sum);
-                    saveIdempotentResponse(request.getIdempotencyKey(), cacheResponse);
-
-                }
+        String idempotencyKey = request.getIdempotencyKey();
+        CheckOutResponse cacheResponse = getIdempotentResponse(idempotencyKey);
+        if (cacheResponse != null) {
+            if (cacheResponse.getVoucherCode().equals(request.getVoucherCode())) {
                 return cacheResponse;
-            } else {
-                throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
             }
+            cacheResponse.setTotalPrice(cacheResponse.getOriginTotalPrice());
+            cacheResponse.setShippingFee(cacheResponse.getOriginalShippingFee());
+            BigDecimal discountValue = cacheResponse.getProducts()
+                    .stream().map(CheckOutProductResponse::getFinalPrice)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            if (request.getVoucherCode() != null) {
+                if (!checkSumUtil.verify(request.getVoucherCode().trim())) {
+                    throw new ApplicationException(ErrorCode.VOUCHER_NOT_FOUND);
+                }
+                try {
+                    discountValue = CheckVoucher(cacheResponse, request.getVoucherCode());
+                } catch (Exception e) {
+                    throw new ApplicationException(ErrorCode.VOUCHER_CANT_APPLY);
+                }
+                cacheResponse.setVoucherCode(request.getVoucherCode());
+                cacheResponse.setTotalPrice(discountValue);
+                cacheResponse.setOriginalShippingFee(cacheResponse.getOriginalShippingFee());
+                cacheResponse.setOriginTotalPrice(cacheResponse.getTotalPrice());
+                cacheResponse.setFinalPrice(cacheResponse.getTotalPrice().add(cacheResponse.getShippingFee()));
+                saveIdempotentResponse(request.getIdempotencyKey(), cacheResponse);
+            }
+            return cacheResponse;
+        } else {
+            throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
+        }
 
     }
+
 
     public Map<String, Boolean> checkStockFromStore(Map<String, Stock> stockMap, List<String> skus) {
         List<Stock> stocks = skus.stream()
@@ -425,11 +429,9 @@ public class CheckOutService {
         if (address != null) {
             route = resolveRoute(skus,
                     quantities, address.getLatitude(), address.getLongitude());
-            double distance = route.getDistanceKm()*1000;
+            double distance = route.getDistanceKm() * 1000;
             double rounded = Math.round(distance * 100.0) / 100.0;
             route.setDistanceKm(rounded);
-
-
 
         }
         Map<String, Stock> stocks = batchLoadStocks(variants, quantities, route);
@@ -461,7 +463,8 @@ public class CheckOutService {
                     "Out of stock for SKUs: " + failedLocks);
         }
         CheckOutResponse response = checkOutOrder(
-                request, stocks, address, variants, route);
+                request, stocks, address, quantities, variants, route);
+
         if (address != null) {
             ShippingAddressRedis shippingAddress = ShippingAddressRedis.builder()
                     .receiverName(address.getReceiverName())
@@ -477,6 +480,7 @@ public class CheckOutService {
                     .latitude(address.getLatitude())
                     .build();
             response.setShippingAddressResponse(shippingAddress);
+
         } else {
             response.setMessageForUser("please add the address or fill " +
                     "an address form to find the nearest store ");
@@ -506,75 +510,84 @@ public class CheckOutService {
     }
 
 
-    public CheckOutResponse calculatorDistance(DistanceRequest request) {
-        try {
-            User user = getUserByJwtHelper.getCurrentUser();
-            String idempotencyKey = request.getIdempotencyKey();
-            CheckOutResponse response = getIdempotentResponse(idempotencyKey);
-            if (response != null) {
-                List<String> skus = response.getProducts().stream().map(
-                        item -> item.getSku()
-                ).toList();
-                Map<String, Integer> quantities = response.getProducts().stream()
-                        .collect(Collectors.toMap(
-                                CheckOutProductResponse::getSku,
-                                CheckOutProductResponse::getQuantity
-                        ));
-                Map<String, ProductVariant> variants = batchLoadVariants(skus);
-                Set<String> notFound = skus.stream()
-                        .filter(sku -> !variants.containsKey(sku))
-                        .collect(Collectors.toSet());
-                if (!notFound.isEmpty()) {
-                    throw new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND,
-                            "SKUs not found: " + notFound);
-                }
-                if (request.getUserAddressId() == null) {
-                    response.setShippingAddressResponse(request.getShippingAddressRedis());
-                } else {
-                    if (response.getUserAddressId() != request.getUserAddressId()) {
-                        UserAddress address = userAddressRepository.findById(request.getUserAddressId())
-                                .orElseThrow(() -> new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND));
-                        ShippingAddressRedis shippingAddress = mapToShippingByUserAddress(address);
-                        response.setShippingAddressResponse(shippingAddress);
-                    }
-                }
-                CheckOutProjection checkOutProjection = resolveRoute(skus,
-                        quantities, response.getShippingAddressResponse().getLatitude(), response.getShippingAddressResponse().getLongitude());
-                double distance = checkOutProjection.getDistanceKm()*1000;
-                double rounded = Math.round(distance * 100.0) / 100.0;
-                checkOutProjection.setDistanceKm(rounded);
-                if (checkOutProjection.getStoreId().equals(response.getStoreId())) {
-                    Store store = storeRepository.findById(response.getStoreId())
-                            .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
-                    response.setShippingFee(shippingCalculator.recalculatorShippingAddress(store, response));
-                } else {
-
-                    Map<String, Stock> stockMap = batchLoadStocks(variants, quantities, checkOutProjection);
-                    Map<String, Boolean> lockResults = batchReLockStock(
-                            response, stockMap, user.getId()
-                    );
-                    List<String> failedLocks = lockResults.entrySet().stream()
-                            .filter(e -> !e.getValue())
-                            .map(Map.Entry::getKey)
-                            .toList();
-                    if (!failedLocks.isEmpty()) {
-                        rollbackLocks(lockResults, user.getId());
-                        throw new ApplicationException(ErrorCode.OUT_OF_STOCK,
-                                "Out of stock for SKUs: " + failedLocks);
-                    }
-
-                    Store store = storeRepository.findById(checkOutProjection.getStoreId())
-                            .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
-                    response.setStoreId(store.getId());
-                    shippingCalculator.recalculatorShippingAddress(store, response);
-                }
-                saveIdempotentResponse(idempotencyKey, response);
-                return response;
+    public CheckOutResponse calculatorDistance(DistanceRequest request) throws JsonProcessingException {
+        User user = getUserByJwtHelper.getCurrentUser();
+        String idempotencyKey = request.getIdempotencyKey();
+        CheckOutResponse response = getIdempotentResponse(idempotencyKey);
+        if (response != null) {
+            List<String> skus = response.getProducts().stream().map(
+                    item -> item.getSku()
+            ).toList();
+            Map<String, Integer> quantities = response.getProducts().stream()
+                    .collect(Collectors.toMap(
+                            CheckOutProductResponse::getSku,
+                            CheckOutProductResponse::getQuantity
+                    ));
+            Map<String, ProductVariant> variants = batchLoadVariants(skus);
+            Set<String> notFound = skus.stream()
+                    .filter(sku -> !variants.containsKey(sku))
+                    .collect(Collectors.toSet());
+            if (!notFound.isEmpty()) {
+                throw new ApplicationException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND,
+                        "SKUs not found: " + notFound);
             }
-        } catch (Exception e) {
-            throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
+            if (request.getUserAddressId() == null) {
+                response.setShippingAddressResponse(request.getShippingAddressRedis());
+            } else {
+                if (response.getUserAddressId() != request.getUserAddressId()) {
+                    UserAddress address = userAddressRepository.findById(request.getUserAddressId())
+                            .orElseThrow(() -> new ApplicationException(ErrorCode.ADDRESS_NOT_FOUND));
+                    ShippingAddressRedis shippingAddress = mapToShippingByUserAddress(address);
+                    response.setShippingAddressResponse(shippingAddress);
+                }
+            }
+            BigDecimal shippingFee = BigDecimal.ZERO;
+            CheckOutProjection checkOutProjection = resolveRoute(skus,
+                    quantities, response.getShippingAddressResponse().getLatitude(), response.getShippingAddressResponse().getLongitude());
+            double distance = checkOutProjection.getDistanceKm() * 1000;
+            double rounded = Math.round(distance * 100.0) / 100.0;
+            checkOutProjection.setDistanceKm(rounded);
+            if (checkOutProjection.getStoreId().equals(response.getStoreId())) {
+                Store store = storeRepository.findById(response.getStoreId())
+                        .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
+                if (response.getType() != VoucherType.FREE_SHIPPING) {
+                    shippingFee = shippingCalculator.recalculatorShippingAddress(store, response);
+                    response.setShippingFee(shippingFee);
+                } else {
+                    response.setShippingFee(shippingFee);
+                }
+            } else {
+                Map<String, Stock> stockMap = batchLoadStocks(variants
+                        ,quantities, checkOutProjection);
+                Map<String, Boolean> lockResults = batchReLockStock(
+                        response, stockMap, user.getId()
+                );
+                List<String> failedLocks = lockResults.entrySet().stream()
+                        .filter(e -> !e.getValue())
+                        .map(Map.Entry::getKey)
+                        .toList();
+                if (!failedLocks.isEmpty()) {
+                    rollbackLocks(lockResults, user.getId());
+                    throw new ApplicationException(ErrorCode.OUT_OF_STOCK,
+                            "Out of stock for SKUs: " + failedLocks);
+                }
+                Store store = storeRepository.findById(checkOutProjection.getStoreId())
+                        .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
+                response.setStoreId(store.getId());
+                calculateCheckoutPrices(response,variants,quantities);
+                if (response.getType() != VoucherType.FREE_SHIPPING) {
+                    shippingFee = shippingCalculator.recalculatorShippingAddress(store, response);
+                    response.setShippingFee(shippingFee);
+                } else {
+                    response.setShippingFee(shippingFee);
+                }
+                response.setFinalPrice(response.getTotalPrice().add(shippingFee));
+            }
+            saveIdempotentResponse(idempotencyKey, response);
+            return response;
         }
-        return null;
+
+        throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
 
     }
 
@@ -582,7 +595,7 @@ public class CheckOutService {
         try {
             User user = getUserByJwtHelper.getCurrentUser();
             CheckOutResponse response = getIdempotentResponse(idempotencyKey);
-            Integer sum = 0;
+            BigDecimal sum = BigDecimal.ZERO;
             Map<String, Stock> stockMap = new HashMap<>();
             if (response != null) {
                 for (IncreaseQuantityRequest quantityRequest : request) {
@@ -594,17 +607,27 @@ public class CheckOutService {
                                     )
                             );
                     for (CheckOutProductResponse productResponse : response.getProducts()) {
-                        ProductVariant productVariant = variantCache.get(productResponse.getSku());
-                        productResponse.setFinaPrice(productVariant.getPrice()
-                                .multiply(BigDecimal.valueOf(productResponse.getQuantity())));
+                        BigDecimal productFinalPrice = productResponse.getDiscountPrice()
+                                .multiply(BigDecimal.valueOf(productResponse.getQuantity()));
+                        productResponse.setFinalPrice(productFinalPrice);
                         Stock stock = stockRepository.findById(productResponse.getStockResponse().getId())
                                 .orElseThrow(() -> new ApplicationException(ErrorCode.STOCK_NOT_FOUND));
-
                         stockMap.put(productResponse.getSku(), stock);
-                        sum += productResponse.getFinaPrice().intValue();
+                        sum = sum.add(productFinalPrice);
                     }
                 }
-                response.setFinalPrice(BigDecimal.valueOf(sum));
+                response.setOriginTotalPrice(sum);
+                response.setTotalPrice(sum);
+                BigDecimal shippingFee = shippingCalculator.recalculatorItem(response);
+                if (response.getVoucherId() != null) {
+                    if (checkSumUtil.verify(response.getVoucherCode())) {
+                       BigDecimal discountValue = CheckVoucher(response,
+                                response.getVoucherCode());
+                    }
+                }
+                response.setOriginalShippingFee(shippingFee);
+                response.setShippingFee(shippingFee);
+                response.setFinalPrice(response.getTotalPrice().add(shippingFee));
                 Map<String, Boolean> lockStock = batchReLockStock(response, stockMap, user.getId());
                 List<String> failedLocks = lockStock.entrySet().stream()
                         .filter(e -> !e.getValue())
@@ -616,9 +639,7 @@ public class CheckOutService {
                     throw new ApplicationException(ErrorCode.OUT_OF_STOCK,
                             "Out of stock for SKUs: " + failedLocks);
                 }
-                if (response.getStoreId() != null) {
-                    shippingCalculator.recalculatorItem(response);
-                } else {
+                if (response.getStoreId()==null){
                     response.setMessageForUser("please add the address or fill " +
                             "an address form to find the nearest store ");
                     response.setStoreId(null);
@@ -683,7 +704,8 @@ public class CheckOutService {
     @Transactional(readOnly = true)
     public CheckOutResponse checkOutOrder(CheckOutRequest request
             , Map<String, Stock> stockMap
-            , UserAddress address
+            , UserAddress address,
+                                          Map<String, Integer> quantites
             , Map<String, ProductVariant> variantMap
             , CheckOutProjection route
     ) throws JsonProcessingException {
@@ -700,12 +722,12 @@ public class CheckOutService {
                         CheckOutItemRequest::getSku,
                         CheckOutItemRequest::getQuantity
                 ));
+
         CheckOutResponse response = new CheckOutResponse();
         for (CheckOutItemRequest checkOutItemRequest : request.getItem()) {
             ProductVariant productVariant = getVariant(checkOutItemRequest.getSku());
             Integer quantity = checkOutItemRequest.getQuantity();
             Stock stock = stockMap.get(productVariant.getSku());
-//            response.setStoreId(stock.getStore().getId());
             total_weight += productVariant.getWeight() * quantity;
             total_height += productVariant.getHeight() * quantity;
             total_length = Math.max(total_length, productVariant.getLength());
@@ -724,8 +746,8 @@ public class CheckOutService {
                     .sizeName(productVariant.getSize().getName())
                     .colorName(productVariant.getProductColor().getColor().getName())
                     .sku(productVariant.getSku())
-                    .productName(productVariant.getProductColor().getProduct().getName()).price(productVariant.getPrice())
-                    .finaPrice(productVariant.getPrice().multiply(BigDecimal.valueOf(checkOutItemRequest.getQuantity())))
+                    .productName(productVariant.getProductColor().getProduct().getName()).originalPrice(productVariant.getPrice())
+                    .finalPrice(productVariant.getPrice().multiply(BigDecimal.valueOf(checkOutItemRequest.getQuantity())))
                     .stockResponse(stockResponse)
                     .weight(productVariant.getWeight())
                     .height(productVariant.getHeight())
@@ -739,11 +761,10 @@ public class CheckOutService {
         }
         response.setProducts(checkOutProductResponses);
         BigDecimal sum = response.getProducts().stream()
-                .map(CheckOutProductResponse::getFinaPrice)
+                .map(CheckOutProductResponse::getFinalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        response.setFinalPrice(sum);
         total_weight = (int) Math.ceil(total_weight * 1.1);
-
+        response.setVoucherCode("chưa có voucher");
         response.setTotal_weight(total_weight);
         response.setTotal_height(total_height);
         response.setTotal_width(total_width);
@@ -753,10 +774,71 @@ public class CheckOutService {
                     .calculatorShippingFee(skuQuantities,
                             stockMap, variantMap, address, route, response);
         }
+        response.setTotalPrice(sum);
+
+        calculateCheckoutPrices(response, variantMap, quantites);
+        response.setOriginTotalPrice(response.getTotalPrice());
+        response.setOriginalShippingFee(fee);
         response.setShippingFee(fee);
+        response.setFinalPrice(response.getTotalPrice().add(fee));
         response.setStoreId(route.getStoreId());
         saveIdempotentResponse(request.getIdempotencyKey(), response);
         return response;
+    }
+
+    public PromotionPriceResponse getVariantPrice(String sku) throws JsonProcessingException {
+
+        String key = "PROMO:VARIANT:" + sku;
+
+        Object value = redisTemplate.opsForValue().get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        PromotionPriceResponse response =
+                objectMapper.readValue(
+                        value.toString(),
+                        PromotionPriceResponse.class
+                );
+        ;
+        return response;
+    }
+
+    public void calculateCheckoutPrices(
+            CheckOutResponse response,
+            Map<String, ProductVariant> variantMap,
+            Map<String, Integer> quantities
+    ) throws JsonProcessingException {
+        BigDecimal subTotal = BigDecimal.ZERO;
+
+        for (CheckOutProductResponse productResponse : response.getProducts()) {
+            String sku = productResponse.getSku();
+            int quantity = productResponse.getQuantity();
+
+            ProductVariant variant = variantMap.get(sku);
+
+            BigDecimal originalPrice = variant.getPrice();
+            BigDecimal unitPrice = originalPrice;
+            BigDecimal discountPrice = null;
+
+            PromotionPriceResponse redisPrice = getVariantPrice(sku);
+
+            if (redisPrice != null) {
+                originalPrice = redisPrice.getOriginalPrice();
+                unitPrice = redisPrice.getDiscountPrice();
+                discountPrice = redisPrice.getDiscountPrice();
+            }
+
+            BigDecimal finalPrice =
+                    unitPrice.multiply(BigDecimal.valueOf(quantity));
+
+            subTotal = subTotal.add(finalPrice);
+            productResponse.setOriginalPrice(originalPrice);
+            productResponse.setDiscountPrice(discountPrice);
+            productResponse.setFinalPrice(finalPrice);
+        }
+        response.setTotalPrice(subTotal);
     }
 
     private CheckOutResponse waitForIdempotentResponse(String key) {

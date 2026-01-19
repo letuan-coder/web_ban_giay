@@ -18,8 +18,10 @@ import com.example.DATN.mapper.ProductColorMapper;
 import com.example.DATN.mapper.ProductVariantMapper;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,11 +46,12 @@ public class ProductColorService {
     private final ColorService colorService;
     private final ProductVariantRepository productVariantRepository;
 
-    private final PromotionRepository promotionRepository;
+    private final ObjectMapper objectMapper;
+    private final RedisTemplate redisTemplate;
     private final ImageProductRepository imageProductRepository;
 
     @Transactional(rollbackOn = Exception.class)
-    public ProductColorResponse createProductColor(ProductColorRequest request) {
+    public ProductColorResponse createProductColor(ProductColorRequest request)  {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
         Color color = null;
@@ -72,7 +75,7 @@ public class ProductColorService {
                 .build();
         ProductColor savedProductColor = productColorRepository.save(productColor);
         List<ProductVariantResponse> productVariantResponses = productVariantService
-                .createListProductVariant(savedProductColor.getId(),request.getVariantRequest());
+                .createListProductVariant(savedProductColor.getId(), request.getVariantRequest());
         List<UUID> variantIds = productVariantResponses.stream()
                 .map(ProductVariantResponse::getId)
                 .collect(Collectors.toList());
@@ -84,13 +87,13 @@ public class ProductColorService {
                     (savedProductColor.getId(), request.getFiles(), request.getAltText()));
         }
 
-        ProductColorResponse response= productColorMapper.toProductColorResponse(savedProductColor);
+        ProductColorResponse response = productColorMapper.toProductColorResponse(savedProductColor);
         response.setVariantResponses(productVariantMapper.toProductVariantResponse(savedProductColor.getVariants()));
         return response;
-
     }
+
     @Transactional(rollbackOn = Exception.class)
-    public void UploadColorImage(ProductColorRequest request){
+    public void UploadColorImage(ProductColorRequest request) {
         ProductColor productColor = productColorRepository.findById(request.getProductId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
         List<ImageProduct> image = imageProductRepository.findAllByProductColor(productColor);
@@ -101,13 +104,13 @@ public class ProductColorService {
         if (totalFiles > FileUtil.FILE_LIMIT) {
             throw new ApplicationException(ErrorCode.FILE_COUNT_EXCEEDED);
         }
-        for(MultipartFile file : request.getFiles()) {
-            if (file.getSize()>= FileUtil.MAX_FILE_SIZE_MB){
+        for (MultipartFile file : request.getFiles()) {
+            if (file.getSize() >= FileUtil.MAX_FILE_SIZE_MB) {
                 throw new ApplicationException(ErrorCode.FILE_SIZE_EXCEEDED);
             }
             ImageProduct imageProduct = ImageProduct.builder()
                     .imageUrl(productColor.getId().toString())
-                    .altText(productColor.getProduct().getSlug()+"-"+productColor.getColor().getName())
+                    .altText(productColor.getProduct().getSlug() + "-" + productColor.getColor().getName())
                     .productColor(productColor)
                     .build();
             UploadImageRequest uploadImageRequest = UploadImageRequest.builder()
@@ -119,15 +122,17 @@ public class ProductColorService {
             imageProductService.uploadImage(uploadImageRequest);
         }
     }
+
     public List<ImageProductResponse> getImageById(UUID id) {
         List<ImageProduct> imageProduct = imageProductRepository.findAllByProductColor_Id(id);
         return imageProduct.stream()
                 .map(imageProductMapper::toImageProductResponse).collect(Collectors.toList());
 
     }
-    public ProductColorResponse getProductColorById(UUID id){
+
+    public ProductColorResponse getProductColorById(UUID id) {
         ProductColor productColor = productColorRepository.findById(id)
-                .orElseThrow(()->new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
+                .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
         return productColorMapper.toProductColorResponse(productColor);
     }
 
@@ -152,7 +157,7 @@ public class ProductColorService {
 
         if (request.getIsAvailable() != null) {
             existingProductColor.setIsAvailable(request.getIsAvailable());
-            if(request.getIsAvailable()== Is_Available.NOT_AVAILABLE) {
+            if (request.getIsAvailable() == Is_Available.NOT_AVAILABLE) {
                 List<ProductVariant> variants = productVariantRepository.findAllByproductColor(existingProductColor);
                 variants.forEach(variant -> variant.setIsAvailable(request.getIsAvailable()));
                 productVariantRepository.saveAll(variants);
@@ -180,11 +185,10 @@ public class ProductColorService {
 
             if (!variantsToCreate.isEmpty()) {
 
-                productVariantService.createListProductVariant(id,request.getVariantRequest());
+                productVariantService.createListProductVariant(id, request.getVariantRequest());
             }
 
         }
-
 
 
         if (request.getFiles() != null && !request.getFiles().isEmpty()) {
@@ -197,12 +201,17 @@ public class ProductColorService {
         return productColorMapper.toProductColorResponse(updatedProductColor);
     }
 
+
+
+
+
+
     @Transactional
     public void deleteProductColor(UUID id) {
         ProductColor productColor = productColorRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_COLOR_NOT_FOUND));
-        if(productColor.getImages()!=null){
-            for(ImageProduct imgName : productColor.getImages()){
+        if (productColor.getImages() != null) {
+            for (ImageProduct imgName : productColor.getImages()) {
                 File file = new File("uploads/" + imgName.getImageUrl());
                 if (file.exists()) {
                     file.delete();

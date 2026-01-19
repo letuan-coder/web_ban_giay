@@ -1,5 +1,6 @@
 package com.example.DATN.dtos.respone.order;
 
+import com.example.DATN.constant.VoucherType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
@@ -28,10 +29,15 @@ public class CheckOutResponse {
     private Integer total_height;
 
     private String voucherCode;
-    private BigDecimal voucherDiscount;
+    @Builder.Default
+    private BigDecimal voucherDiscount = BigDecimal.ZERO;
     private String voucherName;
+    private VoucherType type;
     private UUID voucherId;
 
+    private BigDecimal originalShippingFee;
+    private BigDecimal originTotalPrice;
     private BigDecimal shippingFee;
+    private BigDecimal totalPrice;
     private BigDecimal finalPrice;
 }

@@ -23,6 +23,7 @@ public class ProductVariantResponse {
     private SizeResponse size;
     private Is_Available isAvailable;
     private BigDecimal price;
+    private BigDecimal discountPrice;
     private Integer total_stock;
     private String sku;
     @JsonIgnore
