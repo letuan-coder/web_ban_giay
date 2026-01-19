@@ -4,13 +4,17 @@ import com.example.DATN.constant.Is_Available;
 import com.example.DATN.constant.VariantType;
 import com.example.DATN.dtos.request.cart.CartItemRequest;
 import com.example.DATN.dtos.request.cart.UpdateCartIItemRequest;
+import com.example.DATN.dtos.respone.PromotionPriceResponse;
 import com.example.DATN.dtos.respone.cart.CartItemResponse;
+import com.example.DATN.dtos.respone.cart.ProductCartItemResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.GetUserByJwtHelper;
 import com.example.DATN.mapper.CartItemMapper;
 import com.example.DATN.models.*;
 import com.example.DATN.repositories.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -22,10 +26,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -35,39 +36,75 @@ public class CartItemService {
     private final CartItemMapper cartItemMapper;
     private final CartRepository cartRepository;
     private final ProductVariantRepository productVariantRepository;
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate redisTemplate;
+    private final ObjectMapper objectMapper;
     private final GetUserByJwtHelper getUserByJwtHelper;
     private static final DateTimeFormatter DAY_FMT =
             DateTimeFormatter.ofPattern("yyyyMMdd")
                     .withZone(ZoneId.of("Asia/Ho_Chi_Minh"));
     private final ProductViewRepository productViewRepository;
 
-    public List<CartItemResponse> getAllCartItems() {
-//        String guestKey = getJwtIdForGuest.GetGuestKey();
-//        if (guestKey != null && !guestKey.isEmpty()) {
-//            String redisGuestKey = CART_REDIS_KEY_PREFIX + guestKey + ":items";
-//            Object cachedGuestData = redisTemplate.opsForValue().get(redisGuestKey);
-//            if (cachedGuestData != null) {
-//                return objectMapper.convertValue(
-//                        cachedGuestData,
-//                        new TypeReference<List<CartItemResponse>>() {
-//                        }
-//                );
-//            }
-//        }
+    public List<CartItemResponse> getAllCartItems() throws JsonProcessingException {
         User user = getUserByJwtHelper.getCurrentUser();
         Cart cart = cartRepository.findByUser(user)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.CART_NOT_FOUND));
 
         List<CartItemResponse> listResponse = cartItemRepository.findByCartOrderByCreatedAt(cart).stream()
                 .map(cartItemMapper::toCartItemResponse).toList();
-        return listResponse;
+
+        return calculatePromoPrice(listResponse);
+    }
+    public List<CartItemResponse> getPromotionsBySkus(
+            List<String> skus, List<CartItemResponse> response
+    ) {
+        List<String> keys = skus.stream()
+                .map(sku -> "PROMO:VARIANT:" + sku)
+                .toList();
+
+        List<Object> values = redisTemplate.opsForValue().multiGet(keys);
+
+        Map<String, PromotionPriceResponse> responseMap = new HashMap<>();
+        for (int i = 0; i < keys.size(); i++) {
+            Object value = values.get(i);
+            if (value == null) continue;
+
+            try {
+                PromotionPriceResponse promo =
+                        objectMapper.readValue(
+                                value.toString(),
+                                PromotionPriceResponse.class
+                        );
+                String sku = skus.get(i);
+                responseMap.put(sku, promo);
+
+            } catch (Exception ignored) {
+
+            }
+        }
+        for (CartItemResponse variant : response) {
+            PromotionPriceResponse promo = responseMap.get(variant.getProductVariant().getSku());
+            if (promo != null) {
+                variant.getProductVariant().setPrice(promo.getOriginalPrice());
+                variant.getProductVariant().setDiscountPrice(promo.getDiscountPrice());
+
+            }
+        }
+        return response;
+    }
+
+    public List<CartItemResponse> calculatePromoPrice(
+            List<CartItemResponse> cartItemResponses
+    ) throws JsonProcessingException {
+        List<ProductCartItemResponse> variantResponseList = new ArrayList<>();
+        List<String> skus = cartItemResponses.stream().map(item -> item.getProductVariant().getSku()).toList();
+        return getPromotionsBySkus(skus, cartItemResponses);
     }
 
     public CartItemResponse getCartItemById(UUID id) {
-        var res = cartItemRepository.findById(id)
+        CartItem res = cartItemRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.CART_ITEM_NOT_FOUND));
-        return cartItemMapper.toCartItemResponse(res);
+       return  cartItemMapper.toCartItemResponse(res);
+
     }
 
     @Async
@@ -135,7 +172,7 @@ public class CartItemService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         cart.setTotal_price(newTotalPrice);
         cartRepository.save(cart);
-        return cartItemMapper.toCartItemResponse(cartItem);
+        return  cartItemMapper.toCartItemResponse(cartItem);
     }
 
     @Transactional(rollbackOn = Exception.class)

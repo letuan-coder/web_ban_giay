@@ -102,6 +102,7 @@ public class ShippingCalculator {
         List<ItemRequest> itemRequests = buildItemRequestByResponse(response);
         Store store = storeRepository.findById(response.getStoreId())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
+
         CalculateFeeRequest request = CalculateFeeRequest.builder()
                 .from_district_id(store.getDistrictCode())
                 .from_ward_code(store.getWardCode())

@@ -41,7 +41,7 @@ public class CheckOutController {
     public ApiResponse<CheckOutResponse> calculateitem(
             @RequestBody @Valid List<IncreaseQuantityRequest> request,
             @RequestHeader(value = "X-Idempotency-Key", required = false) String idempotencyKey
-    ) {
+    ) throws JsonProcessingException {
         if (idempotencyKey == null || idempotencyKey.trim().isEmpty()) {
             throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
         }

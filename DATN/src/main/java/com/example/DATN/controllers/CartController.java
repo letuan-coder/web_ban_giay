@@ -1,11 +1,11 @@
 package com.example.DATN.controllers;
 
-import com.example.DATN.dtos.request.cart.CartRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.cart.CartResponse;
 import com.example.DATN.mapper.CartMapper;
 import com.example.DATN.models.Cart;
 import com.example.DATN.services.CartService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -40,7 +40,7 @@ public class CartController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<CartResponse>> getCartByUserId(){
+    public ResponseEntity<ApiResponse<CartResponse>> getCartByUserId() throws JsonProcessingException {
         ApiResponse<CartResponse> response =ApiResponse.<CartResponse>builder()
                 .data(cartService.getCartByUserId())
                 .build();

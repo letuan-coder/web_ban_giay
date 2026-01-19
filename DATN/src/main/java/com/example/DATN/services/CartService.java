@@ -1,8 +1,8 @@
 package com.example.DATN.services;
 
+import com.example.DATN.dtos.respone.PromotionPriceResponse;
 import com.example.DATN.dtos.respone.cart.CartItemResponse;
 import com.example.DATN.dtos.respone.cart.CartResponse;
-import com.example.DATN.dtos.respone.cart.GuestCartResponse;
 import com.example.DATN.dtos.respone.cart.ProductCartItemResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
@@ -14,7 +14,7 @@ import com.example.DATN.models.Cart;
 import com.example.DATN.models.User;
 import com.example.DATN.repositories.CartItemRepository;
 import com.example.DATN.repositories.CartRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +24,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @EnableWebSecurity
@@ -43,9 +41,7 @@ public class CartService {
     private final GetJwtIdForGuest getJwtIdForGuest;
 
     @Transactional
-    public CartResponse getCartByUserId() {
-//       //clear toàn bộ cache redis
-//       redisTemplate.getConnectionFactory().getConnection().flushAll();
+    public CartResponse getCartByUserId() throws JsonProcessingException {
         User user = getUserByJwtHelper.getCurrentUser();
         Cart cart = cartRepository.findByUser(user).orElseGet(() -> {
             Cart newCart = new Cart();
@@ -54,13 +50,61 @@ public class CartService {
             newCart.setItems(null);
             return cartRepository.save(newCart);
         });
-
         CartResponse cartResponse = cartMapper.toCartResponse(cart);
         List<CartItemResponse> cartItemResponse = cartItemRepository
                 .findByCartOrderByCreatedAt(cart).stream().map(cartItemMapper::toCartItemResponse).toList();
+        cartItemResponse = calculatePromoPrice(cartItemResponse);
+        cartResponse.setCartItems(cartItemResponse);
         BigDecimal total = Calculate_Total_Price(cartItemResponse);
         cartResponse.setTotal_price(total);
+
         return cartResponse;
+    }
+
+    public List<CartItemResponse> getPromotionsBySkus(
+            List<String> skus, List<CartItemResponse> response
+    ) {
+        List<String> keys = skus.stream()
+                .map(sku -> "PROMO:VARIANT:" + sku)
+                .toList();
+
+        List<Object> values = redisTemplate.opsForValue().multiGet(keys);
+
+        Map<String, PromotionPriceResponse> responseMap = new HashMap<>();
+        for (int i = 0; i < keys.size(); i++) {
+            Object value = values.get(i);
+            if (value == null) continue;
+
+            try {
+                PromotionPriceResponse promo =
+                        objectMapper.readValue(
+                                value.toString(),
+                                PromotionPriceResponse.class
+                        );
+                String sku = skus.get(i);
+                responseMap.put(sku, promo);
+
+            } catch (Exception ignored) {
+
+            }
+        }
+        for (CartItemResponse variant : response) {
+            PromotionPriceResponse promo = responseMap.get(variant.getProductVariant().getSku());
+            if (promo != null) {
+                variant.getProductVariant().setPrice(promo.getOriginalPrice());
+                variant.getProductVariant().setDiscountPrice(promo.getDiscountPrice());
+
+            }
+        }
+        return response;
+    }
+
+    public List<CartItemResponse> calculatePromoPrice(
+            List<CartItemResponse> cartItemResponses
+    ) throws JsonProcessingException {
+        List<ProductCartItemResponse> variantResponseList = new ArrayList<>();
+        List<String> skus = cartItemResponses.stream().map(item -> item.getProductVariant().getSku()).toList();
+       return getPromotionsBySkus(skus, cartItemResponses);
     }
 
     public CartResponse getCartById(UUID id) {
@@ -69,35 +113,6 @@ public class CartService {
         return cartMapper.toCartResponse(respone);
     }
 
-    public Cart MergeCartForUser(User user) {
-        String guest_key = "cart:" + getJwtIdForGuest.GetGuestKey() + ":item";
-        Object cache = redisTemplate.opsForValue().get(guest_key);
-        if(cache==null){
-            Cart newCart =  Cart.builder()
-                    .user(user)
-                    .total_price(BigDecimal.ZERO)
-                    .items(new ArrayList<>())
-                    .build();
-            return cartRepository.save(newCart);
-
-        }
-        else {
-            GuestCartResponse guestCartResponse =
-                    objectMapper.convertValue(cache, new TypeReference<GuestCartResponse>() {
-                    });
-            List<CartItemResponse> listItem = new ArrayList<>();
-            for (CartItemResponse response : guestCartResponse.getCartItems()) {
-                listItem.add(response);
-            }
-            CartResponse newCartForUser = CartResponse.builder()
-                    .cartItems(listItem)
-                    .userId(user.getId())
-                    .total_price(guestCartResponse.getTotal_price())
-                    .build();
-            Cart cart = cartMapper.toEntity(newCartForUser);
-            return cartRepository.save(cart);
-        }
-    }
 
     @Transactional(rollbackOn = Exception.class)
     public CartResponse createCartForUser() {
@@ -116,11 +131,15 @@ public class CartService {
     @Async
     public BigDecimal Calculate_Total_Price(List<CartItemResponse> responses) {
         BigDecimal totalPrice = BigDecimal.ZERO;
+
         for (CartItemResponse response : responses) {
-            // Lấy thông tin product variant từ response
             ProductCartItemResponse variant = response.getProductVariant();
+            BigDecimal variantPrice = variant.getPrice();
+            if (response.getProductVariant().getDiscountPrice().equals(BigDecimal.ZERO)){
+               variantPrice = response.getProductVariant().getDiscountPrice();
+            }
             BigDecimal quantity = BigDecimal.valueOf(response.getQuantity());
-            totalPrice = totalPrice.add(variant.getPrice().multiply(quantity));
+            totalPrice = totalPrice.add(variantPrice.multiply(quantity));
         }
         return totalPrice;
     }

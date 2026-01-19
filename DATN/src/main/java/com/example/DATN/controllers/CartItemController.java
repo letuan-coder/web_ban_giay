@@ -6,6 +6,7 @@ import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.cart.CartItemResponse;
 import com.example.DATN.mapper.CartItemMapper;
 import com.example.DATN.services.CartItemService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,8 @@ public class CartItemController {
     private final CartItemMapper cartItemMapper;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CartItemResponse>>> getAllCartItems() {
+    public ResponseEntity<ApiResponse<List<CartItemResponse>>> getAllCartItems()
+            throws JsonProcessingException {
        ApiResponse response = ApiResponse.<List<CartItemResponse>>builder()
                .data(cartItemService.getAllCartItems())
                .build();

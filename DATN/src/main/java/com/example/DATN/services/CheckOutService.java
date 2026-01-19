@@ -368,20 +368,27 @@ public class CheckOutService {
     }
 
 
-    public Map<String, Boolean> checkStockFromStore(Map<String, Stock> stockMap, List<String> skus) {
+    public Map<UUID, Boolean> checkStockFromStore(Map<String, Stock> stockMap
+            , List<String> skus
+            , Map<String, Integer> quantities) {
         List<Stock> stocks = skus.stream()
                 .map(stockMap::get)
                 .filter(Objects::nonNull)
                 .toList();
+
         Map<Store, List<Stock>> stockByStore = stocks.stream()
                 .collect(Collectors.groupingBy(Stock::getStore));
-        Map<String, Boolean> result = new HashMap<>();
+        Map<UUID, Boolean> result = new HashMap<>();
         for (Map.Entry<Store, List<Stock>> entry : stockByStore.entrySet()) {
             Store storeId = entry.getKey();
             List<Stock> storeStocks = entry.getValue();
-            boolean hasStock = storeStocks.stream()
-                    .anyMatch(s -> s.getSellableQuantity() > 0);
-            result.put(storeId.toString(), hasStock);
+            boolean canFulfill = storeStocks.stream()
+                    .allMatch(stock -> {
+                        String sku = stock.getVariant().getSku();
+                        int requiredQty = quantities.getOrDefault(sku, 0);
+                        return stock.getSellableQuantity() >= requiredQty;
+                    });
+            result.put(storeId.getId(), canFulfill);
         }
         return result;
     }
@@ -434,18 +441,22 @@ public class CheckOutService {
             route.setDistanceKm(rounded);
 
         }
+        CheckOutResponse response = new CheckOutResponse();
         Map<String, Stock> stocks = batchLoadStocks(variants, quantities, route);
         if (stocks.isEmpty()) {
             throw new ApplicationException(ErrorCode.OUT_OF_STOCK);
         } else {
-            Map<String, Boolean> result = checkStockFromStore(stocks, skus);
-            result.forEach((sku, available) -> {
-                if (available) {
-                    System.out.println("SKU " + sku + " đã hết hàng tại cửa hàng");
-                } else {
-                    System.out.println("SKU " + sku + " đã hết hàng tại cửa hàng");
-                }
-            });
+            Map<UUID, Boolean> result = checkStockFromStore(stocks, skus, quantities);
+            Optional<UUID> storeIdOpt = result.entrySet().stream()
+                    .filter(Map.Entry::getValue)
+                    .map(Map.Entry::getKey)
+                    .findFirst();
+
+            if (storeIdOpt.isEmpty()) {
+                throw new ApplicationException(ErrorCode.OUT_OF_STOCK);
+            }
+
+            response.setStoreId(storeIdOpt.get());
 
         }
         Map<String, Boolean> lockResults = batchLockStocks(
@@ -462,7 +473,7 @@ public class CheckOutService {
             throw new ApplicationException(ErrorCode.OUT_OF_STOCK,
                     "Out of stock for SKUs: " + failedLocks);
         }
-        CheckOutResponse response = checkOutOrder(
+        response = checkOutOrder(
                 request, stocks, address, quantities, variants, route);
 
         if (address != null) {
@@ -516,8 +527,7 @@ public class CheckOutService {
         CheckOutResponse response = getIdempotentResponse(idempotencyKey);
         if (response != null) {
             List<String> skus = response.getProducts().stream().map(
-                    item -> item.getSku()
-            ).toList();
+                    item -> item.getSku()).toList();
             Map<String, Integer> quantities = response.getProducts().stream()
                     .collect(Collectors.toMap(
                             CheckOutProductResponse::getSku,
@@ -556,9 +566,10 @@ public class CheckOutService {
                 } else {
                     response.setShippingFee(shippingFee);
                 }
-            } else {
+            }
+            else {
                 Map<String, Stock> stockMap = batchLoadStocks(variants
-                        ,quantities, checkOutProjection);
+                        , quantities, checkOutProjection);
                 Map<String, Boolean> lockResults = batchReLockStock(
                         response, stockMap, user.getId()
                 );
@@ -566,15 +577,28 @@ public class CheckOutService {
                         .filter(e -> !e.getValue())
                         .map(Map.Entry::getKey)
                         .toList();
+                if (stockMap.isEmpty()) {
+                    throw new ApplicationException(ErrorCode.OUT_OF_STOCK);
+                } else {
+                    Map<UUID, Boolean> result = checkStockFromStore(stockMap, skus, quantities);
+                    Optional<UUID> storeIdOpt = result.entrySet().stream()
+                            .filter(Map.Entry::getValue)
+                            .map(Map.Entry::getKey)
+                            .findFirst();
+                    if (storeIdOpt.isEmpty()) {
+                        throw new ApplicationException(ErrorCode.OUT_OF_STOCK);
+                    }
+                }
                 if (!failedLocks.isEmpty()) {
                     rollbackLocks(lockResults, user.getId());
                     throw new ApplicationException(ErrorCode.OUT_OF_STOCK,
                             "Out of stock for SKUs: " + failedLocks);
                 }
+
                 Store store = storeRepository.findById(checkOutProjection.getStoreId())
                         .orElseThrow(() -> new ApplicationException(ErrorCode.STORE_NOT_FOUND));
                 response.setStoreId(store.getId());
-                calculateCheckoutPrices(response,variants,quantities);
+                calculateCheckoutPrices(response, variants, quantities);
                 if (response.getType() != VoucherType.FREE_SHIPPING) {
                     shippingFee = shippingCalculator.recalculatorShippingAddress(store, response);
                     response.setShippingFee(shippingFee);
@@ -591,43 +615,76 @@ public class CheckOutService {
 
     }
 
-    public CheckOutResponse calculatorItem(List<IncreaseQuantityRequest> request, String idempotencyKey) {
-        try {
-            User user = getUserByJwtHelper.getCurrentUser();
-            CheckOutResponse response = getIdempotentResponse(idempotencyKey);
-            BigDecimal sum = BigDecimal.ZERO;
-            Map<String, Stock> stockMap = new HashMap<>();
-            if (response != null) {
-                for (IncreaseQuantityRequest quantityRequest : request) {
-                    response.getProducts().stream()
-                            .filter(item -> item.getSku().equals(quantityRequest.getSku()))
-                            .findFirst()
-                            .ifPresent(item ->
-                                    item.setQuantity(quantityRequest.getQuantity() + item.getQuantity()
-                                    )
-                            );
-                    for (CheckOutProductResponse productResponse : response.getProducts()) {
-                        BigDecimal productFinalPrice = productResponse.getDiscountPrice()
-                                .multiply(BigDecimal.valueOf(productResponse.getQuantity()));
-                        productResponse.setFinalPrice(productFinalPrice);
-                        Stock stock = stockRepository.findById(productResponse.getStockResponse().getId())
-                                .orElseThrow(() -> new ApplicationException(ErrorCode.STOCK_NOT_FOUND));
-                        stockMap.put(productResponse.getSku(), stock);
-                        sum = sum.add(productFinalPrice);
+    public CheckOutResponse calculatorItem(List<IncreaseQuantityRequest> request, String idempotencyKey) throws JsonProcessingException {
+
+        User user = getUserByJwtHelper.getCurrentUser();
+        CheckOutResponse response = getIdempotentResponse(idempotencyKey);
+        BigDecimal sum = BigDecimal.ZERO;
+        Map<String, Stock> stockMap = new HashMap<>();
+        List<String> skus = new ArrayList<>();
+        Map<String, Integer> quantities = new HashMap<>();
+        BigDecimal shippingFee = BigDecimal.ZERO;
+        if (response != null) {
+            for (IncreaseQuantityRequest quantityRequest : request) {
+                response.getProducts().stream()
+                        .filter(item -> item.getSku().equals(quantityRequest.getSku()))
+                        .findFirst()
+                        .ifPresent(item ->
+                                item.setQuantity(quantityRequest.getQuantity() + item.getQuantity()
+                                )
+                        );
+                for (CheckOutProductResponse productResponse : response.getProducts()) {
+                    BigDecimal productFinalPrice = productResponse.getDiscountPrice()
+                            .multiply(BigDecimal.valueOf(productResponse.getQuantity()));
+                    productResponse.setFinalPrice(productFinalPrice);
+                    Stock stock = stockRepository.findById(productResponse.getStockResponse().getId())
+                            .orElseThrow(() -> new ApplicationException(ErrorCode.STOCK_NOT_FOUND));
+                    stockMap.put(productResponse.getSku(), stock);
+                    skus.add(productResponse.getSku());
+                    quantities.put(productResponse.getSku(), productResponse.getQuantity());
+                    sum = sum.add(productFinalPrice);
+                }
+            }
+
+            if (response.getStoreId() != null || response.getStockId() != null) {
+                if (stockMap.isEmpty()) {
+                    throw new ApplicationException(ErrorCode.OUT_OF_STOCK);
+                } else {
+                    Map<UUID, Boolean> result = checkStockFromStore(stockMap, skus, quantities);
+                    Optional<UUID> storeIdOpt = result.entrySet().stream()
+                            .filter(Map.Entry::getValue)
+                            .map(Map.Entry::getKey)
+                            .findFirst();
+                    if (storeIdOpt.isEmpty()) {
+                        if (response.getShippingAddressResponse() == null) {
+                            response.setMessageForUser("please add the address or fill " +
+                                    "an address form to find the nearest store ");
+
+                            return response;
+                        } else {
+                            throw new ApplicationException(ErrorCode.OUT_OF_STOCK);
+
+                        }
+                    }
+                    else {
+                         response.setStoreId(storeIdOpt.get());
                     }
                 }
                 response.setOriginTotalPrice(sum);
                 response.setTotalPrice(sum);
-                BigDecimal shippingFee = shippingCalculator.recalculatorItem(response);
                 if (response.getVoucherId() != null) {
                     if (checkSumUtil.verify(response.getVoucherCode())) {
-                       BigDecimal discountValue = CheckVoucher(response,
+                        BigDecimal discountValue = CheckVoucher(response,
                                 response.getVoucherCode());
                     }
+                }
+                if(response.getShippingAddressResponse()!=null) {
+                    shippingFee= shippingCalculator.recalculatorItem(response);
                 }
                 response.setOriginalShippingFee(shippingFee);
                 response.setShippingFee(shippingFee);
                 response.setFinalPrice(response.getTotalPrice().add(shippingFee));
+
                 Map<String, Boolean> lockStock = batchReLockStock(response, stockMap, user.getId());
                 List<String> failedLocks = lockStock.entrySet().stream()
                         .filter(e -> !e.getValue())
@@ -639,18 +696,13 @@ public class CheckOutService {
                     throw new ApplicationException(ErrorCode.OUT_OF_STOCK,
                             "Out of stock for SKUs: " + failedLocks);
                 }
-                if (response.getStoreId()==null){
-                    response.setMessageForUser("please add the address or fill " +
-                            "an address form to find the nearest store ");
-                    response.setStoreId(null);
-                }
                 saveIdempotentResponse(idempotencyKey, response);
                 return response;
             }
-        } catch (Exception e) {
-            throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
+        } else {
+            throw new ApplicationException(ErrorCode.OUT_OF_STOCK);
         }
-        return null;
+        throw new ApplicationException(ErrorCode.MISSING_IDEMPOTENCY_KEY);
     }
 
 

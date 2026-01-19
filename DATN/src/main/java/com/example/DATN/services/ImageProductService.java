@@ -28,8 +28,6 @@ public class ImageProductService {
     private final BannerRepository bannerRepository;
     private final Format_ImageUrl_Helper formatImageUrlHelper;
     private final UserRepository userRepository;
-    private final OrderReturnRepository orderReturnRepository;
-    private final ImageOrderReturnRepository imageOrderReturnRepository;
 
     public static boolean isImageFile(MultipartFile file) {
         String contentType = file.getContentType();

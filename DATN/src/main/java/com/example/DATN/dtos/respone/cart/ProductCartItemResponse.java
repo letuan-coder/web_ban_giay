@@ -21,4 +21,7 @@ public class ProductCartItemResponse {
     private String thumbnailUrl;
     private Is_Available isAvailable;
     private BigDecimal price;
+    @Builder.Default
+    private BigDecimal discountPrice = BigDecimal.ZERO;
+
 }
