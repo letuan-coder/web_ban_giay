@@ -2,6 +2,7 @@
 package com.example.DATN.controllers;
 
 import com.example.DATN.dtos.respone.ApiResponse;
+import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.services.FileStorageService;
 import com.example.DATN.services.ImageProductService;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/images")
 @RequiredArgsConstructor
@@ -19,10 +22,10 @@ public class ImageProductController {
 
     private final ImageProductService imageProductService;
     private final FileStorageService fileStorageService;
-
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> deleteImage(@PathVariable Long id) {
+    public ApiResponse<Void> deleteImage(
+            @PathVariable UUID id) {
         imageProductService.deleteImage(id);
         return ApiResponse.<Void>builder().build();
     }
@@ -35,10 +38,19 @@ public class ImageProductController {
 
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\"" + resource.getFilename() + "\"")
                     .body(resource);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+        } catch (ApplicationException e) {
+            Resource resource = fileStorageService.loadFileAsResource("default.png");
+            String contentType = fileStorageService.getMediaTypeForFileName(filename);
+            ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\"" + resource.getFilename() + "\"")
+                    .body(resource);
         }
+        return ResponseEntity.notFound().build();
     }
+
 }

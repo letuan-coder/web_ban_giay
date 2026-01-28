@@ -6,6 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -16,11 +21,20 @@ public class ProductRequest {
     @NotEmpty(message = "PRODUCT_NAME_REQUIRED")
     private String name;
     private String description;
-    private String productCode;
-
+    private MultipartFile file;
+    private BigDecimal price;
+    private BigDecimal importPrice;
+    private Integer weight;
+    private Integer Length;
+    private Integer Width;
+    private Integer Height;
+    private List<String> colorCodes;
+    private List<String> sizeCodes;
+    private UUID supplierId;
     @NotNull(message = "BRAND_ID_REQUIRED")
     private Long brandId;
 
     @NotNull(message = "CATEGORY_ID_REQUIRED")
     private Long categoryId;
+
 }

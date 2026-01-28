@@ -1,16 +1,44 @@
 package com.example.DATN.mapper;
 
 import com.example.DATN.dtos.request.order.OrderItemRequest;
-import com.example.DATN.dtos.respone.order.OrderItemRespone;
+import com.example.DATN.dtos.respone.order.OrderItemResponse;
+import com.example.DATN.dtos.respone.order.PendingOrderItem;
+import com.example.DATN.models.ImageProduct;
 import com.example.DATN.models.OrderItem;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
-@Mapper(componentModel = "spring")
+import java.util.List;
+
+@Mapper(componentModel = "spring",
+        uses = {ProductVariantMapper.class,
+         ProductMapper.class})
 public interface OrderItemMapper {
-    @Mapping(target = "productColor.id", source = "productColorId")
+    OrderItem toEntity(OrderItemResponse response);
+
+    @Mapping(target = "sku", source = "productVariant.sku")
+    @Mapping(target = "quantity", source = "quantity")
+    @Mapping(target = "ID", source = "id")
+    PendingOrderItem toPendingOrderItem(OrderItem item);
+
+    @Mapping(target = "productVariant.sku",source = "sku")
     OrderItem toOrderItem(OrderItemRequest request);
 
-    @Mapping(source = "productColor.id", target = "productColorId")
-    OrderItemRespone toOrderItemRespone(OrderItem orderItem);
+    @Mapping(target = "productName",source = "productVariant.productColor.product.name")
+    @Mapping(target = "colorName",source = "productVariant.productColor.color.name")
+    @Mapping(target = "sizeName",source = "productVariant.size.name")
+    @Mapping(target = "price", source = "price")
+    @Mapping(target = "imageUrl", source = "productVariant.productColor.images",
+            qualifiedByName = "getFirstImageUrl")
+    @Mapping(target = "sku",source = "productVariant.sku")
+    OrderItemResponse toOrderItemResponse(OrderItem orderItem);
+
+    @Named("getFirstImageUrl")
+    default String getFirstImageUrl(List<ImageProduct> images) {
+        if (images == null || images.isEmpty()) {
+            return null;
+        }
+        return images.get(0).getImageUrl();
+    }
 }

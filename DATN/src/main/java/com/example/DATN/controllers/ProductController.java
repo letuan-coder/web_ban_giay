@@ -1,20 +1,30 @@
 package com.example.DATN.controllers;
 
+import com.example.DATN.constant.ProductStatus;
 import com.example.DATN.dtos.request.product.ProductRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.PageResponse;
+import com.example.DATN.dtos.respone.product.ProductDetailReponse;
 import com.example.DATN.dtos.respone.product.ProductResponse;
-import com.example.DATN.services.ImageProductService;
+import com.example.DATN.dtos.respone.product.ProductSupplierResponse;
+import com.example.DATN.dtos.respone.product.SearchProductResponse;
+import com.example.DATN.models.ProductVariantIndex;
+import com.example.DATN.repositories.projection.ProductSalesProjection;
 import com.example.DATN.services.ProductService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -24,32 +34,68 @@ import java.util.UUID;
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
 public class ProductController {
-    private final ProductService productService;
-    private final ImageProductService imageProductService;
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    private final ProductService productService;
+    private final ElasticsearchOperations operations;
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<ProductResponse> createProduct(
-            @RequestBody @Valid ProductRequest request) {
+            @ModelAttribute @Valid ProductRequest request) {
         return ApiResponse.<ProductResponse>builder()
                 .data(productService.createProduct(request))
                 .build();
     }
+    @GetMapping("/search")
+    public List<ProductVariantIndex> search
+            (@RequestParam String keyword,
+             @RequestParam(defaultValue = "0") int page,
+             @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
 
-    @PostMapping("/upload")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> uploadProducts(@RequestParam("file") MultipartFile file) {
-        productService.addProductsFromExcel(file);
-        return ApiResponse.<Void>builder().build();
+        NativeQuery query = NativeQuery.builder()
+                .withQuery(q -> q.multiMatch(m -> m
+                        .query(keyword)
+                        .fields("name^3", "productCode")
+                        .fuzziness("AUTO")
+                ))
+                .withPageable(pageable)
+                .build();
+
+        SearchHits<ProductVariantIndex> result =
+                operations.search(query, ProductVariantIndex.class);
+        return result.getSearchHits().stream()
+                .map(SearchHit::getContent)
+                .toList();
     }
-
     @GetMapping
     public ApiResponse<PageResponse<ProductResponse>> getAllProducts(
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<ProductResponse> productPage = productService.getAllProducts(pageable);
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "15") int limit,
+            @RequestParam(name = "name", required = false) String productName,
+            @RequestParam(required = false) String sizeCode,
+            @RequestParam(required = false) String colorCode,
+            @RequestParam(required = false) Long category_id,
+            @RequestParam(required = false) Long brand_id,
+            @RequestParam(name = "sort_by", required = false) String sortBy,
+            @RequestParam(name = "sort_order", defaultValue = "desc") String sortOrder,
+            @RequestParam(name = "price_min", required = false) Double priceMin,
+            @RequestParam(name = "price_max", required = false) Double priceMax,
+            @RequestParam(name = "status", required = false) ProductStatus status
+    ) throws JsonProcessingException{
+        String sortField = (sortBy == null || sortBy.trim().isEmpty()) ? "createdAt" : sortBy.trim();
+
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortOrder)
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Sort sort = Sort.by(direction, sortField);
+        Pageable pageable = PageRequest.of(page - 1, limit, sort);
+        Page<ProductResponse> productPage = productService.getAllProducts(
+                productName, priceMin, priceMax, status, brand_id, category_id,sizeCode,colorCode,pageable);
         PageResponse<ProductResponse> pageResponse = PageResponse.<ProductResponse>builder()
-                .page(productPage.getNumber())
+                .page(productPage.getNumber() + 1)
                 .size(productPage.getSize())
+                .limit(limit)
                 .totalElements(productPage.getTotalElements())
                 .totalPages(productPage.getTotalPages())
                 .content(productPage.getContent())
@@ -59,33 +105,99 @@ public class ProductController {
                 .build();
     }
 
+    @GetMapping("/colorId/{product_color_id}")
+    public ApiResponse<List<String>> GetImageByProductColor(
+            @PathVariable UUID product_color_id) {
+        return ApiResponse.<List<String>>builder()
+                .data(productService.getImageByProductColorId(product_color_id))
+                .build();
+    }
+
     @GetMapping("/code/{productCode}")
-    public ApiResponse<List<ProductResponse>> getProductByProductCode(
+    public ApiResponse<List<SearchProductResponse>> getProductByProductCode(
             @PathVariable String productCode) {
-        return ApiResponse.<List<ProductResponse>>builder()
+        return ApiResponse.<List<SearchProductResponse>>builder()
                 .data(productService.getProductByProductCode(productCode))
                 .build();
     }
-
-    @GetMapping("/search")
-    public ApiResponse<List<ProductResponse>> searchProducts
-            (@RequestParam("name") String name) {
-        return ApiResponse.<List<ProductResponse>>builder()
-                .data(productService.searchProductsByName(name))
+    @GetMapping("/supplier/{supplierId}")
+    public ApiResponse<List<ProductSupplierResponse>> getProductBySupplierId(
+            @PathVariable UUID supplierId) {
+        return ApiResponse.<List<ProductSupplierResponse>>builder()
+                .data(productService.getProductBySupplierId(supplierId))
                 .build();
     }
 
+
     @GetMapping("/{id}")
-    public ApiResponse<ProductResponse> getProductById(@PathVariable UUID id) {
-        return ApiResponse.<ProductResponse>builder()
+    public ApiResponse<ProductDetailReponse> getProductById
+            (@PathVariable UUID id) throws JsonProcessingException {
+        return ApiResponse.<ProductDetailReponse>builder()
                 .data(productService.getProductById(id))
                 .build();
     }
 
+    @GetMapping("/admin/{id}")
+    public ApiResponse<ProductResponse> getProductAdminById
+            (@PathVariable UUID id) {
+        ProductResponse response = productService.getProductAdminById(id);
+        return ApiResponse.<ProductResponse>builder()
+                .data(response)
+                .build();
+    }
+    @GetMapping("/supplier/admin/{supplierId}")
+    public ApiResponse<List<ProductSupplierResponse>> getProductBySupplierIdAdmin
+            (@PathVariable UUID supplierId) {
+        return ApiResponse.<List<ProductSupplierResponse>>builder()
+                .data(productService.getAllProductBySupplier(supplierId))
+                .build();
+    }
+
+    @GetMapping("/best-sellers")
+    public ApiResponse<PageResponse<ProductSalesProjection>> getBestSellingProducts(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(name = "sort_by", required = false) String sortBy,
+            @RequestParam(name = "sort_order", defaultValue = "desc") String sortOrder
+    ) {
+        String sortField = (sortBy == null || sortBy.trim().isEmpty()) ? "createdAt" : sortBy.trim();
+
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortOrder)
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortField);
+        Pageable pageable = PageRequest.of(page - 1, limit, sort);
+        Page<ProductSalesProjection> productPage = productService.BestSellingProductSales(pageable);
+        PageResponse<ProductSalesProjection> pageResponse = PageResponse.<ProductSalesProjection>builder()
+                .page(productPage.getNumber() + 1)
+                .size(productPage.getSize())
+                .limit(limit)
+                .totalElements(productPage.getTotalElements())
+                .totalPages(productPage.getTotalPages())
+                .content(productPage.getContent())
+                .build();
+        return ApiResponse.<PageResponse<ProductSalesProjection>>builder()
+                .data(pageResponse)
+                .build();
+    }
+
+    @GetMapping("/worst-sellers")
+    public ApiResponse<List<ProductSalesProjection>> getWorstSellingProducts(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(name = "sort_by", required = false) String sortBy,
+            @RequestParam(name = "sort_order", defaultValue = "desc") String sortOrder
+    ) {
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        return ApiResponse.<List<ProductSalesProjection>>builder()
+                .data(productService.WorstSellingProductSales(pageable))
+                .build();
+    }
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<ProductResponse> updateProduct(
-            @PathVariable UUID id, @RequestBody @Valid ProductRequest request) {
+            @PathVariable UUID id,
+            @RequestBody @Valid ProductRequest request) {
         return ApiResponse.<ProductResponse>builder()
                 .data(productService.updateProduct(id, request))
                 .build();
@@ -99,4 +211,15 @@ public class ProductController {
         return ApiResponse.<Void>builder().build();
     }
 
+    @PatchMapping("/{id}/images")
+    public ApiResponse<ProductResponse> uploadWithImage(
+            @PathVariable UUID id,
+            @RequestPart("data") ProductRequest request,
+            @RequestPart("file") MultipartFile file)
+    {
+        ProductResponse response= productService.updateProductWithImage(id,request,file);
+        return ApiResponse.<ProductResponse>builder()
+                .data(response)
+                .build();
+    }
 }

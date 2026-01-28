@@ -27,7 +27,7 @@ public class CartItem extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonBackReference
+    @JsonBackReference("cart-items")
     Cart cart;
 
     @ManyToOne(fetch = FetchType.EAGER)

@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 public class ProvinceResponse {
     @JsonIgnore
     private String id;
-    @JsonIgnore
     private String code;
     @JsonIgnore
     private String name;

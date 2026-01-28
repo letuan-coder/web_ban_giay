@@ -1,6 +1,5 @@
 package com.example.DATN.dtos.request.product;
 
-import com.example.DATN.constant.Is_Available;
 import com.example.DATN.dtos.request.ColorRequest;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
@@ -21,8 +20,7 @@ public class ProductColorRequest {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String colorName;
     ColorRequest color;
-    List<ProductVariantRequest> variantRequests;
+    ProductVariantRequest variantRequest;
     List<MultipartFile> files;
     List<String> altText;
-    Is_Available IsAvailable;
 }

@@ -1,0 +1,27 @@
+Tạo một white-frame cho trang quản lý sản phẩm. Trang này cần có các phần sau:
+
+1.  **Tiêu đề:** "Quản lý Sản phẩm" nằm ở phía trên cùng, bên trái.
+2.  **Khu vực hành động (Action Area):** Nằm ở phía trên cùng, bên phải, cùng dòng với tiêu đề. Bao gồm:
+    *   Một ô tìm kiếm (`input text`) với placeholder "Tìm kiếm sản phẩm...".
+    *   Nút "Tìm" (`button`) bên cạnh ô tìm kiếm.
+    *   Nút "Xóa (X) sản phẩm" (`button`) (X là số lượng sản phẩm được chọn), chỉ hiển thị khi có sản phẩm được chọn.
+    *   Nút "Thêm sản phẩm" (`button`).
+    *   Nút "Tải lại" (`button`).
+3.  **Hiển thị sản phẩm (Product Display):**
+    *   Sử dụng dạng lưới (grid) để hiển thị các thẻ sản phẩm (product card).
+    *   Mỗi thẻ sản phẩm bao gồm:
+        *   Ô checkbox ở góc trên bên phải để chọn sản phẩm.
+        *   Hình ảnh sản phẩm (có thể là placeholder).
+        *   Tên sản phẩm.
+        *   Mô tả ngắn gọn sản phẩm.
+        *   Giá sản phẩm.
+        *   Hai nút hành động ở cuối thẻ: "Chi tiết" và "Sửa".
+4.  **Phân trang (Pagination):** Nằm ở phía dưới cùng, giữa trang. Bao gồm:
+    *   Nút "Trước".
+    *   Các nút số trang (ví dụ: 1, 2, 3...).
+    *   Nút "Sau".
+5.  **Trạng thái tải (Loading State):** Hiển thị một spinner quay tròn ở giữa màn hình khi dữ liệu đang tải.
+6.  **Trạng thái lỗi (Error State):** Hiển thị một alert màu đỏ với thông báo lỗi.
+7.  **Trạng thái trống (Empty State):** Hiển thị thông báo "Không có sản phẩm nào." khi không có dữ liệu.
+
+Đảm bảo bố cục rõ ràng, dễ sử dụng và tuân thủ các nguyên tắc thiết kế hiện đại.

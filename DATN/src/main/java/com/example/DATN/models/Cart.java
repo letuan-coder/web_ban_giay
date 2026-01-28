@@ -28,14 +28,14 @@ public class Cart extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonBackReference
+    @JsonBackReference("user-carts")
     User user;
 
     @OneToMany(mappedBy = "cart",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
             fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @JsonManagedReference("cart-items")
     private List<CartItem> items;
 
     BigDecimal total_price;

@@ -1,19 +1,20 @@
 package com.example.DATN.dtos.respone;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class ApiResponse <T>   {
+public class ApiResponse<T> {
     @Builder.Default
-    int code=1000;
-    String message;
+    private int code = 200;
+    @Builder.Default
+    private String message = "Success";
     private T data;
-
 }

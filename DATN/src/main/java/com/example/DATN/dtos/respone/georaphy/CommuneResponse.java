@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class CommuneResponse {
     @JsonIgnore
     private String id;
-    @JsonIgnore
+
     private String code;
     @JsonIgnore
     private String name;

@@ -6,6 +6,7 @@ import com.example.DATN.dtos.respone.ApiResponse;
 import com.example.DATN.dtos.respone.cart.CartItemResponse;
 import com.example.DATN.mapper.CartItemMapper;
 import com.example.DATN.services.CartItemService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,8 @@ public class CartItemController {
     private final CartItemMapper cartItemMapper;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CartItemResponse>>> getAllCartItems() {
+    public ResponseEntity<ApiResponse<List<CartItemResponse>>> getAllCartItems()
+            throws JsonProcessingException {
        ApiResponse response = ApiResponse.<List<CartItemResponse>>builder()
                .data(cartItemService.getAllCartItems())
                .build();
@@ -47,18 +49,23 @@ public class CartItemController {
                 .build();
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping
     public ApiResponse<CartItemResponse> updateCartItem(
             @RequestBody UpdateCartIItemRequest request) {
-        CartItemResponse cartItem = cartItemService.updateCartItem( request);
+       cartItemService.updateCartItem( request);
         return ApiResponse.<CartItemResponse>builder()
-                .data(cartItem)
+                .data(null)
+                .message("update cart-item succes")
                 .build();
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCartItem(@PathVariable UUID id) {
+    @DeleteMapping
+    public ApiResponse<CartItemResponse> deleteCartItem(
+            @RequestBody List<UUID> id) {
         cartItemService.deleteCartItem(id);
-        return ResponseEntity.noContent().build();
+        return ApiResponse.<CartItemResponse>builder()
+                .data(null)
+                .message("delete cart-item succes")
+                .build();
     }
 }

@@ -1,15 +1,16 @@
 package com.example.DATN.dtos.request.order;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
-import java.math.BigDecimal;
-import java.util.UUID;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderItemRequest {
-    private UUID productColorId;
+    private String sku;
     private Integer quantity;
-    private BigDecimal price;
+
 }

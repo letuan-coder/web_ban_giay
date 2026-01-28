@@ -7,7 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,9 +21,21 @@ public class ProductResponse {
     private String name;
     private String slug;
     private String productCode;
-    private String description;
     private Is_Available available;
     private List<ProductColorResponse> colorResponses;
-    private LocalDate createdAt;
-    private LocalDate updatedAt;
+    private String ThumbnailUrl;
+    private String altText;
+    private BigDecimal price;
+    private BigDecimal discountPrice;
+    private Long brandId;
+    private String brandName;
+    private String categoryName;
+    private Long categoryId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private Double averageRating;
+    private Double weight;
+    private Integer totalComment;
+    @Builder.Default
+    private Long totalView =0L;
 }

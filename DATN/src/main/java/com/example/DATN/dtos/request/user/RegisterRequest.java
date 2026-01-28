@@ -24,6 +24,9 @@ public class RegisterRequest {
     @Size(min = 8, message = "INVALID_PASSWORD")
     String password;
 
+    @Size(min = 8, message = "INVALID_PASSWORD")
+    String passwordConfirm;
+
     @DobConstraint(min = 12,message = "INVALID_DOB")
     LocalDate dob;
 

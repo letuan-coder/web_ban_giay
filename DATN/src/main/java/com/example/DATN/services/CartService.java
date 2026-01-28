@@ -1,8 +1,9 @@
 package com.example.DATN.services;
 
+import com.example.DATN.dtos.respone.PromotionPriceResponse;
 import com.example.DATN.dtos.respone.cart.CartItemResponse;
 import com.example.DATN.dtos.respone.cart.CartResponse;
-import com.example.DATN.dtos.respone.product.ProductVariantResponse;
+import com.example.DATN.dtos.respone.cart.ProductCartItemResponse;
 import com.example.DATN.exception.ApplicationException;
 import com.example.DATN.exception.ErrorCode;
 import com.example.DATN.helper.GetJwtIdForGuest;
@@ -13,7 +14,7 @@ import com.example.DATN.models.Cart;
 import com.example.DATN.models.User;
 import com.example.DATN.repositories.CartItemRepository;
 import com.example.DATN.repositories.CartRepository;
-import com.example.DATN.repositories.UserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,14 +24,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 
-/**
- * Service nghiệp vụ giỏ hàng
- */
 @Service
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -39,34 +34,15 @@ public class CartService {
     final private CartRepository cartRepository;
     final private CartMapper cartMapper;
     final private RedisTemplate redisTemplate;
-    final private UserRepository userRepository;
     private final CartItemRepository cartItemRepository;
     private final CartItemMapper cartItemMapper;
     private final ObjectMapper objectMapper;
-    private String CART_REDIS_KEY_PREFIX = "cart:user:";
     private final GetUserByJwtHelper getUserByJwtHelper;
     private final GetJwtIdForGuest getJwtIdForGuest;
 
     @Transactional
-    public CartResponse getCartByUserId() {
-//       //clear toàn bộ cache redis
-//       redisTemplate.getConnectionFactory().getConnection().flushAll();
-        String guestKey = getJwtIdForGuest.GetGuestKey();
-        if (guestKey != null && !guestKey.isEmpty()) {
-            String redisGuestKey = CART_REDIS_KEY_PREFIX + guestKey;
-            Object cachedGuestData = redisTemplate.opsForValue().get(redisGuestKey);
-            if (cachedGuestData != null) {
-                return objectMapper.convertValue(cachedGuestData, CartResponse.class);
-            }
-        }
-
+    public CartResponse getCartByUserId() throws JsonProcessingException {
         User user = getUserByJwtHelper.getCurrentUser();
-        String redisUserKey = CART_REDIS_KEY_PREFIX+ user.getId();
-        Object cachedUserData = redisTemplate.opsForValue().get(redisUserKey);
-        if (cachedUserData != null) {
-            return objectMapper.convertValue(cachedUserData, CartResponse.class);
-        }
-
         Cart cart = cartRepository.findByUser(user).orElseGet(() -> {
             Cart newCart = new Cart();
             newCart.setUser(user);
@@ -74,17 +50,61 @@ public class CartService {
             newCart.setItems(null);
             return cartRepository.save(newCart);
         });
-
         CartResponse cartResponse = cartMapper.toCartResponse(cart);
         List<CartItemResponse> cartItemResponse = cartItemRepository
-                .findByCart(cart).stream().map(cartItemMapper::toCartItemResponse).toList();
+                .findByCartOrderByCreatedAt(cart).stream().map(cartItemMapper::toCartItemResponse).toList();
+        cartItemResponse = calculatePromoPrice(cartItemResponse);
+        cartResponse.setCartItems(cartItemResponse);
         BigDecimal total = Calculate_Total_Price(cartItemResponse);
         cartResponse.setTotal_price(total);
 
-        // Cache the cart for the user
-        redisTemplate.opsForValue().set(redisUserKey, cartResponse, 7, TimeUnit.DAYS);
-
         return cartResponse;
+    }
+
+    public List<CartItemResponse> getPromotionsBySkus(
+            List<String> skus, List<CartItemResponse> response
+    ) {
+        List<String> keys = skus.stream()
+                .map(sku -> "PROMO:VARIANT:" + sku)
+                .toList();
+
+        List<Object> values = redisTemplate.opsForValue().multiGet(keys);
+
+        Map<String, PromotionPriceResponse> responseMap = new HashMap<>();
+        for (int i = 0; i < keys.size(); i++) {
+            Object value = values.get(i);
+            if (value == null) continue;
+
+            try {
+                PromotionPriceResponse promo =
+                        objectMapper.readValue(
+                                value.toString(),
+                                PromotionPriceResponse.class
+                        );
+                String sku = skus.get(i);
+                responseMap.put(sku, promo);
+
+            } catch (Exception ignored) {
+
+            }
+        }
+        for (CartItemResponse variant : response) {
+            PromotionPriceResponse promo = responseMap.get(variant.getProductVariant().getSku());
+            if (promo != null) {
+                variant.getProductVariant().setPrice(promo.getOriginalPrice());
+                variant.getProductVariant().setDiscountPrice(promo.getDiscountPrice());
+
+            }
+        }
+        return response;
+    }
+
+    public List<CartItemResponse> calculatePromoPrice(
+            List<CartItemResponse> cartItemResponses
+    ) throws JsonProcessingException {
+        List<ProductCartItemResponse> variantResponseList = new ArrayList<>();
+        List<String> skus = cartItemResponses.stream().map(item -> item.getProductVariant().getSku()).toList();
+       return getPromotionsBySkus(skus, cartItemResponses);
     }
 
     public CartResponse getCartById(UUID id) {
@@ -93,37 +113,33 @@ public class CartService {
         return cartMapper.toCartResponse(respone);
     }
 
+
     @Transactional(rollbackOn = Exception.class)
     public CartResponse createCartForUser() {
         User user = getUserByJwtHelper.getCurrentUser();
-        // Nếu user đã có cart thì trả về cart đó luôn
         Cart cart = user.getCart();
         if (cart == null) {
-            cart = new Cart();
-            cart.setUser(user);
-            cart.setCreatedAt(LocalDateTime.now());
-            cart.setTotal_price(BigDecimal.ZERO);
+            cart = Cart.builder()
+                    .user(user)
+                    .total_price(BigDecimal.ZERO)
+                    .build();
             cart = cartRepository.save(cart);
         }
-        // Lưu cache vào Redis
-
-        CartResponse dto = cartMapper.toCartResponse(cart);
-        String redisUserKey = CART_REDIS_KEY_PREFIX+ user.getId(); // Consistent key
-        redisTemplate.opsForValue().set(redisUserKey, dto, 7, TimeUnit.DAYS); // Add expiration
         return cartMapper.toCartResponse(cart);
     }
 
     @Async
     public BigDecimal Calculate_Total_Price(List<CartItemResponse> responses) {
         BigDecimal totalPrice = BigDecimal.ZERO;
+
         for (CartItemResponse response : responses) {
-            // Lấy thông tin product variant từ response
-            ProductVariantResponse variant = response.getProductVariant();
-            BigDecimal price = variant.getDiscountPrice() != null
-                    ? variant.getDiscountPrice()
-                    : variant.getPrice();
+            ProductCartItemResponse variant = response.getProductVariant();
+            BigDecimal variantPrice = variant.getPrice();
+            if (response.getProductVariant().getDiscountPrice().equals(BigDecimal.ZERO)){
+               variantPrice = response.getProductVariant().getDiscountPrice();
+            }
             BigDecimal quantity = BigDecimal.valueOf(response.getQuantity());
-            totalPrice = totalPrice.add(price.multiply(quantity));
+            totalPrice = totalPrice.add(variantPrice.multiply(quantity));
         }
         return totalPrice;
     }

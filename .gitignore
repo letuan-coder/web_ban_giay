@@ -1,0 +1,38 @@
+# Original
+DATN/target/classes/application.properties
+DATN/src/main/resources/application.properties
+
+# Maven
+/DATN/target/
+/DATN/.mvn/
+*.class
+*.log
+*.jar
+*.war
+*.ear
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Node
+/DATN-FE/node_modules/
+/DATN-FE/dist/
+/DATN-FE/.angular/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Uploads
+/uploads/
+/DATN/uploads/
+
+# OS
+.DS_Store
+Thumbs.db

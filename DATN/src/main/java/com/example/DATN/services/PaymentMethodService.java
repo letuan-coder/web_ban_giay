@@ -1,38 +1,55 @@
 package com.example.DATN.services;
 
+import com.example.DATN.dtos.request.PaymentMethodRequest;
+import com.example.DATN.dtos.respone.PaymentMethodResponse;
+import com.example.DATN.exception.ApplicationException;
+import com.example.DATN.exception.ErrorCode;
+import com.example.DATN.mapper.PaymentMethodMapper;
 import com.example.DATN.models.PaymentMethod;
 import com.example.DATN.repositories.PaymentMethodRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
-/**
- * Service nghiệp vụ phương thức thanh toán
- */
 @Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PaymentMethodService {
-    @Autowired
-    private PaymentMethodRepository paymentMethodRepository;
+    PaymentMethodRepository paymentMethodRepository;
+    PaymentMethodMapper paymentMethodMapper;
 
-    public List<PaymentMethod> getAllPaymentMethods() {
-        return paymentMethodRepository.findAll();
+    public PaymentMethodResponse createPaymentMethod(PaymentMethodRequest request) {
+        if (paymentMethodRepository.existsBydisplayName(request.getDisplayName())) {
+            throw new ApplicationException(ErrorCode.PAYMENT_METHOD_EXISTED);
+        }
+
+        PaymentMethod paymentMethod = paymentMethodMapper.toPaymentMethod(request);
+        return paymentMethodMapper.toPaymentMethodResponse(paymentMethodRepository.save(paymentMethod));
     }
 
-    public Optional<PaymentMethod> getPaymentMethodById(Long id) {
-        return paymentMethodRepository.findById(id);
+    public List<PaymentMethodResponse> getAllPaymentMethods() {
+        return paymentMethodRepository.findAll().stream()
+                .map(paymentMethodMapper::toPaymentMethodResponse)
+                .collect(Collectors.toList());
     }
 
-    public PaymentMethod createPaymentMethod(PaymentMethod paymentMethod) {
-        return paymentMethodRepository.save(paymentMethod);
+    public PaymentMethodResponse getPaymentMethodById(Long id) {
+        return paymentMethodRepository.findById(id)
+                .map(paymentMethodMapper::toPaymentMethodResponse)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.PAYMENT_METHOD_NOT_EXISTED));
     }
 
-    public PaymentMethod updatePaymentMethod(PaymentMethod paymentMethod) {
-        return paymentMethodRepository.save(paymentMethod);
+    public PaymentMethodResponse updatePaymentMethod(Long id, PaymentMethodRequest request) {
+        PaymentMethod paymentMethod = paymentMethodRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.PAYMENT_METHOD_NOT_EXISTED));
+        paymentMethod.setIsAvailable(request.getIsAvailable());
+
+        paymentMethodMapper.updatePaymentMethod(paymentMethod, request);
+        return paymentMethodMapper.toPaymentMethodResponse(paymentMethodRepository.save(paymentMethod));
     }
 
-    public void deletePaymentMethod(Long id) {
-        paymentMethodRepository.deleteById(id);
-    }
 }
-

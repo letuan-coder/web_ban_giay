@@ -1,0 +1,44 @@
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Dashboard</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+          </div>
+          <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" [class.active]="selectedTimeFrame === 'monthly'" (click)="setTimeFrame('monthly')">Tháng</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" [class.active]="selectedTimeFrame === 'yearly'" (click)="setTimeFrame('yearly')">Năm</button>
+          </div>
+        </div>
+      </div>
+
+      <canvas class="my-4 w-100" id="salesChart" width="900" height="380"></canvas>
+
+      <div class="d-flex align-items-center">
+        <h2 *ngIf="selectedPeriod" class="me-3">Doanh thu chi tiết cho {{ selectedPeriod }}</h2>
+        <h2 *ngIf="!selectedPeriod" class="me-3">Chi tiết doanh thu</h2>
+        <button *ngIf="tableData.length > 0" class="btn btn-sm btn-outline-secondary" (click)="sortDetailsTable()">
+          Sắp xếp <span [innerHTML]="sortDirection === 'asc' ? '&#x25B2;' : '&#x25BC;'"></span>
+        </button>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped table-sm">
+          <thead>
+            <tr>
+              <th scope="col">Thời gian</th>
+              <th scope="col">Doanh thu</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of tableData">
+              <td>{{ row.time }}</td>
+              <td>{{ row.revenue | number }} VND</td>
+            </tr>
+            <tr *ngIf="tableData.length === 0">
+              <td colspan="2" class="text-center">Chưa có dữ liệu. Vui lòng chọn một cột trên biểu đồ.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>

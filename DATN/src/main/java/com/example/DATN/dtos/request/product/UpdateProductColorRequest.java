@@ -17,7 +17,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UpdateProductColorRequest {
     String colorName;
-    List<ProductVariantRequest> variantRequests;
+    ProductVariantRequest variantRequest;
     List<MultipartFile> files;
     List<String> altText;
     Is_Available IsAvailable;

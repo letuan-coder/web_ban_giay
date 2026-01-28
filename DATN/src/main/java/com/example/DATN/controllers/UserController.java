@@ -1,10 +1,11 @@
 package com.example.DATN.controllers;
 
 import com.example.DATN.dtos.request.user.RegisterRequest;
+import com.example.DATN.dtos.request.user.UpdatePasswordRequest;
 import com.example.DATN.dtos.request.user.UpdateUserRequest;
 import com.example.DATN.dtos.respone.ApiResponse;
+import com.example.DATN.dtos.respone.user.UserDetailResponse;
 import com.example.DATN.dtos.respone.user.UserResponse;
-import com.example.DATN.models.User;
 import com.example.DATN.repositories.UserRepository;
 import com.example.DATN.services.UserService;
 import jakarta.validation.Valid;
@@ -14,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -30,51 +32,72 @@ public class UserController {
     @PostMapping("/register")
     ApiResponse<UserResponse> createUser(
             @RequestBody @Valid RegisterRequest request) {
+        userService.createUser(request);
         return ApiResponse.<UserResponse>builder()
-                .data(userService.createUser(request))
+                .data(null)
                 .message("Đăng ký thành công")
                 .build();
     }
 
-    @GetMapping
+    @GetMapping("/admin/all")
     ApiResponse<List<UserResponse>> getAllUsers() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.info("Authenticated? {}", authentication.isAuthenticated());
-        log.info("Authorities: {}", authentication.getAuthorities());
-        authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
         return ApiResponse.<List<UserResponse>>builder()
                 .data(userService.getAllUsers())
                 .build();
     }
+
+
+
     @GetMapping("/myinfo")
-    ApiResponse<UserResponse> myinfo(){
+    ApiResponse<UserDetailResponse> myinfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         authentication.getAuthorities();
         authentication.getName();
-        return ApiResponse.<UserResponse>builder()
+        return ApiResponse.<UserDetailResponse>builder()
                 .data(userService.getmyinfo())
                 .build();
     }
 
 
     @DeleteMapping("/{id}")
-    public ApiResponse<UserResponse> deleteUser(@PathVariable Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với id: " + id));
-        return ApiResponse.<UserResponse>builder()
-                .data(userService.deleteUser(id))
-                .message("Xóa thành công người dùng"+" "+user.getUsername())
-                .build();
-    }
-    @PutMapping("/{id}")
-    public ApiResponse<UserResponse> updateProfile(
-            @PathVariable Long id, @RequestBody @Valid UpdateUserRequest request) {
-        return ApiResponse.<UserResponse>builder()
-                .data(userService.updateUser(id, request))
+    public ApiResponse<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ApiResponse.<Void>builder()
+                .data(null)
+                .message("Xóa thành công người dùng")
                 .build();
     }
 
-    @GetMapping("/{id}")
+    @PatchMapping
+    public ApiResponse<UserDetailResponse> updateProfile(
+            @RequestBody @Valid UpdateUserRequest request) {
+        return ApiResponse.<UserDetailResponse>builder()
+                .data(userService.updateUser(request))
+                .build();
+    }
+
+    @PostMapping(consumes = "multipart/form-data")
+    public ApiResponse<UserDetailResponse> uploadImageProfile(
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+        UserDetailResponse response = userService.UploadUserImage(file);
+        return ApiResponse.<UserDetailResponse>builder()
+                .data(null)
+                .message("upload avatar successfully")
+                .build();
+    }
+
+    @PatchMapping("/password")
+    public ApiResponse<Void> updatePassword(
+            @RequestBody @Valid UpdatePasswordRequest request) {
+        userService.updatePassword(request);
+        return ApiResponse.<Void>builder()
+                .data(null)
+                .message("update password successfully !!")
+                .build();
+    }
+
+
+    @GetMapping("/admin/{id}")
     public ApiResponse<UserResponse> getUser(@PathVariable Long id) {
         return ApiResponse.<UserResponse>builder()
                 .data(userService.getUserById(id))

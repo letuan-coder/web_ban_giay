@@ -1,0 +1,121 @@
+{
+  "code": 200,
+  "message": "Success",
+  "data": [
+    {
+      "name": "Giày Cao Gót Công Sở",
+      "variantDetailResponses": [
+        {
+          "id": "20968715-b3db-43a7-af35-8c5d463682dd",
+          "sku": "SHOES387213748525469696-CL010-SMA006",
+          "size": "41",
+          "colorName": "Trắng",
+          "colorHex": "#FFFFFF",
+          "isAvailable": "AVAILABLE",
+          "price": 1000000.00,
+          "total_stock": 0,
+          "stocks": []
+        },
+        {
+          "id": "2f53ff50-1ee1-4599-b9c1-499ca6b367ab",
+          "sku": "SHOES387213748525469696-CL010-SMA005",
+          "size": "40",
+          "colorName": "Trắng",
+          "colorHex": "#FFFFFF",
+          "isAvailable": "AVAILABLE",
+          "price": 1000000.00,
+          "total_stock": 0,
+          "stocks": []
+        },
+        {
+          "id": "405f679f-b838-4d46-9cd7-d89651011ca7",
+          "sku": "SHOES387213748525469696-CL010-SMA001",
+          "size": "36",
+          "colorName": "Trắng",
+          "colorHex": "#FFFFFF",
+          "isAvailable": "AVAILABLE",
+          "price": 1000000.00,
+          "total_stock": 0,
+          "stocks": []
+        },
+        {
+          "id": "45885f68-c8ef-4644-9c34-edef1cdcc522",
+          "sku": "SHOES387213748525469696-CL010-SMA010",
+          "size": "45",
+          "colorName": "Trắng",
+          "colorHex": "#FFFFFF",
+          "isAvailable": "AVAILABLE",
+          "price": 1000000.00,
+          "total_stock": 0,
+          "stocks": []
+        },
+        {
+          "id": "8b4f1a3c-8a6d-4dfb-95a1-573b8734bd84",
+          "sku": "SHOES387213748525469696-CL010-SMA007",
+          "size": "42",
+          "colorName": "Trắng",
+          "colorHex": "#FFFFFF",
+          "isAvailable": "AVAILABLE",
+          "price": 1000000.00,
+          "total_stock": 0,
+          "stocks": []
+        },
+        {
+          "id": "a76e575f-f06d-4355-bfe2-23e5373fa438",
+          "sku": "SHOES387213748525469696-CL010-SMA002",
+          "size": "37",
+          "colorName": "Trắng",
+          "colorHex": "#FFFFFF",
+          "isAvailable": "AVAILABLE",
+          "price": 1000000.00,
+          "total_stock": 0,
+          "stocks": []
+        },
+        {
+          "id": "c9e2c07c-5d67-44cc-8d13-48d6d1f18be6",
+          "sku": "SHOES387213748525469696-CL010-SMA009",
+          "size": "44",
+          "colorName": "Trắng",
+          "colorHex": "#FFFFFF",
+          "isAvailable": "AVAILABLE",
+          "price": 1000000.00,
+          "total_stock": 0,
+          "stocks": []
+        },
+        {
+          "id": "d65786ba-cefc-4e3d-9933-847d1f23878b",
+          "sku": "SHOES387213748525469696-CL010-SMA004",
+          "size": "39",
+          "colorName": "Trắng",
+          "colorHex": "#FFFFFF",
+          "isAvailable": "AVAILABLE",
+          "price": 1000000.00,
+          "total_stock": 0,
+          "stocks": []
+        },
+        {
+          "id": "e34025cf-d585-4d8c-956e-1035a59c03a6",
+          "sku": "SHOES387213748525469696-CL010-SMA003",
+          "size": "38",
+          "colorName": "Trắng",
+          "colorHex": "#FFFFFF",
+          "isAvailable": "AVAILABLE",
+          "price": 1000000.00,
+          "total_stock": 0,
+          "stocks": []
+        },
+        {
+          "id": "e5ae4428-260d-4689-a462-cb6070ae4c1a",
+          "sku": "SHOES387213748525469696-CL010-SMA008",
+          "size": "43",
+          "colorName": "Trắng",
+          "colorHex": "#FFFFFF",
+          "isAvailable": "AVAILABLE",
+          "price": 1000000.00,
+          "total_stock": 0,
+          "stocks": []
+        }
+      ]
+    }
+  ]
+}

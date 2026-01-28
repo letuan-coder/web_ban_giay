@@ -37,6 +37,7 @@ public class ApplicationInitConfig {
     @Bean
     ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
         return args -> {
+
             if (userRepository.findByUsername(ADMIN_USER_NAME).isEmpty()) {
                 if (roleRepository.findByName(PredefinedRole.ADMIN.name()).isEmpty()) {
                     Role role = Role.builder()

@@ -1,0 +1,40 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../enviroment/enviroment';
+import { ApiResponse } from './sale.service';
+import { Banner } from '../model/banner.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class BannerService {
+  private apiUrl = environment.apiBaseUrl + '/api/banners';
+  private imageApiUrl = environment.apiBaseUrl + '/api/images';
+
+  constructor(private http: HttpClient) { }
+
+  getBanners(): Observable<ApiResponse<Banner[]>> {
+    return this.http.get<ApiResponse<Banner[]>>(this.apiUrl);
+  }
+
+  createBanner(formData: FormData): Observable<ApiResponse<Banner>> {
+    return this.http.post<ApiResponse<Banner>>(`${this.apiUrl}`, formData);
+  }
+
+  updateBanner(id: string, banner: any): Observable<ApiResponse<Banner>> {
+    return this.http.patch<ApiResponse<Banner>>(`${this.apiUrl}/${id}`, banner);
+  }
+
+  deleteBanner(id: string): Observable<ApiResponse<string>> {
+    return this.http.delete<ApiResponse<string>>(`${this.apiUrl}/${id}`);
+  }
+
+  updateSortOrder(banners: { id: string; sortOrder: number }[]): Observable<ApiResponse<any>> {
+    return this.http.patch<ApiResponse<any>>(`${this.apiUrl}/sort-order`, banners);
+  }
+
+  deleteImage(bannerId: string): Observable<any> {
+    return this.http.delete(`${this.imageApiUrl}/${bannerId}`);
+  }
+}

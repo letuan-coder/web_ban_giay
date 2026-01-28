@@ -1,0 +1,97 @@
+.card {
+  border-radius: 0.75rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+  border: none;
+}
+
+.card-header {
+  font-size: 1.1rem;
+  font-weight: 600;
+  background-color: #f8f9fa;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.item-row {
+  background-color: #fdfdff;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: #f8f9fa;
+  }
+}
+
+.d-flex.align-items-end {
+  padding-bottom: 1px; // Align button better with input
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+// Autocomplete styles
+.search-container {
+  z-index: 10;
+}
+
+.autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  border-top: none;
+  border-radius: 0 0 0.375rem 0.375rem;
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+
+  .list-group-item {
+    cursor: pointer;
+    text-align: left;
+    border: none;
+    border-top: 1px solid #eee;
+    padding: 0.75rem 1rem;
+
+    &:hover, &:focus {
+      background-color: #f0f0f0;
+    }
+  }
+}
+
+.selected-variant {
+  background-color: #e9ecef;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  min-height: 38px; // Match input height
+  
+    span {
+  
+      line-height: 1.2;
+  
+    }
+  
+  }
+  
+  
+  
+  .supplier-products-container {
+  
+    max-height: 400px;
+  
+    overflow-y: auto;
+  
+    background-color: #f9f9f9;
+  
+  }
+  
+  

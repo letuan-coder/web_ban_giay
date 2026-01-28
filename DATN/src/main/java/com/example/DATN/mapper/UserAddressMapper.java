@@ -1,0 +1,22 @@
+package com.example.DATN.mapper;
+
+import com.example.DATN.dtos.request.user_address.UpdateUserAddressesRequest;
+import com.example.DATN.dtos.respone.user_address.UserAddressResponse;
+import com.example.DATN.models.UserAddress;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
+import java.util.List;
+
+@Mapper(componentModel = "spring")
+public interface UserAddressMapper {
+    UserAddressResponse toResponse(UserAddress userAddress);
+    List<UserAddressResponse> toResponseList(List<UserAddress> userAddresses);
+    @Mapping(target = "provinceCode", ignore = true)
+    @Mapping(target = "districtCode", ignore = true)
+    @Mapping(target = "wardCode", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    void updateUserAddress(@MappingTarget UserAddress userAddress, UpdateUserAddressesRequest request);
+}

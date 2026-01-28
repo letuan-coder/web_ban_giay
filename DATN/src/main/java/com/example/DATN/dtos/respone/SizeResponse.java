@@ -10,7 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SizeResponse {
-
     private String code;
-    private String name;
+    private Integer name;
 }

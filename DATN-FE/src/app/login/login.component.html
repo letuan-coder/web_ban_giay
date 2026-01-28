@@ -1,0 +1,33 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title text-center mb-4">Đăng nhập</h3>
+          <form (ngSubmit)="login()">
+            <div class="mb-3">
+              <label for="username" class="form-label">Tên đăng nhập</label>
+              <input type="text" class="form-control" id="username" [(ngModel)]="credentials.username" name="username" required>
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Mật khẩu</label>
+              <input type="password" class="form-control" id="password" [(ngModel)]="credentials.password" name="password" required>
+            </div>
+            <div *ngIf="error" class="alert alert-danger mt-3">
+              {{ error }}
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary" [disabled]="loading">
+                <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span *ngIf="!loading">Đăng nhập</span>
+              </button>
+            </div>
+            <div class="text-center mt-3">
+               <a routerLink="/forgot-password" routerLinkActive="active">Quên mật khẩu?</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

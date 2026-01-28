@@ -9,10 +9,17 @@ import org.springframework.http.HttpStatusCode;
 @AllArgsConstructor
 public enum ErrorCode {
     // Auth & User
-    ROLE_NOT_FOUND(1036,"ROLE NOT FOUND",HttpStatus.NOT_FOUND),
+    IDEMPOTENCY_TIMEOUT(7000,"idempotency is expired",HttpStatus.BAD_REQUEST),
+    CONCURRENT_REQUEST_ERROR(6000,"Concurrent request is error",HttpStatus.BAD_REQUEST),
+    MISSING_IDEMPOTENCY_KEY(8000,"Missing idempotency key",HttpStatus.BAD_REQUEST),
+    INVALID_TOKEN(9000,"invalid token ",HttpStatus.BAD_REQUEST),
+    PASSWORD_MATCHED(1057,"password must be differrent from old password",HttpStatus.BAD_REQUEST),
+    PASSWORD_NOT_MATCH(1038, "Incorrect password", HttpStatus.BAD_REQUEST),
+    PASSWORD_CONFIRM_NOT_MATCH(1039, "Password and confirm password do not match", HttpStatus.BAD_REQUEST),
+    ROLE_NOT_FOUND(1036, "ROLE NOT FOUND", HttpStatus.NOT_FOUND),
     EXPIRED_TOKEN(1001, "TOKEN EXPIRED", HttpStatus.UNAUTHORIZED),
-    USERNAME_INVALID(1003, "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
-    INVALID_PASSWORD(1004, "Password must be at least {min} characters", HttpStatus.BAD_REQUEST),
+    USERNAME_INVALID(1003, "Username must be at least 8 characters", HttpStatus.BAD_REQUEST),
+    INVALID_PASSWORD(1004, "Password must be at least 8 characters", HttpStatus.BAD_REQUEST),
     USER_NOT_EXISTED(1005, "User not existed", HttpStatus.NOT_FOUND),
     UNAUTHENTICATED(1007, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     INVALID_DOB(1008, "Your age must be at least 12  ", HttpStatus.BAD_REQUEST),
@@ -23,15 +30,21 @@ public enum ErrorCode {
     USERNAME_ALREADY_EXISTS(1013, "Username is already existed", HttpStatus.BAD_REQUEST),
     EMAIL_ALREADY_EXISTS(1026, "Email already exists", HttpStatus.BAD_REQUEST), // Re-numbered
     ACCESS_DENIED(1014, "You do not have permission", HttpStatus.FORBIDDEN),
-    ROLE_NOT_EXIST(1015, "Role not exist",HttpStatus.NOT_FOUND),
+    ROLE_NOT_EXIST(1015, "Role not exist", HttpStatus.NOT_FOUND),
 
     // Validation
     INVALID_VALIDATION(1016, "Invalid validation", HttpStatus.BAD_REQUEST),
 
+
+    //PROMOTION
+    INVALID_PROMOTION_DATES(1087, "Invalid promotion dates", HttpStatus.BAD_REQUEST),
+    PROMOTION_NOT_FOUND(1088, "Promotion not found", HttpStatus.NOT_FOUND),
+
     // Product
-    PRODUCT_NOT_AVAILABLE(1099,"product is not available",HttpStatus.BAD_REQUEST),
+    INVALID_PRICE(1209,"price must be higher import price",HttpStatus.BAD_REQUEST),
+    PRODUCT_NOT_AVAILABLE(1099, "product is not available", HttpStatus.BAD_REQUEST),
     INVALID_HEX_CODE(1038, "Invalid hex color code", HttpStatus.BAD_REQUEST),
-    HEXCODE_ALREADY_EXISTS  (1037, "Hex code already exists", HttpStatus.BAD_REQUEST),
+    HEXCODE_ALREADY_EXISTS(1037, "Hex code already exists", HttpStatus.BAD_REQUEST),
     SIZE_CANNOT_BE_EMPTY(1036, "Size cannot be empty", HttpStatus.BAD_REQUEST),
     PRODUCT_COLOR_OR_SIZE_EXISTED(1035, "Product color or size already existed", HttpStatus.BAD_REQUEST),
     PRODUCT_ID_REQUIRED(1028, "Product ID is required", HttpStatus.BAD_REQUEST), // Re-numbered
@@ -54,10 +67,12 @@ public enum ErrorCode {
     PRODUCT_COLOR_NOT_FOUND(1046, "Product color not found", HttpStatus.NOT_FOUND),
     PRODUCT_COLOR_EXISTED(1047, "Product color already exists", HttpStatus.BAD_REQUEST),
     INVALID_SIZE_FOR_TYPE(1048, "Invalid size for type", HttpStatus.BAD_REQUEST),
+    PRODUCT_NOT_FROM_SUPPLIER(1052, "Product does not belong to the supplier", HttpStatus.BAD_REQUEST),
 
-    //
     SIZE_NOT_ALLOW(1049, "size must be at least 20", HttpStatus.NOT_FOUND),
     TYPE_ALREADY_EXISTS(1050, "Type already exists", HttpStatus.BAD_REQUEST),
+    BANNER_NOT_FOUND(1070, "Banner not found", HttpStatus.NOT_FOUND),
+    BANNER_EXISTED(1071, "Banner already exists", HttpStatus.BAD_REQUEST),
 
     // File & Image
     FILE_EMPTY(1006, "File is empty", HttpStatus.BAD_REQUEST),
@@ -71,19 +86,73 @@ public enum ErrorCode {
     NEWSLETTER_SUBSCRIPTION_NOT_FOUND(1025, "Newsletter subscription not found", HttpStatus.NOT_FOUND), // Re-numbered
 
     //CART
-    OUT_OF_STOCK(1028,"out of stock",HttpStatus.BAD_REQUEST),
-    CART_ITEM_NOT_FOUND(1027,"item is empty", HttpStatus.NOT_FOUND),
-    CART_NOT_FOUND(1026,"cart is not exsited",HttpStatus.NOT_FOUND),
+    CART_EMPTY(1027, "cart is empty", HttpStatus.BAD_REQUEST),
+    OUT_OF_STOCK(1028, "out of stock", HttpStatus.BAD_REQUEST),
+    CART_ITEM_NOT_FOUND(1027, "item is empty", HttpStatus.NOT_FOUND),
+    CART_NOT_FOUND(1026, "cart is not exsited", HttpStatus.NOT_FOUND),
 
     // Order
-    ORDER_ITEM_NOT_FOUND(1054,"Order item not found",HttpStatus.NOT_FOUND),
+    ORDER_IS_EXISTED(1234,"order already existed ",HttpStatus.BAD_REQUEST),
+    ORDER_NOT_CANCEABLE(2020,"order not allow to cancle ",HttpStatus.BAD_REQUEST),
+    ORDER_REVIEW_EXISTED(1980,"order item all ready reviewed",HttpStatus.BAD_REQUEST),
+    ORDER_ITEM_NOT_FOUND(1054, "Order item not found", HttpStatus.NOT_FOUND),
     ORDER_NOT_FOUND(1043, "Order not found", HttpStatus.NOT_FOUND),
-    PAYMENT_METHOD_NOT_FOUND(1044, "Payment method not found", HttpStatus.NOT_FOUND),
+    ORDER_STATUS_INVALID(1060, "Order status is invalid", HttpStatus.BAD_REQUEST),
+    PAYMENT_METHOD_NOT_EXISTED(1044, "Payment method not existed", HttpStatus.NOT_FOUND),
+    PAYMENT_METHOD_EXISTED(1055, "Payment method existed", HttpStatus.BAD_REQUEST),
+    PAYMENT_METHOD_NOT_FOUND(2002, "Payment method not found ", HttpStatus.NOT_FOUND),
     INSUFFICIENT_STOCK(1045, "Insufficient stock", HttpStatus.BAD_REQUEST),
 
+    // Address
+    PROVINCE_NOT_FOUND(1056, "Province not found", HttpStatus.NOT_FOUND),
+    DISTRICT_NOT_FOUND(1057, "District not found", HttpStatus.NOT_FOUND),
+    COMMUNE_NOT_FOUND(1058, "Commune not found", HttpStatus.NOT_FOUND),
+    ADDRESS_NOT_FOUND(1059, "User don't have detail to create order", HttpStatus.NOT_FOUND),
+
+    // Order Return
+    RETURN_PERIOD_EXPIRED(1060, "Return period has expired for this order.", HttpStatus.BAD_REQUEST),
+    RETURN_REQUEST_ALREADY_EXISTS(1061, "A return request for this order is already pending.", HttpStatus.BAD_REQUEST),
+    ORDER_NOT_RETURNABLE(1062, "Order cannot be returned.", HttpStatus.BAD_REQUEST),
+    RETURN_QUANTITY_INVALID(1063, "Return quantity exceeds ordered quantity or is invalid.", HttpStatus.BAD_REQUEST),
+    RETURN_REQUEST_NOT_FOUND
+            (1064, "Return request not found.", HttpStatus.NOT_FOUND),
+    RETURN_STATUS_INVALID
+            (1065, "Return request status is invalid for this operation.", HttpStatus.BAD_REQUEST),
+
+    //WareHouse
+    WAREHOUSE_NOT_FOUND
+            (1090, "Warehouse not found", HttpStatus.NOT_FOUND),
+
+    //store
+    STORE_NOT_FOUND
+            (1091, "Store not found", HttpStatus.NOT_FOUND),
+
+    STOCK_NOT_FOUND(1100, "Stock not found", HttpStatus.NOT_FOUND),
+
+    // Supplier
+    SUPPLIER_NOT_FOUND(1101, "Supplier not found", HttpStatus.NOT_FOUND),
+    SUPPLIER_NAME_EXISTED(1102, "Supplier name already existed", HttpStatus.BAD_REQUEST),
+    SUPPLIER_TAXCODE_EXISTED(1103, "Supplier tax code already existed", HttpStatus.BAD_REQUEST),
+    SUPPLIER_EMAIL_EXISTED(1104, "Supplier email already existed", HttpStatus.BAD_REQUEST),
+    SUPPLIER_PHONE_EXISTED(1105, "Supplier phone number already existed", HttpStatus.BAD_REQUEST),
+    //VNPAY
+    PAYMENT_VNPAY_FAIL(1125, "payment vnpay fail", HttpStatus.BAD_REQUEST),
+    //refund
+    REFUND_NOT_ALLOWDED(1128, "refund is not allowded", HttpStatus.BAD_REQUEST),
+
+    //STOCK-TRANSACTION
+    INVALID_DATE(1130, "Invalid date", HttpStatus.BAD_REQUEST),
+    //Voucher
+    VOUCHER_ALREADY_CLAIMED(2997,"voucher already claimed",HttpStatus.BAD_REQUEST),
+    VOUCHER_CANT_APPLY(2998,"voucher cant not apply ",HttpStatus.BAD_REQUEST),
+    VOUCHER_EXPIRED(2999,"voucher is expired ",HttpStatus.BAD_REQUEST),
+    VOUCHER_NOT_FOUND(3000,"Voucher not found",HttpStatus.NOT_FOUND),
+
     // Generic
-    UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR)
-    ;
+    TOO_MANY_CANCEL_REQUEST(9001,"too many cancel request",HttpStatus.BAD_REQUEST),
+    DUPLICATE_REQUEST(9000,"duplicate request",HttpStatus.BAD_REQUEST),
+    INVALID_INPUT(9998,"INVALID_INPUT",HttpStatus.BAD_REQUEST),
+    UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final int code;
     private final String message;

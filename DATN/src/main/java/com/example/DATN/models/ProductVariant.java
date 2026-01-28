@@ -2,12 +2,16 @@ package com.example.DATN.models;
 
 import com.example.DATN.constant.Is_Available;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -23,31 +27,33 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductVariant extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @UuidGenerator
     UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_color_id", nullable = false)
     @JsonBackReference
-    private ProductColor productColor;
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    ProductColor productColor;
 
     @ManyToOne
     @JoinColumn(name = "size_code")
-    @JsonManagedReference
     Size size;
 
     BigDecimal price;
 
-    BigDecimal discountPrice;
 
-    Integer stock;
+    @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL)
+    private Set<Stock> stocks = new HashSet<>();
+
+    //for shipping
+    Integer weight;
+    Integer height;
+    Integer width;
+    Integer length;
 
     @Column(nullable = false, unique = true)
     String sku;
-
-    @ManyToOne
-    @JsonBackReference
-    CartItem cartItem;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default

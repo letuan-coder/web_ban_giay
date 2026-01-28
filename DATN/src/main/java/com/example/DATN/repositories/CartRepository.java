@@ -13,7 +13,7 @@ import java.util.UUID;
  */
 @Repository
 public interface CartRepository extends JpaRepository<Cart, UUID> {
-    Optional<Cart> findById (UUID id);
+    Optional<Cart> findByIdAndUser (UUID id,User user);
     Optional<Cart> findByUser(User user);
 }
 

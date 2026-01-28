@@ -1,0 +1,41 @@
+.searchable-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.dropdown-list-container {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  margin-top: 4px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.dropdown-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown-item {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+}
+
+.dropdown-item.disabled {
+  cursor: default;
+  color: #6c757d;
+}

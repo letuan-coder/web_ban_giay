@@ -14,37 +14,41 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.Duration;
 
 @Configuration
+//@EnableRedisDocumentRepositories(basePackages = "com.example.DATN.models")
 public class RedisConfig {
 
-    // Sửa lại để inject ObjectMapper đã được cấu hình đúng
     @Bean
-    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory, ObjectMapper objectMapper) {
+    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory,
+                                          ObjectMapper objectMapper) {
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(10)) // Thời gian sống mặc định: 10 phút
-                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                // Sử dụng GenericJackson2JsonRedisSerializer với ObjectMapper đúng
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper)))
-                .disableCachingNullValues(); // Không cache giá trị null
-
+                // Thời gian sống mặc định: 10 phút
+                .entryTtl(Duration.ofMinutes(10))
+                // Sử dụng StringRedisSerializer cho key
+                .serializeKeysWith(RedisSerializationContext.SerializationPair
+                        .fromSerializer(new StringRedisSerializer()))
+                // Sử dụng GenericJackson2JsonRedisSerializer với ObjectMapper cho value
+                .serializeValuesWith(RedisSerializationContext.SerializationPair
+                        .fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper)))
+                // Không cache giá trị null
+                .disableCachingNullValues();
+        RedisCacheConfiguration productVariantConfig =
+                config.entryTtl(Duration.ofHours(1));
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
+                .withCacheConfiguration("product_variant", productVariantConfig)
                 .build();
     }
 
-    // Sửa lại để inject ObjectMapper đã được cấu hình đúng
     @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory, ObjectMapper objectMapper) {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
+    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, String> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // Sử dụng GenericJackson2JsonRedisSerializer với ObjectMapper đúng
-        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
-
-        // Cấu hình serializer cho key và value
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(serializer);
         template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(serializer);
+
+        template.setValueSerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new StringRedisSerializer());
 
         template.afterPropertiesSet();
         return template;

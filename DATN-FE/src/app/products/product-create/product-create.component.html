@@ -1,0 +1,171 @@
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-4">Thêm sản phẩm mới</h3>
+
+                    <div *ngIf="message" class="alert" [ngClass]="isError ? 'alert-danger' : 'alert-success'">
+                        {{ message }}
+                    </div>
+
+                    <form #productForm="ngForm" (ngSubmit)="createProduct(productForm)">
+                        <!-- Base Product Info -->
+                        <h4 class="mb-3">1. Thông tin cơ bản</h4>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">Tên sản phẩm</label>
+                                <input type="text" id="name" [(ngModel)]="product.name" name="name"
+                                    (input)="onNameInput()" class="form-control" required>
+                                <ul *ngIf="filteredProducts.length" class="list-group position-absolute w-100"
+                                    style="z-index: 1000;">
+                                    <li *ngFor="let suggestion of filteredProducts"
+                                        class="list-group-item list-group-item-action"
+                                        (click)="selectSuggestion(suggestion)">
+                                        {{ suggestion }}
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="supplier" class="form-label">Nhà cung cấp</label>
+                                <select id="supplier" [(ngModel)]="product.supplierId" name="supplierId"
+                                    class="form-select" required>
+                                    <option *ngFor="let s of suppliers" [value]="s.id">{{ s.name }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Mô tả</label>
+                            <textarea id="description" [(ngModel)]="product.description" name="description"
+                                class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="brand" class="form-label">Thương hiệu</label>
+                                <select [(ngModel)]="product.brandId" name="brandId" class="form-select" required>
+                                    <option *ngFor="let b of brands" [value]="b.id">{{ b.name }}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="category" class="form-label">Danh mục</label>
+                                <select id="category" [(ngModel)]="product.categoryId" name="categoryId"
+                                    class="form-select" required>
+                                    <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
+                                </select>
+                            </div>
+                        </div>
+                         <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Giá bán</label>
+                                <input [currencyMask]="{ prefix: '', thousands: '.', decimal: '.', align: 'left',
+         precision: 0 }" inputmode="numeric" type="text" class="form-control" [(ngModel)]="product.price"
+                                    name="price" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Giá nhập</label>
+                                <input
+                                    [currencyMask]="{ prefix: '', thousands: '.', decimal: '.', align: 'left',
+         precision: 0 }" inputmode="numeric" type="text" class="form-control" [(ngModel)]="product.importPrice"
+                                    name="importPrice" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="mainImage" class="form-label">Ảnh đại diện sản phẩm</label>
+                            <input type="file" id="mainImage" (change)="onMainFileSelected($event)" name="mainImage"
+                                class="form-control" />
+                        </div>
+                         <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="Weight" class="form-label">Khối lượng (g)</label>
+                                <input type="number" id="Weight" [(ngModel)]="product.Weight" name="Weight" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="Height" class="form-label">Chiều cao (cm)</label>
+                                <input type="number" id="Height" [(ngModel)]="product.Height" name="Height" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="Length" class="form-label">Chiều dài (cm)</label>
+                                <input type="number" id="Length" [(ngModel)]="product.Length" name="Length" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="Width" class="form-label">Chiều rộng (cm)</label>
+                                <input type="number" id="Width" [(ngModel)]="product.Width" name="Width" class="form-control">
+                            </div>
+                        </div>
+                        <!-- Variants Info -->
+                        <hr class="my-4">
+                        <h4 class="mb-3">2. Các phiên bản (Màu sắc & Size)</h4>
+
+                        <div *ngFor="let colorEntry of variantData; let i = index; trackBy: trackByColorEntry"
+                            class="card border-secondary mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <strong>Phiên bản màu #{{i + 1}}</strong>
+                                <button *ngIf="variantData.length > 1" type="button" class="btn-close"
+                                    aria-label="Close" (click)="removeColorEntry(i)"></button>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Màu sắc</label>
+                                        <div class="input-group">
+                                            <button class="btn btn-outline-secondary" type="button"
+                                                (click)="colorEntry.isNewColor = !colorEntry.isNewColor">
+                                                {{ colorEntry.isNewColor ? 'Chọn màu có sẵn' : 'Thêm màu mới' }}
+                                            </button>
+                                            <select *ngIf="!colorEntry.isNewColor" class="form-select"
+                                                [(ngModel)]="colorEntry.colorName" [name]="'colorName' + i" required>
+                                                <option [ngValue]="null" disabled>-- Chọn màu --</option>
+                                                <option *ngFor="let color of colors" [ngValue]="color.code">{{
+                                                    color.name }}</option>
+                                            </select>
+                                            <input *ngIf="colorEntry.isNewColor" type="text" class="form-control"
+                                                [(ngModel)]="colorEntry.newColorName" [name]="'newColorName' + i"
+                                                required placeholder="Tên màu mới">
+                                            <input *ngIf="colorEntry.isNewColor" type="color"
+                                                class="form-control form-control-color"
+                                                [(ngModel)]="colorEntry.newColorCode" [name]="'newColorCode' + i"
+                                                required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label d-flex justify-content-between align-items-center">
+                                            <span>Các size cho màu này</span>
+                                            <button type="button" class="btn btn-sm btn-outline-info" (click)="toggleAllSizes(colorEntry)">
+                                                Chọn tất cả / Bỏ chọn
+                                            </button>
+                                        </label>
+                                        <div class="p-2 border rounded"
+                                            style="max-height: 150px; overflow-y: auto;">
+                                            <div *ngFor="let size of sizes" class="form-check">
+                                                <input type="checkbox" class="form-check-input"
+                                                    [id]="'size-' + i + '-' + size.code"
+                                                    [checked]="colorEntry.sizeCodes.includes(size.code)"
+                                                    (change)="toggleSizeInColor(size.code, colorEntry)">
+                                                <label class="form-check-label"
+                                                    [for]="'size-' + i + '-' + size.code">{{
+                                                    size.name }}</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-secondary" (click)="addColorEntry()">Thêm màu khác</button>
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <button class="btn btn-primary btn-lg" type="submit"
+                                [disabled]="loading || productForm.invalid">
+                                <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status"
+                                    aria-hidden="true"></span>
+                                {{ loading ? 'Đang xử lý...' : 'Tạo sản phẩm' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

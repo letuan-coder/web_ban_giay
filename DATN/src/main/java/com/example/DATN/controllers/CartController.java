@@ -5,6 +5,7 @@ import com.example.DATN.dtos.respone.cart.CartResponse;
 import com.example.DATN.mapper.CartMapper;
 import com.example.DATN.models.Cart;
 import com.example.DATN.services.CartService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -31,13 +32,15 @@ public class CartController {
 
     @PostMapping
     public ApiResponse<CartResponse> createCart() {
+        CartResponse response=cartService.createCartForUser();
+
         return ApiResponse.<CartResponse>builder()
-                .data(cartService.createCartForUser())
+                .data(response)
                 .build();
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<CartResponse>> getCartByUserId(){
+    public ResponseEntity<ApiResponse<CartResponse>> getCartByUserId() throws JsonProcessingException {
         ApiResponse<CartResponse> response =ApiResponse.<CartResponse>builder()
                 .data(cartService.getCartByUserId())
                 .build();
@@ -45,7 +48,8 @@ public class CartController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<CartResponse> updateCart(@PathVariable UUID id, @RequestBody Cart cart) {
+    public ApiResponse<CartResponse> updateCart
+            (@PathVariable UUID id, @RequestBody Cart cart) {
         cart.setId(id);
         return ApiResponse.<CartResponse>builder()
                 .data((cartMapper.toCartResponse(cartService.updateCart(cart))))

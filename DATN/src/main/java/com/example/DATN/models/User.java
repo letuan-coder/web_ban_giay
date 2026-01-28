@@ -28,11 +28,12 @@ public class User extends BaseEntity {
             , unique = true)
     String username;
 
-    @Column(nullable = false, length = 255)
+    @Column(name = "google_id", unique = true, length = 255)
+    String googleId;
+
     @NotBlank(message = "FIRST_NAME_REQUIRED")
     String firstName;
 
-    @Column(nullable = false, length = 255)
     @NotBlank(message = "LAST_NAME_REQUIRED")
     String lastName;
 
@@ -44,24 +45,29 @@ public class User extends BaseEntity {
 
     LocalDate dob;
 
-    @Column(nullable = false)
-    boolean isGuest = false;
+
+    String userImage;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 50)
     AuthProvider provider;
 
-    @Column(length = 255)
-    String providerId;
-
     @ManyToMany
     Set<Role> roles;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference("user-carts")
     private Cart cart;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonManagedReference("user-orders")
     List<Order> orders;
+
+    @OneToMany(mappedBy = "user"
+            , fetch = FetchType.LAZY)
+    @JsonManagedReference("user-address")
+    List<UserAddress> userAddress;
+
+
 
 }

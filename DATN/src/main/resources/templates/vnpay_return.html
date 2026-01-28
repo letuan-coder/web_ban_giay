@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Kết quả thanh toán VNPAY</title>
+</head>
+<body>
+
+<h2>Kết quả thanh toán</h2>
+
+<div th:if="${params['vnp_ResponseCode']} == '00'">
+    <h3 style="color:green;">Thanh toán thành công!</h3>
+</div>
+
+<div th:if="${params['vnp_ResponseCode']} != '00'">
+    <h3 style="color:red;">Thanh toán thất bại! Mã lỗi: <span th:text="${params['vnp_ResponseCode']}"></span></h3>
+</div>
+
+<hr>
+
+<p><strong>Mã đơn hàng:</strong> <span th:text="${params['vnp_TxnRef']}"></span></p>
+<p><strong>Số tiền:</strong>
+    <span th:text="${#numbers.formatDecimal(T(java.lang.Long).parseLong(params['vnp_Amount']) / 100, 0, 'POINT', 0, 'COMMA')} + ' VND'"></span>
+</p>
+
+<p><strong>Ngân hàng:</strong> <span th:text="${params['vnp_BankCode']}"></span></p>
+<p><strong>Thời gian thanh toán:</strong> <span th:text="${params['vnp_PayDate']}"></span></p>
+
+</body>
+</html>

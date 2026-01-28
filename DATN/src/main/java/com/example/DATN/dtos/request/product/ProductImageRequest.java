@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ProductImageRequest {
-
     private String imageUrl;
-
     private String altText;
 }

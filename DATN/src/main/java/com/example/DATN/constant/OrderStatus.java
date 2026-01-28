@@ -1,11 +1,11 @@
 package com.example.DATN.constant;
 
 public enum OrderStatus {
-    UNPAID, // Chưa thanh toán
-    PAID, // Đã thanh toán
     PENDING, // Đang chờ xác nhận
+    PROCESSCING, // Đang xử lý
+    DELEVERING, // Đang giao hàng
+    DELEVERED, // Đã giao hàng
     CONFIRMED, // Đã xác nhận
-    DELIVERING, // Chuẩn bị hàng -> Shipper nhận hàng
-    DELIVERED, // Đã giao hàng
-    CANCELLED // Đã hủy
+    CANCELLED,// Đã hủy
+    COMPLETED // Hoàn thành
 }

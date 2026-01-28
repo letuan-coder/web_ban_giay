@@ -1,6 +1,6 @@
 package com.example.DATN.config;
 
-import com.example.DATN.models.Role;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -23,44 +23,65 @@ import java.util.List;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-   Role role;
+
     private final String[] PUBLIC_API =
             {"/api/users/register",
                     "/api/auth/**"
-                    ,"/api/permission"
-                    ,"/api/role"
-                    ,"/api/auth/logout"
-                    ,"/api/auth/introspect"
-                    ,"/api/auth/refresh"
-                    ,"/api/images/view/**"
-                    ,"/api/newsletter/subscribe"
-                    ,"/api/products"
-                    ,"/api/products/search"
-                    ,"/api/ghtk/create-order",
-                    "/api/guest"};
-    private final String [] POST_PUBLIC_API={"/api/users/register","/api/ghtk/create-order"};
+                    , "/api/permission"
+                    , "/api/role"
+                    , "/api/auth/logout"
+                    , "/api/auth/introspect"
+                    , "/api/auth/refresh"
+                    , "/api/images/view/**"
+                    , "/api/newsletter/subscribe"
+                    , "/api/products"
+                    , "/api/products/search"
+                    , "/api/product-variants/**"
+                    , "/api/ghtk/create-order","/api/vnpay/ipn",
+                    "/api/check-out/**",
+                    "/api/vnpay/return",
+                    "/api/check-out/**"
+                    ,"/api/guest","/api/voucher"};
+    private final String[] POST_PUBLIC_API = {"/api/ghtk/create-order"};
     @Value("${jwt.secret}")
     private String jwtSecret;
 
+    @Value("${google.client-id}")
+    private String clientId;
+
+    @Value("${google.client-secret}")
+    private String clientSecret;
+//
+//    @Autowired
+//    private RateLimitFilter rateLimitFilter;
+
     @Autowired
     private CustomeJwtDecoder customeJwtDecoder;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.cors(cors -> cors.configurationSource(corsConfigurationSource()));
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+        httpSecurity
+                .csrf(AbstractHttpConfigurer::disable);
+        //rateLimit không dùng trong thời gian dev
+//        httpSecurity.addFilterBefore(
+//                rateLimitFilter,
+//                org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class
+//        );
         httpSecurity.authorizeHttpRequests(request -> request
-                .requestMatchers( PUBLIC_API).permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/users")
-                .hasAuthority("USER_VIEW")
-                .requestMatchers(HttpMethod.GET,"/api/products").permitAll()
-                .requestMatchers(HttpMethod.POST,POST_PUBLIC_API).permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/brands/**", "/api/categories/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/provinces/**","/api/districts/**","/api/communes/**").permitAll()
-                .anyRequest().authenticated()
-
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers(PUBLIC_API).permitAll()
+                        .requestMatchers("/google-login-test.html").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products").permitAll()
+                        .requestMatchers(HttpMethod.POST, POST_PUBLIC_API).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/brands/**", "/api/categories/**", "/api/banners/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/provinces/**", "/api/districts/**", "/api/communes/**").permitAll()
+                        .anyRequest().authenticated()
         );
-        httpSecurity.oauth2ResourceServer(oauth2->
-                oauth2.jwt(jwtConfigurer->jwtConfigurer
+
+        httpSecurity.oauth2ResourceServer(oauth2 ->
+                oauth2.jwt(jwtConfigurer -> jwtConfigurer
                                 .decoder(customeJwtDecoder)
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                         .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
@@ -68,10 +89,11 @@ public class SecurityConfig {
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
         return httpSecurity.build();
     }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:4000"));
+        config.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:5173"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
@@ -80,6 +102,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
+
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();

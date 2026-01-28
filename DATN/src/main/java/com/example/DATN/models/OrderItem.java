@@ -1,12 +1,14 @@
 package com.example.DATN.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.UUID;
 
 @Setter
 @Getter
@@ -17,23 +19,36 @@ import java.math.BigDecimal;
 @Table(name = "order_items")
 public class OrderItem extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @UuidGenerator
+    UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    String name;
+    String code;
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
+    @JsonBackReference("order_items")
     Order order;
 
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "productColor_id", nullable = false)
-    ProductColor productColor;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "stock_id", nullable = false)
+    private Stock stock;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "productVariant_id", nullable = false)
+    ProductVariant productVariant;
 
     @Column(nullable = false)
     Integer quantity;
 
+    private Integer weight;
+    private Integer height;
+    private Integer width;
+    private Integer length;
+
     @Column(nullable = false)
     private BigDecimal price;
+    private Boolean Rated;
+
+    private LocalDate returnDate;
 }
 

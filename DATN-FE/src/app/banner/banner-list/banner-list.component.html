@@ -1,0 +1,150 @@
+<div class="container">
+  <h1>Banners</h1>
+  <button (click)="openForm()" class="add-btn">Add New Banner</button>
+
+  <div *ngIf="showForm" class="form-container">
+    <h2>{{ isEditing ? 'Edit Banner' : 'Create Banner' }}</h2>
+    <form [formGroup]="bannerForm" (ngSubmit)="onSubmit()">
+      <div *ngIf="isEditing && currentEditingBanner && currentEditingBanner.imageUrl" class="form-group image-preview-container">
+        <label>Current Image</label>
+        <div class="image-container">
+          <img [src]="imageApiUrl + currentEditingBanner.imageUrl" alt="Current Banner Image" width="150">
+          <button type="button" (click)="clearImageForUpload()" class="delete-image-btn" title="Delete Image">&times;</button>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="bannerName">Banner Name</label>
+          <input id="bannerName" formControlName="bannerName" placeholder="Banner Name">
+        </div>
+
+        <div class="form-group">
+          <label for="type">Vị trí Banner</label>
+          <select id="type" formControlName="type">
+            <option [ngValue]="null" disabled>Select a type</option>
+            <option *ngFor="let type of bannerTypes" [value]="type">{{ type }}</option>
+          </select>
+        </div>
+
+        <!-- Show file input only if creating new or if image has been cleared in edit mode -->
+        <div class="form-group" *ngIf="!isEditing || (isEditing && currentEditingBanner && !currentEditingBanner.imageUrl)">
+          <label for="fileInput">{{ isEditing ? 'New Image' : 'Image' }}</label>
+          <input id="fileInput" type="file" (change)="onFileSelected($event)">
+        </div>
+
+        <div class="form-group">
+          <label for="redirectType">Loại trang dẫn tới</label>
+          <select id="redirectType" [(ngModel)]="selectedRedirectType" (ngModelChange)="onRedirectTypeChange()" [ngModelOptions]="{standalone: true}" class="form-control">
+            <option [ngValue]="null">Không dẫn tới trang nào</option>
+            <option value="category">Danh mục</option>
+            <option value="brand">Thương hiệu</option>
+            <option value="product">Sản phẩm</option>
+          </select>
+        </div>
+
+        <div class="form-group" *ngIf="selectedRedirectType">
+          <label for="redirectEntity">Chọn {{selectedRedirectType}}</label>
+          <select id="redirectEntity" [(ngModel)]="selectedRedirectId" (ngModelChange)="onEntitySelect()" [ngModelOptions]="{standalone: true}" class="form-control">
+            <option [ngValue]="null">Chọn một mục</option>
+            <ng-container [ngSwitch]="selectedRedirectType">
+              <ng-container *ngSwitchCase="'category'">
+                <option *ngFor="let item of categories" [value]="item.id">{{ item.name }}</option>
+              </ng-container>
+              <ng-container *ngSwitchCase="'brand'">
+                <option *ngFor="let item of brands" [value]="item.id">{{ item.name }}</option>
+              </ng-container>
+              <ng-container *ngSwitchCase="'product'">
+                <option *ngFor="let item of products" [value]="item.id">{{ item.name }}</option>
+              </ng-container>
+            </ng-container>
+          </select>
+        </div>
+        
+        <input type="hidden" formControlName="redirectUrl">
+
+        <div class="form-group">
+          <label for="sortOrder">Thứ Tự Slider</label>
+          <input id="sortOrder" type="number" formControlName="sortOrder" placeholder="Sort Order">
+        </div>
+
+        <div class="form-group">
+          <label for="startAt">Ngày bắt đầu</label>
+          <input id="startAt" type="date" formControlName="startAt">
+        </div>
+
+        <div class="form-group">
+          <label for="endAt">Ngày kết thúc</label>
+          <input id="endAt" type="date" formControlName="endAt">
+        </div>
+
+        <div class="form-group-checkbox">
+          <label for="active">Sãn Sàng</label>
+          <input id="active" type="checkbox" formControlName="active">
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="bannerForm.invalid || (!selectedFile && !isEditing)">
+          {{ isEditing ? 'Update' : 'Create' }}
+        </button>
+        <button type="button" (click)="resetForm()">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <div cdkDropListGroup>
+    <div *ngFor="let type of bannerTypeKeys" class="banner-group">
+      <h2>{{ type }}</h2>
+
+      <div *ngIf="groupedBanners[type].length > 0; else emptyList">
+        <table class="banner-table">
+          <thead>
+            <tr>
+              <th>Drag</th>
+              <th>Hình ảnh </th>
+              <th>Tên Banner</th>
+              <th>Loại Banner</th>
+              <th>Đang chạy</th>
+              <th>Thự tự Sắp xếp</th>
+              <th>Ngày bắt đầu</th>
+              <th>Ngày kết thúc</th>
+              <th>Dẫn tới</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody cdkDropList [cdkDropListData]="groupedBanners[type]" (cdkDropListDropped)="drop($event)">
+            <tr *ngFor="let banner of groupedBanners[type]" cdkDrag>
+              <td class="drag-handle" cdkDragHandle>&#x2630;</td>
+              <td>
+                <div class="image-container">
+                  <img [src]="'http://localhost:8080/api/images/view/'+banner.imageUrl" alt="{{banner.bannerName}}" width="100">
+                </div>
+              </td>
+              <td>{{ banner.bannerName }}</td>
+              <td>{{ banner.type }}</td>
+              <td>{{ banner.active ? 'Đang chạy' : 'Đã ngưng' }}</td>
+              <td>{{ banner.sortOrder }}</td>
+              <td>{{ banner.startAt | date:'dd/MM/yyyy':'UTC+7' }}</td>
+              <td>{{ banner.endAt | date:'dd/MM/yyyy':'UTC+7'}}</td>
+              <td>{{ banner.redirectUrl }}</td>
+
+              <td>
+                <button (click)="editBanner(banner)">Edit</button>
+                <button (click)="deleteBanner(banner.id)" class="delete-btn">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #emptyList>
+        <div cdkDropList [cdkDropListData]="groupedBanners[type]" (cdkDropListDropped)="drop($event)" class="empty-state-droppable">
+          <div class="empty-state">
+            No banners of this type. Drag one here.
+          </div>
+        </div>
+      </ng-template>
+
+    </div>
+  </div>
+</div>
